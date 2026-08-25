@@ -12,125 +12,89 @@ export default function Navbar() {
   ];
 
   return (
-    <div className="fixed top-6 left-0 right-0 z-50 flex justify-center px-6 pointer-events-none">
-
-      {/*
-        h-[80px] gives the SVG room for the wave to breathe.
-        pointer-events-auto re-enables interaction on the actual component.
+    <div className="fixed top-6 left-0 right-0 z-50 flex justify-center px-4 pointer-events-none">
+      
+      {/* 
+        Main Pristine Container
+        Uses standard rounded-[40px] for a flawless edge. overflow-hidden is key here.
       */}
-      <header className="relative w-full max-w-6xl h-[80px] pointer-events-auto">
+      <header className="relative w-full max-w-5xl h-[72px] bg-white rounded-[40px] shadow-[0_8px_30px_rgb(0,0,0,0.06)] flex items-center justify-between overflow-hidden pointer-events-auto">
+        
+        {/* 
+          The Internal Right-Side Swooping Curve
+          This creates the perfect mathematical curve without messy SVGs.
+        */}
+        <div className="absolute -top-[150px] -right-[50px] w-[450px] h-[450px] bg-gradient-to-bl from-emerald-100/80 to-emerald-50/30 rounded-full pointer-events-none z-0"></div>
 
-        {/* ── SVG SHELL ─────────────────────────────────────────────────────
-            viewBox: 1200 wide × 80 tall.
-
-            Path 1 (white body):
-              - Starts at top-left with a rounded pill cap (r=36).
-              - Top edge is FLAT across to the right pill cap.
-              - Right pill cap curves down.
-              - Bottom-right is HIGHER (sage zone sits taller).
-              - A smooth S-wave runs left from ~x=870 to x=260, dipping to y=80 at center.
-              - Bottom-left rises back up and closes at the left pill cap.
-
-            Path 2 (sage green right zone):
-              - Mirrors the right portion of path 1, filling it with the mint tone.
-              - Organic left edge curves inward to create the fluid blob shape.
-        ──────────────────────────────────────────────────────────────── */}
-        <svg
-          className="absolute inset-0 w-full h-full"
-          style={{ filter: 'drop-shadow(0 8px 24px rgba(0,0,0,0.06))' }}
-          viewBox="0 0 1200 80"
-          preserveAspectRatio="none"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          {/* White pill body with organic wavy bottom */}
-          <path
-            d="
-              M36,0
-              H1164 C1184,0 1200,16 1200,36
-              C1200,56 1184,72 1164,72
-              H870
-              C840,72 820,62 790,54
-              C755,44 730,80 700,80
-              H500
-              C470,80 445,44 410,54
-              C380,62 360,72 330,72
-              H36 C16,72 0,56 0,36
-              C0,16 16,0 36,0 Z
-            "
-            fill="white"
-          />
-
-          {/* Sage green right action zone — matches Image 2's mint blob */}
-          <path
-            d="
-              M870,72
-              H1164 C1184,72 1200,56 1200,36
-              C1200,16 1184,0 1164,0
-              H980
-              C940,0 910,14 885,32
-              C862,48 852,64 870,72 Z
-            "
-            fill="#D4EDDA"
-            opacity="0.9"
-          />
-        </svg>
-
-        {/* ── FOREGROUND CONTENT ────────────────────────────────────────── */}
-        <div className="relative z-10 flex items-center h-full px-4">
-
-          {/* Logo — vertically centered in the pill (standard height zone) */}
-          <div className="flex-shrink-0 flex items-center gap-2.5 pr-8">
-            <div className="w-9 h-9 rounded-[10px] bg-camel-600 flex items-center justify-center shadow-sm">
-              <HeartHandshake size={18} className="text-white" />
+        {/* Foreground Content */}
+        <div className="relative z-10 flex items-center justify-between w-full h-full px-2">
+          
+          {/* Left: Logo (Matching the Blue Box from reference) */}
+          <div className="flex items-center gap-3 pl-4 pr-8">
+            <div className="w-9 h-9 rounded-xl bg-indigo-600 flex items-center justify-center shadow-sm">
+              <span className="text-white font-bold text-lg leading-none">F</span>
             </div>
-            <span className="font-display font-extrabold text-xl text-espresso-900 tracking-tight">
-              FurShield<span className="text-camel-500">.</span>
+            <span className="font-display font-bold text-xl text-slate-900 tracking-tight">
+              FurShield<span className="text-indigo-600">.</span>
             </span>
           </div>
 
-          {/* Nav — sits in the visual wave valley, pushed down slightly */}
-          <nav className="hidden md:flex items-end flex-1 gap-1 pb-1">
+          {/* Center: Navigation (Exact Reference Match) */}
+          <nav className="flex items-center gap-2 h-full">
             {navItems.map((item) => {
               const Icon = item.icon;
               return (
                 <NavLink
                   key={item.name}
                   to={item.path}
-                  className={({ isActive }) => cn(
-                    "group relative flex items-center gap-2 px-4 py-2 text-sm font-semibold transition-all duration-200",
-                    isActive
-                      ? "text-slate-900"
-                      : "text-slate-500 hover:text-slate-800"
-                  )}
+                  className="relative group h-full flex items-center px-3"
                 >
                   {({ isActive }) => (
-                    <>
-                      <Icon size={15} className="shrink-0" />
-                      <span>{item.name}</span>
-                      {/* Exact match to reference: solid green underline, no pill */}
-                      {isActive && (
-                        <span className="absolute bottom-0 left-4 right-4 h-[2.5px] rounded-full bg-emerald-500" />
-                      )}
-                    </>
+                    <div className="flex flex-col items-center justify-center relative">
+                      <div className="flex items-center gap-2">
+                        {/* Icon Container: Only white circle if active */}
+                        <div className={cn(
+                          "w-8 h-8 rounded-full flex items-center justify-center transition-all duration-300",
+                          isActive 
+                            ? "bg-white shadow-sm text-emerald-700" 
+                            : "bg-transparent text-slate-500 group-hover:text-emerald-600"
+                        )}>
+                          <Icon size={16} strokeWidth={isActive ? 2.5 : 2} />
+                        </div>
+                        {/* Text */}
+                        <span className={cn(
+                          "text-sm font-semibold transition-colors duration-300 pr-1",
+                          isActive ? "text-emerald-700" : "text-slate-500 group-hover:text-emerald-600"
+                        )}>
+                          {item.name}
+                        </span>
+                      </div>
+                      
+                      {/* Active Underline (Floating) */}
+                      <div className={cn(
+                        "absolute -bottom-2.5 h-[3px] rounded-full bg-emerald-700 transition-all duration-300",
+                        isActive ? "w-6 opacity-100" : "w-0 opacity-0"
+                      )}></div>
+                    </div>
                   )}
                 </NavLink>
               );
             })}
           </nav>
 
-          {/* Right actions — over the sage SVG zone */}
-          <div className="flex items-center gap-1.5 ml-auto pr-1">
-            <button className="p-2 text-slate-600 hover:text-camel-700 transition-colors rounded-full hover:bg-white/60">
-              <Search size={19} />
+          {/* Right: Actions (Inside the green swoop) */}
+          <div className="flex items-center gap-3 pr-2 pl-8 h-full">
+            <button className="p-2 text-emerald-900/70 hover:text-emerald-900 transition-colors rounded-full hover:bg-white/40">
+              <Search size={18} strokeWidth={2.5} />
             </button>
-
-            <button className="relative p-2 text-slate-600 hover:text-camel-700 transition-colors rounded-full hover:bg-white/60">
-              <Bell size={19} />
-              <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-red-500 border-2 border-white" />
+            
+            <button className="relative p-2 text-emerald-900/70 hover:text-emerald-900 transition-colors rounded-full hover:bg-white/40">
+              <Bell size={18} strokeWidth={2.5} />
+              <span className="absolute top-1.5 right-2 w-2 h-2 rounded-full bg-red-500 border-2 border-[#e6f4ed]"></span>
             </button>
-
-            <div className="w-9 h-9 rounded-full bg-white border border-slate-200 flex items-center justify-center ml-1 cursor-pointer shadow-sm hover:scale-105 hover:shadow-md transition-all">
-              <span className="text-xs font-black text-slate-700">RH</span>
+            
+            <div className="w-10 h-10 rounded-full bg-emerald-100/50 border border-emerald-200/50 flex items-center justify-center ml-2 cursor-pointer hover:bg-white/60 transition-all">
+              <span className="text-xs font-bold text-emerald-800">RH</span>
             </div>
           </div>
 

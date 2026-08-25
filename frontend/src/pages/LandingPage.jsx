@@ -1,6 +1,6 @@
 ﻿import React from 'react';
 import { Link } from 'react-router-dom';
-import { HeartHandshake, ArrowRight, PlayCircle } from 'lucide-react';
+import { ArrowRight, PlayCircle, PawPrint } from 'lucide-react';
 
 export default function LandingPage() {
   return (
@@ -8,7 +8,6 @@ export default function LandingPage() {
       
       {/* --- Video Background Section --- */}
       <div className="absolute inset-0 z-0">
-        {/* Placeholder Video - Will be replaced by AI generated video */}
         <video 
           autoPlay 
           loop 
@@ -16,49 +15,82 @@ export default function LandingPage() {
           playsInline 
           className="w-full h-full object-cover"
         >
-          {/* Using a generic high-quality pet video placeholder for scaffolding */}
           <source src="https://cdn.pixabay.com/video/2021/08/04/83908-584742637_large.mp4" type="video/mp4" />
         </video>
-        
-        {/* Warm Overlay to match the Espresso/Camel theme and ensure text contrast */}
         <div className="absolute inset-0 bg-espresso-900/60 mix-blend-multiply"></div>
-        {/* Additional gradient for bottom fading */}
         <div className="absolute inset-0 bg-gradient-to-t from-espresso-900/90 via-transparent to-transparent"></div>
       </div>
 
-      {/* --- Public Transparent Navbar --- */}
-      <header className="relative z-10 w-full px-6 py-6 md:px-12 flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-camel-600 flex items-center justify-center shadow-lg">
-            <HeartHandshake size={20} className="text-white" />
+      {/* --- Premium Public Navbar (Matching Finalized Dashboard Aesthetic) --- */}
+      <div className="fixed top-4 md:top-6 left-0 right-0 z-50 flex justify-center px-4 pointer-events-none">
+        <header className="relative w-full max-w-5xl h-[64px] md:h-[72px] bg-white rounded-[32px] md:rounded-[40px] shadow-[0_15px_40px_rgba(0,0,0,0.15)] border border-camel-100/50 flex items-center justify-between overflow-hidden pointer-events-auto transition-all duration-300">
+          
+          {/* RIGHT ZONE SWOOP BACKGROUND - Perfect SVG curve */}
+          <div className="absolute top-0 right-0 h-full w-[220px] md:w-[360px] z-0 pointer-events-none transition-all duration-300">
+            <svg viewBox="0 0 360 72" className="w-full h-full" preserveAspectRatio="none">
+              <defs>
+                <linearGradient id="camelSwoop" x1="0" y1="0" x2="1" y2="1">
+                  <stop offset="0%" stopColor="#F9F6F0" stopOpacity="1" />
+                  <stop offset="100%" stopColor="#E4D1B9" stopOpacity="0.4" />
+                </linearGradient>
+              </defs>
+              <path 
+                d="M0,72 C120,72 160,0 260,0 L360,0 L360,72 Z" 
+                fill="url(#camelSwoop)" 
+              />
+            </svg>
           </div>
-          <span className="font-display font-extrabold text-2xl text-white tracking-tight drop-shadow-md">
-            FurShield<span className="text-camel-500">.</span>
-          </span>
-        </div>
-        
-        <nav className="hidden md:flex items-center gap-8 text-white/90 font-medium text-sm">
-          <a href="#features" className="hover:text-camel-400 transition-colors">Features</a>
-          <a href="#about" className="hover:text-camel-400 transition-colors">Our Mission</a>
-          <a href="#contact" className="hover:text-camel-400 transition-colors">Contact</a>
-        </nav>
 
-        <div>
-          <Link 
-            to="/dashboard" 
-            className="px-6 py-2.5 bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/20 text-white rounded-full font-bold text-sm transition-all flex items-center gap-2"
-          >
-            Sign In
-          </Link>
-        </div>
-      </header>
+          <div className="relative z-10 flex items-center justify-between w-full h-full px-2">
+            
+            {/* Left: Logo (Exact match to Dashboard Watercolor/Script Logo) */}
+            <div className="flex items-center gap-2 md:gap-3 pl-3 md:pl-4 md:pr-4 lg:pr-8 shrink-0">
+              <div className="relative w-9 h-9 md:w-11 md:h-11 flex items-center justify-center transition-all duration-300">
+                <div className="absolute inset-0 bg-camel-200 rounded-full mix-blend-multiply filter blur-[3px] opacity-80 scale-110 rotate-12"></div>
+                <div className="absolute inset-1 bg-camel-300 rounded-full mix-blend-multiply filter blur-[4px] opacity-60 -rotate-12"></div>
+                <div className="absolute -inset-0.5 bg-camel-100 rounded-full mix-blend-multiply filter blur-[2px] opacity-70 rotate-45 scale-105"></div>
+                <PawPrint size={20} className="relative z-10 text-espresso-900 md:w-[22px] md:h-[22px]" fill="currentColor" />
+              </div>
+              <div className="flex flex-col justify-center">
+                <span 
+                  className="text-[24px] md:text-[26px] lg:text-[28px] text-espresso-900 leading-[0.9] tracking-tight transition-all duration-300"
+                  style={{ fontFamily: "'Dancing Script', cursive", fontWeight: 700 }}
+                >
+                  FurShield
+                </span>
+                <span className="hidden lg:block text-[10px] text-espresso-500 font-medium mt-0.5 tracking-wide">
+                  For tails that tell stories.
+                </span>
+              </div>
+            </div>
+
+            {/* Center: Public Navigation Links */}
+            <nav className="hidden md:flex items-center gap-4 lg:gap-8 h-full">
+              <a href="#features" className="text-[13px] lg:text-sm font-semibold text-espresso-600 hover:text-camel-800 transition-colors">Features</a>
+              <a href="#about" className="text-[13px] lg:text-sm font-semibold text-espresso-600 hover:text-camel-800 transition-colors">Our Mission</a>
+              <a href="#contact" className="text-[13px] lg:text-sm font-semibold text-espresso-600 hover:text-camel-800 transition-colors">Contact</a>
+            </nav>
+
+            {/* Right: Sign In Action */}
+            <div className="flex items-center pr-1 md:pr-3 h-full shrink-0">
+              <Link 
+                to="/dashboard" 
+                className="px-5 py-2 md:px-7 md:py-2.5 bg-camel-600 hover:bg-camel-500 text-white rounded-full font-bold text-[13px] md:text-sm transition-all shadow-sm hover:shadow-md hover:-translate-y-0.5"
+              >
+                Sign In
+              </Link>
+            </div>
+
+          </div>
+        </header>
+      </div>
 
       {/* --- Hero Content --- */}
-      <main className="relative z-10 flex-1 flex flex-col items-center justify-center text-center px-4 max-w-4xl mx-auto mt-[-80px]">
+      <main className="relative z-10 flex-1 flex flex-col items-center justify-center text-center px-4 max-w-4xl mx-auto mt-24">
         
-        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-camel-500/20 border border-camel-400/30 backdrop-blur-md mb-6">
+        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/10 border border-white/20 backdrop-blur-md mb-6">
           <span className="w-2 h-2 rounded-full bg-camel-400 animate-pulse"></span>
-          <span className="text-xs font-bold text-camel-100 tracking-wide uppercase">Next-Gen Pet Care Platform</span>
+          <span className="text-xs font-bold text-white tracking-wide uppercase">Next-Gen Pet Care Platform</span>
         </div>
 
         <h1 className="text-5xl md:text-7xl font-display font-extrabold text-white tracking-tight leading-[1.1] mb-6 drop-shadow-lg">

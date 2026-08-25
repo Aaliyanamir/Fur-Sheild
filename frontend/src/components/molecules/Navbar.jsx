@@ -113,7 +113,7 @@ export default function Navbar() {
                         )}
                         <span 
                           className={cn(
-                            "relative z-10 text-[14px] tracking-tight transition-colors duration-300",
+                            "relative z-10 text-[13px] tracking-wide transition-colors duration-300",
                             isActive ? "text-camel-900 font-bold" : "text-espresso-600 font-semibold group-hover:text-camel-800"
                           )}
                         >

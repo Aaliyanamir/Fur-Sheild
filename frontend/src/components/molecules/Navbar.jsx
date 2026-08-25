@@ -17,7 +17,7 @@ export default function Navbar() {
       {/* Main Pristine Container - Strictly 72px for perfect curve containment */}
       <header className="relative w-full max-w-5xl h-[72px] bg-white rounded-[40px] shadow-[0_8px_30px_rgb(90,56,37,0.06)] border border-camel-100 flex items-center justify-between overflow-hidden pointer-events-auto">
         
-        {/* RIGHT ZONE SWOOP BACKGROUND - Restored to the perfect SVG curve instead of the huge circle */}
+        {/* RIGHT ZONE SWOOP BACKGROUND - Perfect SVG curve */}
         <div className="absolute top-0 right-0 h-full w-[360px] z-0 pointer-events-none">
           <svg viewBox="0 0 360 72" className="w-full h-full" preserveAspectRatio="none">
             <defs>
@@ -60,7 +60,7 @@ export default function Navbar() {
             </div>
           </div>
 
-          {/* Center: Navigation (AI reference stacked layout with cursive font and SVG brushstroke) */}
+          {/* Center: Navigation (AI reference stacked layout with cursive font and rough rectangle brushstroke) */}
           <nav className="flex items-center gap-6 h-full pt-1">
             {navItems.map((item) => {
               const Icon = item.icon;
@@ -83,26 +83,32 @@ export default function Navbar() {
                         )}
                       />
                       
-                      {/* Bottom Text with SVG Brushstroke */}
+                      {/* Bottom Text with Hand-Painted Rectangle Marker SVG */}
                       <div className="relative px-3 py-0.5 flex items-center justify-center">
                         {/* Active Brushstroke */}
                         {isActive && (
                           <svg 
-                            className="absolute inset-0 w-full h-full text-camel-200 scale-[1.3] -z-10 drop-shadow-sm opacity-90" 
+                            className="absolute inset-0 w-full h-full text-camel-200 scale-x-[1.25] scale-y-[1.1] -z-10 drop-shadow-sm opacity-90" 
                             preserveAspectRatio="none" 
-                            viewBox="0 0 100 40"
+                            viewBox="0 0 100 30"
                           >
-                            <path d="M2,20 Q15,5 50,8 T98,20 Q85,35 50,32 T2,20 Z" fill="currentColor" />
+                            <path 
+                              d="M 3,6 C 20,2 40,7 60,3 S 80,8 97,5 C 98,12 95,20 96,25 C 80,28 60,23 40,27 S 20,22 4,24 C 2,18 5,10 3,6 Z" 
+                              fill="currentColor" 
+                            />
                           </svg>
                         )}
                         {/* Hover Brushstroke */}
                         {!isActive && (
                           <svg 
-                            className="absolute inset-0 w-full h-full text-camel-100 scale-[1.3] -z-10 opacity-0 group-hover:opacity-60 transition-opacity duration-300" 
+                            className="absolute inset-0 w-full h-full text-camel-100 scale-x-[1.25] scale-y-[1.1] -z-10 opacity-0 group-hover:opacity-60 transition-opacity duration-300" 
                             preserveAspectRatio="none" 
-                            viewBox="0 0 100 40"
+                            viewBox="0 0 100 30"
                           >
-                            <path d="M2,20 Q15,5 50,8 T98,20 Q85,35 50,32 T2,20 Z" fill="currentColor" />
+                            <path 
+                              d="M 3,6 C 20,2 40,7 60,3 S 80,8 97,5 C 98,12 95,20 96,25 C 80,28 60,23 40,27 S 20,22 4,24 C 2,18 5,10 3,6 Z" 
+                              fill="currentColor" 
+                            />
                           </svg>
                         )}
                         <span 

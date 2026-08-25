@@ -27,7 +27,7 @@ export default function Navbar() {
         {/* Main Pristine Container - Responsive Pill */}
         <header className="relative w-full max-w-5xl h-[64px] md:h-[72px] bg-white rounded-[32px] md:rounded-[40px] shadow-[0_8px_30px_rgb(90,56,37,0.06)] border border-camel-100 flex items-center justify-between overflow-hidden pointer-events-auto transition-all duration-300">
           
-          {/* RIGHT ZONE SWOOP BACKGROUND - Perfect SVG curve, scaled for mobile */}
+          {/* RIGHT ZONE SWOOP BACKGROUND */}
           <div className="absolute top-0 right-0 h-full w-[220px] md:w-[360px] z-0 pointer-events-none transition-all duration-300">
             <svg viewBox="0 0 360 72" className="w-full h-full" preserveAspectRatio="none">
               <defs>
@@ -46,10 +46,9 @@ export default function Navbar() {
           {/* Foreground Content */}
           <div className="relative z-10 flex items-center justify-between w-full h-full px-2">
             
-            {/* Left: Logo */}
-            <div className="flex items-center gap-2 md:gap-3 pl-3 md:pl-4 md:pr-8">
+            {/* Left: Logo (Prevent shrink on tablet) */}
+            <div className="flex items-center gap-2 md:gap-3 pl-3 md:pl-4 md:pr-4 lg:pr-8 shrink-0">
               <div className="relative w-9 h-9 md:w-11 md:h-11 flex items-center justify-center transition-all duration-300">
-                {/* Watercolor Splash Blobs */}
                 <div className="absolute inset-0 bg-camel-200 rounded-full mix-blend-multiply filter blur-[3px] opacity-80 scale-110 rotate-12"></div>
                 <div className="absolute inset-1 bg-camel-300 rounded-full mix-blend-multiply filter blur-[4px] opacity-60 -rotate-12"></div>
                 <div className="absolute -inset-0.5 bg-camel-100 rounded-full mix-blend-multiply filter blur-[2px] opacity-70 rotate-45 scale-105"></div>
@@ -59,30 +58,30 @@ export default function Navbar() {
               
               <div className="flex flex-col justify-center">
                 <span 
-                  className="text-[24px] md:text-[28px] text-espresso-900 leading-[0.9] tracking-tight transition-all duration-300"
+                  className="text-[24px] md:text-[26px] lg:text-[28px] text-espresso-900 leading-[0.9] tracking-tight transition-all duration-300"
                   style={{ fontFamily: "'Dancing Script', cursive", fontWeight: 700 }}
                 >
                   FurShield
                 </span>
-                <span className="hidden sm:block text-[10px] text-espresso-500 font-medium mt-0.5 tracking-wide">
+                {/* Hide tagline on tablet to save horizontal space */}
+                <span className="hidden lg:block text-[10px] text-espresso-500 font-medium mt-0.5 tracking-wide">
                   For tails that tell stories.
                 </span>
               </div>
             </div>
 
             {/* Desktop Center: Navigation */}
-            <nav className="hidden md:flex items-center gap-6 h-full pt-1">
+            <nav className="hidden md:flex items-center gap-1 md:gap-2 lg:gap-6 h-full pt-1">
               {navItems.map((item) => {
                 const Icon = item.icon;
                 return (
                   <NavLink
                     key={item.name}
                     to={item.path}
-                    className="relative group h-full flex items-center justify-center px-1"
+                    className="relative group h-full flex items-center justify-center px-1 lg:px-2"
                   >
                     {({ isActive }) => (
                       <div className="flex flex-col items-center justify-center gap-[3px]">
-                        {/* Top Icon */}
                         <Icon 
                           size={21} 
                           strokeWidth={1.5} 
@@ -91,8 +90,7 @@ export default function Navbar() {
                             isActive ? "text-camel-900" : "text-espresso-400 group-hover:text-camel-600"
                           )}
                         />
-                        {/* Bottom Text with Marker SVG */}
-                        <div className="relative px-3 py-0.5 flex items-center justify-center">
+                        <div className="relative px-2 lg:px-3 py-0.5 flex items-center justify-center">
                           {isActive && (
                             <svg className="absolute inset-0 w-full h-full text-camel-200 scale-x-[1.25] scale-y-[1.1] -z-10 drop-shadow-sm opacity-90" preserveAspectRatio="none" viewBox="0 0 100 30">
                               <path d="M 3,6 C 20,2 40,7 60,3 S 80,8 97,5 C 98,12 95,20 96,25 C 80,28 60,23 40,27 S 20,22 4,24 C 2,18 5,10 3,6 Z" fill="currentColor" />
@@ -104,7 +102,7 @@ export default function Navbar() {
                             </svg>
                           )}
                           <span className={cn(
-                            "relative z-10 text-[13px] tracking-wide transition-colors duration-300",
+                            "relative z-10 text-[12px] lg:text-[13px] tracking-wide transition-colors duration-300",
                             isActive ? "text-camel-900 font-bold" : "text-espresso-600 font-semibold group-hover:text-camel-800"
                           )}>
                             {item.name}
@@ -118,23 +116,23 @@ export default function Navbar() {
             </nav>
 
             {/* Desktop Right: Actions */}
-            <div className="hidden md:flex items-center gap-3 pr-2 pl-8 h-full">
-              <button className="p-2 text-espresso-500 hover:text-camel-700 transition-colors rounded-full hover:bg-white/50">
+            <div className="hidden md:flex items-center gap-1 lg:gap-3 pr-2 pl-2 lg:pl-8 h-full shrink-0">
+              <button className="p-1.5 lg:p-2 text-espresso-500 hover:text-camel-700 transition-colors rounded-full hover:bg-white/50">
                 <Search size={18} strokeWidth={2.5} />
               </button>
               
-              <button className="relative p-2 text-espresso-500 hover:text-camel-700 transition-colors rounded-full hover:bg-white/50">
+              <button className="relative p-1.5 lg:p-2 text-espresso-500 hover:text-camel-700 transition-colors rounded-full hover:bg-white/50">
                 <Bell size={18} strokeWidth={2.5} />
-                <span className="absolute top-1.5 right-2 w-2 h-2 rounded-full bg-accent-500 border-2 border-[#f6e9de]"></span>
+                <span className="absolute top-1 lg:top-1.5 right-1.5 lg:right-2 w-2 h-2 rounded-full bg-accent-500 border-2 border-[#f6e9de]"></span>
               </button>
               
-              <div className="w-10 h-10 rounded-full bg-white border border-camel-200 flex items-center justify-center ml-2 cursor-pointer hover:shadow-md transition-all">
-                <span className="text-xs font-bold text-camel-800">RH</span>
+              <div className="w-8 h-8 lg:w-10 lg:h-10 rounded-full bg-white border border-camel-200 flex items-center justify-center ml-1 lg:ml-2 cursor-pointer hover:shadow-md transition-all">
+                <span className="text-[10px] lg:text-xs font-bold text-camel-800">RH</span>
               </div>
             </div>
 
             {/* Mobile Hamburger Button */}
-            <div className="flex md:hidden items-center pr-3">
+            <div className="flex md:hidden items-center pr-3 shrink-0">
                <button 
                  onClick={() => setIsMobileMenuOpen(true)}
                  className="p-2 text-camel-800 hover:bg-white/50 rounded-full transition-colors"
@@ -152,7 +150,6 @@ export default function Navbar() {
       <AnimatePresence>
         {isMobileMenuOpen && (
           <>
-            {/* Backdrop */}
             <motion.div 
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -161,7 +158,6 @@ export default function Navbar() {
               className="fixed inset-0 bg-espresso-900/40 backdrop-blur-sm z-[60] md:hidden"
             />
             
-            {/* Drawer */}
             <motion.div
               initial={{ x: '100%' }}
               animate={{ x: 0 }}
@@ -169,7 +165,6 @@ export default function Navbar() {
               transition={{ type: 'spring', damping: 28, stiffness: 220 }}
               className="fixed top-0 right-0 bottom-0 w-[280px] bg-bg-primary shadow-2xl z-[70] flex flex-col border-l border-camel-200 md:hidden"
             >
-              {/* Drawer Header */}
               <div className="p-6 flex items-center justify-between border-b border-camel-200/50">
                 <span 
                   className="text-[26px] text-espresso-900 leading-[0.9]"
@@ -185,7 +180,6 @@ export default function Navbar() {
                 </button>
               </div>
 
-              {/* Drawer Links */}
               <nav className="flex-1 overflow-y-auto py-6 px-4 flex flex-col gap-2">
                 {navItems.map((item) => {
                   const Icon = item.icon;
@@ -208,7 +202,6 @@ export default function Navbar() {
                 })}
               </nav>
 
-              {/* Drawer Footer (Actions) */}
               <div className="p-6 border-t border-camel-200/50 flex items-center justify-between">
                  <div className="flex items-center gap-3">
                    <button className="p-2.5 bg-white text-espresso-600 hover:text-camel-800 hover:bg-camel-50 transition-colors rounded-full shadow-sm border border-camel-100">

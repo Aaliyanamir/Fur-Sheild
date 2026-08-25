@@ -17,8 +17,21 @@ export default function Navbar() {
       {/* Main Pristine Container - Strictly 72px for perfect curve containment */}
       <header className="relative w-full max-w-5xl h-[72px] bg-white rounded-[40px] shadow-[0_8px_30px_rgb(90,56,37,0.06)] border border-camel-100 flex items-center justify-between overflow-hidden pointer-events-auto">
         
-        {/* The Soft Right-Side Swoop */}
-        <div className="absolute -top-[120px] -right-[40px] w-[400px] h-[400px] bg-gradient-to-bl from-camel-100/70 to-camel-50/30 rounded-full pointer-events-none z-0"></div>
+        {/* RIGHT ZONE SWOOP BACKGROUND - Restored to the perfect SVG curve instead of the huge circle */}
+        <div className="absolute top-0 right-0 h-full w-[360px] z-0 pointer-events-none">
+          <svg viewBox="0 0 360 72" className="w-full h-full" preserveAspectRatio="none">
+            <defs>
+              <linearGradient id="camelSwoop" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0%" stopColor="#F9F6F0" stopOpacity="1" />
+                <stop offset="100%" stopColor="#E4D1B9" stopOpacity="0.4" />
+              </linearGradient>
+            </defs>
+            <path 
+              d="M0,72 C120,72 160,0 260,0 L360,0 L360,72 Z" 
+              fill="url(#camelSwoop)" 
+            />
+          </svg>
+        </div>
 
         {/* Foreground Content */}
         <div className="relative z-10 flex items-center justify-between w-full h-full px-2">

@@ -1,8 +1,16 @@
 ﻿import React from 'react';
-import { Link } from 'react-router-dom';
-import { ArrowRight, PlayCircle, PawPrint } from 'lucide-react';
+import { Link, NavLink } from 'react-router-dom';
+import { ArrowRight, PlayCircle, PawPrint, LayoutDashboard, Stethoscope, HeartHandshake, ShoppingBag } from 'lucide-react';
+import { cn } from '../lib/utils';
 
 export default function LandingPage() {
+  const navItems = [
+    { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
+    { name: 'Veterinarian', path: '/vet', icon: Stethoscope },
+    { name: 'Shelter', path: '/shelter', icon: HeartHandshake },
+    { name: 'Shop', path: '/shop', icon: ShoppingBag },
+  ];
+
   return (
     <div className="relative min-h-screen flex flex-col font-sans overflow-hidden">
       
@@ -64,11 +72,49 @@ export default function LandingPage() {
               </div>
             </div>
 
-            {/* Center: Public Navigation Links */}
-            <nav className="hidden md:flex items-center gap-4 lg:gap-8 h-full">
-              <a href="#features" className="text-[13px] lg:text-sm font-semibold text-espresso-600 hover:text-camel-800 transition-colors">Features</a>
-              <a href="#about" className="text-[13px] lg:text-sm font-semibold text-espresso-600 hover:text-camel-800 transition-colors">Our Mission</a>
-              <a href="#contact" className="text-[13px] lg:text-sm font-semibold text-espresso-600 hover:text-camel-800 transition-colors">Contact</a>
+            {/* Center: Replicated Dashboard Navigation (Using Exact Dashboard Code) */}
+            <nav className="hidden md:flex items-center gap-1 md:gap-2 lg:gap-6 h-full pt-1">
+              {navItems.map((item) => {
+                const Icon = item.icon;
+                return (
+                  <NavLink
+                    key={item.name}
+                    to={item.path}
+                    className="relative group h-full flex items-center justify-center px-1 lg:px-2"
+                  >
+                    {({ isActive }) => (
+                      <div className="flex flex-col items-center justify-center gap-[3px]">
+                        <Icon 
+                          size={21} 
+                          strokeWidth={1.5} 
+                          className={cn(
+                            "transition-colors duration-300",
+                            isActive ? "text-camel-900" : "text-espresso-400 group-hover:text-camel-600"
+                          )}
+                        />
+                        <div className="relative px-2 lg:px-3 py-0.5 flex items-center justify-center">
+                          {isActive && (
+                            <svg className="absolute inset-0 w-full h-full text-camel-200 scale-x-[1.25] scale-y-[1.1] -z-10 drop-shadow-sm opacity-90" preserveAspectRatio="none" viewBox="0 0 100 30">
+                              <path d="M 3,6 C 20,2 40,7 60,3 S 80,8 97,5 C 98,12 95,20 96,25 C 80,28 60,23 40,27 S 20,22 4,24 C 2,18 5,10 3,6 Z" fill="currentColor" />
+                            </svg>
+                          )}
+                          {!isActive && (
+                            <svg className="absolute inset-0 w-full h-full text-camel-100 scale-x-[1.25] scale-y-[1.1] -z-10 opacity-0 group-hover:opacity-60 transition-opacity duration-300" preserveAspectRatio="none" viewBox="0 0 100 30">
+                              <path d="M 3,6 C 20,2 40,7 60,3 S 80,8 97,5 C 98,12 95,20 96,25 C 80,28 60,23 40,27 S 20,22 4,24 C 2,18 5,10 3,6 Z" fill="currentColor" />
+                            </svg>
+                          )}
+                          <span className={cn(
+                            "relative z-10 text-[12px] lg:text-[13px] tracking-wide transition-colors duration-300",
+                            isActive ? "text-camel-900 font-bold" : "text-espresso-600 font-semibold group-hover:text-camel-800"
+                          )}>
+                            {item.name}
+                          </span>
+                        </div>
+                      </div>
+                    )}
+                  </NavLink>
+                );
+              })}
             </nav>
 
             {/* Right: Sign In Action */}

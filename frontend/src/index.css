@@ -1,4 +1,4 @@
-﻿@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Plus+Jakarta+Sans:wght@600;700&display=swap');
+﻿@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&family=JetBrains+Mono:wght@400&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -6,24 +6,21 @@
 
 @layer base {
   body {
-    @apply bg-bg-primary text-espresso-800 font-sans antialiased;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
+    @apply bg-bg-primary text-espresso-800 font-sans antialiased selection:bg-camel-200 selection:text-camel-900;
   }
   h1, h2, h3, h4, h5, h6 {
-    @apply font-display tracking-tight text-espresso-900;
-  }
-  ::selection {
-    @apply bg-camel-100 text-camel-900;
+    @apply font-display tracking-tight;
   }
 }
 
 @layer utilities {
-  .scrollbar-hide {
-    -ms-overflow-style: none;
-    scrollbar-width: none;
-  }
-  .scrollbar-hide::-webkit-scrollbar {
-    display: none;
+  /* Vibrant, distinct watercolor paint wash */
+  .bg-watercolor {
+    background-color: #f9f6f0;
+    background-image: 
+      radial-gradient(at 0% 0%, hsla(28, 90%, 65%, 0.4) 0px, transparent 60%),
+      radial-gradient(at 100% 0%, hsla(15, 85%, 65%, 0.4) 0px, transparent 60%),
+      radial-gradient(at 100% 100%, hsla(40, 95%, 60%, 0.3) 0px, transparent 50%),
+      radial-gradient(at 0% 100%, hsla(22, 100%, 75%, 0.4) 0px, transparent 50%);
   }
 }

@@ -1,27 +1,15 @@
-﻿import React, { useState } from 'react';
+﻿import React from 'react';
 import { Outlet } from 'react-router-dom';
-import Sidebar from '../molecules/Sidebar';
-import Topbar from '../molecules/Topbar';
+import Navbar from '../molecules/Navbar';
 
 export default function GlobalLayout() {
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-
   return (
-    <div className="flex h-screen bg-bg-secondary overflow-hidden font-sans text-slate-900">
-      <Sidebar 
-        isOpen={isSidebarOpen} 
-        onClose={() => setIsSidebarOpen(false)} 
-      />
-
-      <main className="flex-1 flex flex-col h-screen overflow-hidden relative">
-        <Topbar onOpenSidebar={() => setIsSidebarOpen(true)} />
-
-        {/* Scrollable Content Area */}
-        <div className="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8">
-          <div className="w-full max-w-7xl mx-auto pb-24">
-            <Outlet />
-          </div>
-        </div>
+    <div className="min-h-screen bg-bg-primary font-sans text-slate-900 flex flex-col">
+      <Navbar />
+      
+      {/* Main Content Area */}
+      <main className="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <Outlet />
       </main>
     </div>
   );

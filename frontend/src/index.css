@@ -1,4 +1,4 @@
-﻿@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Plus+Jakarta+Sans:wght@600;700&family=JetBrains+Mono:wght@400&display=swap');
+﻿@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Plus+Jakarta+Sans:wght@600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -6,8 +6,7 @@
 
 @layer base {
   body {
-    @apply bg-bg-primary text-text-primary font-sans antialiased;
-    selection-color: theme('colors.forest.800');
+    @apply bg-bg-primary text-slate-900 font-sans antialiased;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
@@ -15,7 +14,7 @@
     @apply font-display tracking-tight;
   }
   ::selection {
-    @apply bg-forest-100 text-forest-800;
+    @apply bg-brand-100 text-brand-900;
   }
 }
 

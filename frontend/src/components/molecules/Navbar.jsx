@@ -12,109 +12,87 @@ export default function Navbar() {
   ];
 
   return (
-    <div className="fixed top-6 left-0 right-0 z-50 flex justify-center px-4 pointer-events-none">
+    <div className="fixed top-6 left-0 right-0 z-50 flex justify-center px-6 pointer-events-none">
       
       {/* 
-        Container with precise drop-shadow. 
-        The SVG inside will cast this shadow naturally outlining the custom curves.
+        PERFECT CSS PILL CONTAINER
+        No SVG distortion. Perfectly crisp rounded-full pill with overflow-hidden.
       */}
-      <header className="relative w-full max-w-5xl h-[80px] pointer-events-auto filter drop-shadow-[0_12px_24px_rgba(90,56,37,0.06)]">
+      <header className="relative w-full max-w-[1060px] h-[72px] bg-white rounded-full shadow-[0_8px_30px_rgb(90,56,37,0.06)] border border-camel-100 flex items-center justify-between overflow-hidden pointer-events-auto">
         
-        {/* EXACT GEOMETRY: SVG Background */}
-        <div className="absolute inset-0 w-full h-full z-0">
-          <svg viewBox="0 0 1024 80" className="w-full h-full" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+        {/* 
+          RIGHT ZONE SWOOP BACKGROUND
+          Fixed width SVG inside the overflow-hidden container. Never distorts.
+        */}
+        <div className="absolute top-0 right-0 h-full w-[360px] z-0 pointer-events-none">
+          <svg viewBox="0 0 360 72" className="w-full h-full" preserveAspectRatio="none">
             <defs>
-              <linearGradient id="rightZone" x1="0" y1="0" x2="1" y2="1">
-                <stop offset="0%" stopColor="#F9F6F0" stopOpacity="1" />
-                <stop offset="100%" stopColor="#E4D1B9" stopOpacity="0.4" />
+              <linearGradient id="camelSwoop" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0%" stopColor="#FAF7F2" stopOpacity="1" />
+                <stop offset="100%" stopColor="#EADDCB" stopOpacity="0.4" />
               </linearGradient>
             </defs>
-            
-            {/* Main White Body with Left/Right Thin zones and Center Deep zone */}
-            <path d="
-              M 24 0
-              L 1000 0
-              C 1013.25 0, 1024 10.75, 1024 24
-              L 1024 36
-              C 1024 49.25, 1013.25 60, 1000 60
-              L 800 60
-              C 760 60, 740 80, 700 80
-              L 300 80
-              C 260 80, 240 60, 200 60
-              L 24 60
-              C 10.75 60, 0 49.25, 0 36
-              L 0 24
-              C 0 10.75, 10.75 0, 24 0
-              Z
-            " fill="white" />
-            
-            {/* The Right-Side Swooping Zone */}
-            <path d="
-              M 750 0
-              C 750 40, 720 80, 700 80
-              C 740 80, 760 60, 800 60
-              L 1000 60
-              C 1013.25 60, 1024 49.25, 1024 36
-              L 1024 24
-              C 1024 10.75, 1013.25 0, 1000 0
-              Z
-            " fill="url(#rightZone)" />
+            <path 
+              d="M0,72 C120,72 160,0 260,0 L360,0 L360,72 Z" 
+              fill="url(#camelSwoop)" 
+            />
           </svg>
         </div>
 
-        {/* Foreground Content */}
-        <div className="relative z-10 flex items-start justify-between w-full h-full">
+        {/* 
+          FOREGROUND CONTENT 
+        */}
+        <div className="relative z-10 flex items-center justify-between w-full h-full px-2">
           
-          {/* Left: Logo (Centered in the 60px height part) */}
-          <div className="flex items-center gap-3 pl-6 pr-8 h-[60px]">
-            <div className="w-8 h-8 rounded-lg bg-camel-600 flex items-center justify-center shadow-sm">
-              <span className="text-white font-bold text-[16px] leading-none">F</span>
+          {/* Left: Logo */}
+          <div className="flex items-center gap-3 pl-5 pr-8">
+            <div className="w-9 h-9 rounded-xl bg-camel-600 flex items-center justify-center shadow-sm">
+              <span className="text-white font-bold text-lg leading-none">F</span>
             </div>
-            <span className="font-display font-bold text-[19px] text-espresso-900 tracking-tight">
+            <span className="font-display font-extrabold text-[20px] text-espresso-900 tracking-tight">
               FurShield<span className="text-camel-500">.</span>
             </span>
           </div>
 
-          {/* Center: Navigation (Centered in the 80px height part) */}
-          <nav className="flex items-center gap-6 h-[80px] px-4">
+          {/* Center: Navigation */}
+          <nav className="flex items-center gap-1 h-full">
             {navItems.map((item) => {
               const Icon = item.icon;
               return (
                 <NavLink
                   key={item.name}
                   to={item.path}
-                  className="relative group flex items-center justify-center h-full"
+                  className="relative group h-full flex items-center px-4"
                 >
                   {({ isActive }) => (
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2.5">
                       
-                      {/* Icon inside a shadow circle when active */}
+                      {/* Icon Container */}
                       <div className={cn(
-                        "w-[34px] h-[34px] rounded-full flex items-center justify-center transition-all duration-300",
+                        "w-[36px] h-[36px] rounded-full flex items-center justify-center transition-all duration-300",
                         isActive 
-                          ? "bg-white shadow-[0_2px_10px_rgba(90,56,37,0.08)] border border-slate-50 text-camel-700" 
-                          : "bg-transparent text-espresso-400 group-hover:text-camel-600 group-hover:bg-camel-50/50"
+                          ? "bg-white shadow-[0_2px_12px_rgba(90,56,37,0.06)] border border-camel-50 text-camel-700" 
+                          : "bg-transparent text-slate-400 group-hover:text-camel-600 group-hover:bg-camel-50/50"
                       )}>
-                        <Icon size={16} strokeWidth={isActive ? 2.5 : 2} />
+                        <Icon size={17} strokeWidth={isActive ? 2.5 : 2} />
                       </div>
                       
-                      {/* Text & Underline Stack */}
-                      <div className="flex flex-col items-center pt-1">
-                        <span className={cn(
-                          "text-[14px] font-semibold transition-colors duration-300 tracking-tight",
-                          isActive ? "text-camel-700" : "text-espresso-500 group-hover:text-camel-700"
-                        )}>
-                          {item.name}
-                        </span>
+                      {/* Text & Underline */}
+                      <span className={cn(
+                        "relative text-[15px] font-bold transition-colors duration-300 tracking-wide",
+                        isActive ? "text-camel-800" : "text-slate-500 group-hover:text-camel-700"
+                      )}>
+                        {item.name}
                         
-                        {/* Reference-Perfect Underline centered beneath the text */}
-                        <div className="h-[3px] mt-1 flex justify-center w-full">
-                          <div className={cn(
-                            "h-full rounded-full bg-camel-600 transition-all duration-300",
-                            isActive ? "w-[18px] opacity-100" : "w-0 opacity-0"
-                          )}></div>
-                        </div>
-                      </div>
+                        {/* 
+                          Active Underline
+                          Perfectly centered under the text only. Absolute positioned so it never breaks flex alignment.
+                        */}
+                        <span className={cn(
+                          "absolute -bottom-[20px] left-1/2 -translate-x-1/2 h-[3px] rounded-full bg-camel-600 transition-all duration-300",
+                          isActive ? "w-[20px] opacity-100" : "w-0 opacity-0"
+                        )}></span>
+                      </span>
                       
                     </div>
                   )}
@@ -123,19 +101,19 @@ export default function Navbar() {
             })}
           </nav>
 
-          {/* Right: Actions (Centered in the 60px height part) */}
-          <div className="flex items-center gap-3 pr-4 h-[60px]">
-            <button className="p-2 text-espresso-600 hover:text-camel-800 transition-colors rounded-full hover:bg-white/40">
-              <Search size={18} strokeWidth={2} />
+          {/* Right: Actions */}
+          <div className="flex items-center gap-3 pr-3 pl-8">
+            <button className="p-2.5 text-espresso-600 hover:text-camel-800 transition-colors rounded-full hover:bg-white/50">
+              <Search size={20} strokeWidth={2} />
             </button>
             
-            <button className="relative p-2 text-espresso-600 hover:text-camel-800 transition-colors rounded-full hover:bg-white/40">
-              <Bell size={18} strokeWidth={2} />
-              <span className="absolute top-1.5 right-2 w-2 h-2 rounded-full bg-accent-500 border-2 border-[#F6EBE0]"></span>
+            <button className="relative p-2.5 text-espresso-600 hover:text-camel-800 transition-colors rounded-full hover:bg-white/50">
+              <Bell size={20} strokeWidth={2} />
+              <span className="absolute top-2 right-2 w-2.5 h-2.5 rounded-full bg-accent-500 border-[2.5px] border-[#F6EBE0]"></span>
             </button>
             
-            <div className="w-[34px] h-[34px] rounded-full bg-camel-100/80 border border-camel-200/60 flex items-center justify-center ml-2 cursor-pointer hover:bg-white transition-all shadow-sm text-camel-800">
-              <span className="text-[11px] font-bold">RH</span>
+            <div className="w-[40px] h-[40px] rounded-full bg-white border border-camel-200 flex items-center justify-center ml-1 cursor-pointer hover:shadow-md transition-all shadow-sm">
+              <span className="text-[13px] font-black text-camel-800">RH</span>
             </div>
           </div>
 

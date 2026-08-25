@@ -60,7 +60,7 @@ export default function Navbar() {
             </div>
           </div>
 
-          {/* Center: Navigation (AI reference stacked layout with cursive font and rough rectangle brushstroke) */}
+          {/* Center: Navigation (AI reference stacked layout with simple sans font and rough rectangle brushstroke) */}
           <nav className="flex items-center gap-6 h-full pt-1">
             {navItems.map((item) => {
               const Icon = item.icon;
@@ -83,7 +83,7 @@ export default function Navbar() {
                         )}
                       />
                       
-                      {/* Bottom Text with Hand-Painted Rectangle Marker SVG */}
+                      {/* Bottom Text with Hand-Painted Marker SVG */}
                       <div className="relative px-3 py-0.5 flex items-center justify-center">
                         {/* Active Brushstroke */}
                         {isActive && (
@@ -113,10 +113,9 @@ export default function Navbar() {
                         )}
                         <span 
                           className={cn(
-                            "relative z-10 text-[17px] tracking-wide transition-colors duration-300",
+                            "relative z-10 text-[14px] tracking-tight transition-colors duration-300",
                             isActive ? "text-camel-900 font-bold" : "text-espresso-600 font-semibold group-hover:text-camel-800"
                           )}
-                          style={{ fontFamily: "'Dancing Script', cursive" }}
                         >
                           {item.name}
                         </span>

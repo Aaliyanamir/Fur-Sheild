@@ -52,7 +52,7 @@ export default function LandingPage() {
           <div className="relative z-10 flex items-center justify-between w-full h-full px-2">
             
             {/* Left: Logo (Exact match to Dashboard Watercolor/Script Logo) */}
-            <div className="flex items-center gap-2 md:gap-3 pl-3 md:pl-4 md:pr-4 lg:pr-8 shrink-0">
+            <Link to="/" className="flex items-center gap-2 md:gap-3 pl-3 md:pl-4 md:pr-4 lg:pr-8 shrink-0 hover:opacity-80 transition-opacity">
               <div className="relative w-9 h-9 md:w-11 md:h-11 flex items-center justify-center transition-all duration-300">
                 <div className="absolute inset-0 bg-camel-200 rounded-full mix-blend-multiply filter blur-[3px] opacity-80 scale-110 rotate-12"></div>
                 <div className="absolute inset-1 bg-camel-300 rounded-full mix-blend-multiply filter blur-[4px] opacity-60 -rotate-12"></div>
@@ -70,7 +70,7 @@ export default function LandingPage() {
                   For tails that tell stories.
                 </span>
               </div>
-            </div>
+            </Link>
 
             {/* Center: Replicated Dashboard Navigation (Using Exact Dashboard Code) */}
             <nav className="hidden md:flex items-center gap-1 md:gap-2 lg:gap-6 h-full pt-1">
@@ -166,3 +166,4 @@ export default function LandingPage() {
     </div>
   );
 }
+

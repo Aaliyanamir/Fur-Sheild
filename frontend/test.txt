@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import { LayoutDashboard, Stethoscope, HeartHandshake, ShoppingBag, Bell, Search, PawPrint, Menu, X } from 'lucide-react';
 import { cn } from '../../lib/utils';
@@ -47,7 +47,7 @@ export default function Navbar() {
           <div className="relative z-10 flex items-center justify-between w-full h-full px-2">
             
             {/* Left: Logo (Prevent shrink on tablet) */}
-            <Link to="/" className="flex items-center gap-2 md:gap-3 pl-3 md:pl-4 md:pr-4 lg:pr-8 shrink-0 hover:opacity-80 transition-opacity">
+            <Link to="/" className="flex items-center gap-2 md:gap-3 pl-3 md:pl-4 md:pr-4 lg:pr-8 shrink-0 hover:opacity-80 transition-opacity cursor-pointer"><div className="flex items-center gap-2 md:gap-3 pl-3 md:pl-4 md:pr-4 lg:pr-8 shrink-0">
               <div className="relative w-9 h-9 md:w-11 md:h-11 flex items-center justify-center transition-all duration-300">
                 <div className="absolute inset-0 bg-camel-200 rounded-full mix-blend-multiply filter blur-[3px] opacity-80 scale-110 rotate-12"></div>
                 <div className="absolute inset-1 bg-camel-300 rounded-full mix-blend-multiply filter blur-[4px] opacity-60 -rotate-12"></div>
@@ -68,7 +68,7 @@ export default function Navbar() {
                   For tails that tell stories.
                 </span>
               </div>
-            </Link>
+            </div></Link>
 
             {/* Desktop Center: Navigation */}
             <nav className="hidden md:flex items-center gap-1 md:gap-2 lg:gap-6 h-full pt-1">

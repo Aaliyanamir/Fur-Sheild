@@ -1,5 +1,5 @@
 ﻿import React, { useState, useEffect } from 'react';
-import { NavLink, useLocation } from 'react-router-dom';
+import { NavLink, Link, useLocation } from 'react-router-dom';
 import { LayoutDashboard, Stethoscope, HeartHandshake, ShoppingBag, Bell, Search, PawPrint, Menu, X } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import { AnimatePresence, motion } from 'framer-motion';

@@ -8,19 +8,28 @@ export default {
     extend: {
       colors: {
         bg: {
-          primary: '#F8FAFC',
-          secondary: '#F1F5F9',
+          primary: '#FDFBF7',
+          secondary: '#F5F2EB', 
         },
-        brand: {
-          50: '#EEF2FF',
-          100: '#E0E7FF',
-          500: '#6366F1',
-          600: '#4F46E5',
-          700: '#4338CA',
-          900: '#312E81',
+        camel: {
+          50: '#F9F6F0',
+          100: '#F0E7D8',
+          200: '#E4D1B9',
+          300: '#D5B694',
+          400: '#C79A6D',
+          500: '#BA7F48',
+          600: '#A4683A',
+          700: '#865131',
+          800: '#6E432B',
+          900: '#5A3825',
+        },
+        espresso: {
+          900: '#2C1E16',
+          800: '#3E2A20',
+          500: '#8A7366',
         },
         accent: {
-          500: '#F43F5E',
+          500: '#D97757',
         }
       },
       fontFamily: {
@@ -28,8 +37,8 @@ export default {
         display: ['"Plus Jakarta Sans"', 'sans-serif'],
       },
       boxShadow: {
-        'glass': '0 4px 30px rgba(0, 0, 0, 0.05)',
-        'glow': '0 0 15px rgba(99, 102, 241, 0.5)',
+        'floating': '0 20px 40px -15px rgba(90, 56, 37, 0.1)',
+        'soft': '0 4px 20px -2px rgba(90, 56, 37, 0.05)',
       }
     },
   },

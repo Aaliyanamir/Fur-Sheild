@@ -6,15 +6,15 @@
 
 @layer base {
   body {
-    @apply bg-bg-primary text-slate-900 font-sans antialiased;
+    @apply bg-bg-primary text-espresso-800 font-sans antialiased;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
   h1, h2, h3, h4, h5, h6 {
-    @apply font-display tracking-tight;
+    @apply font-display tracking-tight text-espresso-900;
   }
   ::selection {
-    @apply bg-brand-100 text-brand-900;
+    @apply bg-camel-100 text-camel-900;
   }
 }
 

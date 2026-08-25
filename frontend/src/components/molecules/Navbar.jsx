@@ -60,40 +60,62 @@ export default function Navbar() {
             </div>
           </div>
 
-          {/* Center: Navigation (Clean side-by-side layout, simple underline active state) */}
-          <nav className="flex items-center gap-2 h-full">
+          {/* Center: Navigation (AI reference stacked layout with cursive font and SVG brushstroke) */}
+          <nav className="flex items-center gap-6 h-full pt-1">
             {navItems.map((item) => {
               const Icon = item.icon;
               return (
                 <NavLink
                   key={item.name}
                   to={item.path}
-                  className="relative group h-full flex items-center px-4"
+                  className="relative group h-full flex items-center justify-center px-1"
                 >
                   {({ isActive }) => (
-                    <div className="flex flex-col items-center justify-center relative h-full">
-                      <div className="flex items-center gap-2">
-                        <Icon 
-                          size={18} 
-                          strokeWidth={isActive ? 2.5 : 2}
+                    <div className="flex flex-col items-center justify-center gap-[3px]">
+                      
+                      {/* Top Icon */}
+                      <Icon 
+                        size={21} 
+                        strokeWidth={1.5} 
+                        className={cn(
+                          "transition-colors duration-300",
+                          isActive ? "text-camel-900" : "text-espresso-400 group-hover:text-camel-600"
+                        )}
+                      />
+                      
+                      {/* Bottom Text with SVG Brushstroke */}
+                      <div className="relative px-3 py-0.5 flex items-center justify-center">
+                        {/* Active Brushstroke */}
+                        {isActive && (
+                          <svg 
+                            className="absolute inset-0 w-full h-full text-camel-200 scale-[1.3] -z-10 drop-shadow-sm opacity-90" 
+                            preserveAspectRatio="none" 
+                            viewBox="0 0 100 40"
+                          >
+                            <path d="M2,20 Q15,5 50,8 T98,20 Q85,35 50,32 T2,20 Z" fill="currentColor" />
+                          </svg>
+                        )}
+                        {/* Hover Brushstroke */}
+                        {!isActive && (
+                          <svg 
+                            className="absolute inset-0 w-full h-full text-camel-100 scale-[1.3] -z-10 opacity-0 group-hover:opacity-60 transition-opacity duration-300" 
+                            preserveAspectRatio="none" 
+                            viewBox="0 0 100 40"
+                          >
+                            <path d="M2,20 Q15,5 50,8 T98,20 Q85,35 50,32 T2,20 Z" fill="currentColor" />
+                          </svg>
+                        )}
+                        <span 
                           className={cn(
-                            "transition-colors duration-300",
-                            isActive ? "text-camel-700" : "text-espresso-400 group-hover:text-camel-600"
+                            "relative z-10 text-[17px] tracking-wide transition-colors duration-300",
+                            isActive ? "text-camel-900 font-bold" : "text-espresso-600 font-semibold group-hover:text-camel-800"
                           )}
-                        />
-                        <span className={cn(
-                          "text-sm font-semibold transition-colors duration-300",
-                          isActive ? "text-camel-800" : "text-espresso-500 group-hover:text-camel-700"
-                        )}>
+                          style={{ fontFamily: "'Dancing Script', cursive" }}
+                        >
                           {item.name}
                         </span>
                       </div>
                       
-                      {/* Floating Underline Only */}
-                      <div className={cn(
-                        "absolute bottom-[18px] h-[3px] rounded-full bg-camel-600 transition-all duration-300",
-                        isActive ? "w-6 opacity-100" : "w-0 opacity-0"
-                      )}></div>
                     </div>
                   )}
                 </NavLink>

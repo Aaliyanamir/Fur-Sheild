@@ -6,6 +6,7 @@ import { cn } from '../lib/utils';
 import EcosystemSection from '../components/sections/EcosystemSection';
 import FeatureBentoSection from '../components/sections/FeatureBentoSection';
 import TrustSection from '../components/sections/TrustSection';
+import FAQSection from '../components/sections/FAQSection';
 
 export default function LandingPage() {
   const navItems = [
@@ -224,9 +225,11 @@ export default function LandingPage() {
       <EcosystemSection />
       <FeatureBentoSection />
       <TrustSection />
+      <FAQSection />
     </main>
   );
 }
+
 
 
 

@@ -138,12 +138,55 @@ export default function ShopCatalog() {
         {/* PHASE 3: Main Product Grid Area (Cols 9) */}
         <div className="lg:col-span-9 flex flex-col gap-10">
            
-           {/* Phase 6 & 7 Placeholder: Order History & Tracking */}
-           <div className="w-full h-[120px] border border-dashed border-emerald-200 rounded-[2rem] flex items-center justify-center bg-emerald-50/30">
-             <span className="text-xs font-bold text-emerald-500 uppercase tracking-widest">[ Phase 6 & 7: Active Delivery & History Vault Pending ]</span>
-           </div>
+           {/* PHASE 6 & 7: Cinematic Active Delivery Tracker */}
+             <motion.div 
+               initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}
+               className="bg-espresso-900 rounded-[2.5rem] p-6 md:p-8 shadow-[0_20px_40px_rgba(90,56,37,0.15)] text-white flex flex-col md:flex-row items-center gap-6 md:gap-8 relative overflow-hidden"
+             >
+               {/* Ambient Background Glow */}
+               <div className="absolute top-0 right-0 w-72 h-72 bg-camel-500/20 rounded-full blur-3xl -mr-20 -mt-20 pointer-events-none animate-pulse"></div>
 
-           {/* Buy It Again Bento Row */}
+               {/* Glassmorphic Icon */}
+               <div className="flex-shrink-0 relative z-10">
+                  <div className="w-16 h-16 rounded-2xl bg-white/10 backdrop-blur-md flex items-center justify-center border border-white/20 shadow-inner">
+                     <Truck className="text-camel-400" size={28} />
+                  </div>
+               </div>
+
+               {/* Tracker Content */}
+               <div className="flex-1 w-full relative z-10">
+                  <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-4 gap-4">
+                     <div>
+                        <div className="flex items-center gap-2 mb-1.5">
+                          <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+                          <p className="text-camel-400 text-[10px] font-black uppercase tracking-widest">Active Delivery • Order #FS-8921</p>
+                        </div>
+                        <h4 className="font-display font-bold text-2xl md:text-3xl leading-tight">Arriving Today by 8:00 PM</h4>
+                        <p className="text-white/60 text-xs font-medium mt-1">Flea & Tick Prevention (3-Month) + 1 more item</p>
+                     </div>
+                     <button className="w-full md:w-auto px-5 py-2.5 bg-white/10 hover:bg-white/20 border border-white/20 rounded-full text-xs font-bold transition-colors flex items-center justify-center gap-2">
+                        Track Package <ArrowRight size={14} />
+                     </button>
+                  </div>
+
+                  {/* Custom Progress Bar */}
+                  <div className="mt-6 relative">
+                     <div className="h-1.5 w-full bg-white/10 rounded-full overflow-hidden">
+                        <div className="h-full bg-gradient-to-r from-emerald-600 to-emerald-400 w-3/4 rounded-full relative">
+                           <div className="absolute inset-0 bg-white/20 animate-pulse"></div>
+                        </div>
+                     </div>
+                     <div className="flex justify-between mt-3 text-[9px] font-bold uppercase tracking-wider text-white/50">
+                        <span className="text-emerald-400">Processed</span>
+                        <span className="text-emerald-400 hidden sm:inline">Shipped</span>
+                        <span className="text-white">Out for Delivery</span>
+                        <span>Delivered</span>
+                     </div>
+                  </div>
+               </div>
+             </motion.div>
+
+             {/* Buy It Again Bento Row */}
            <div>
               <div className="flex justify-between items-end mb-4 px-2">
                 <h3 className="font-display font-bold text-xl text-espresso-900">Buy It Again</h3>
@@ -272,4 +315,5 @@ export default function ShopCatalog() {
     </div>
   );
 }
+
 

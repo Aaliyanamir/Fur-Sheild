@@ -132,37 +132,51 @@ export default function OwnerDashboard() {
           </div>
         </motion.div>
 
-        {/* RIGHT COLUMN: Data Widgets (Col 8) */}
-        <div className="lg:col-span-8 flex flex-col gap-6">
-
-          {/* AI Predictor Module */}
-          <motion.div variants={itemVariant} className="bg-gradient-to-br from-espresso-900 to-espresso-800 rounded-[2rem] p-8 shadow-[0_15px_40px_rgba(90,56,37,0.15)] relative overflow-hidden flex flex-col md:flex-row gap-6 items-start md:items-center">
-            <div className="absolute -top-24 -right-24 w-64 h-64 bg-camel-500/20 blur-[80px] rounded-full pointer-events-none"></div>
+                {/* RIGHT COLUMN: Data Widgets (Col 8) */}
+        <div className="lg:col-span-8 flex flex-col gap-8">
+          
+          {/* Spatial Generative AI Insight (No Generic Icons) */}
+          <motion.div 
+            variants={itemVariant} 
+            className="relative overflow-hidden rounded-[2.5rem] bg-gradient-to-br from-white/80 to-white/40 backdrop-blur-2xl border border-white shadow-[0_20px_40px_rgba(90,56,37,0.05)] p-8 md:p-10"
+          >
+            {/* Subtle animated background gradient */}
+            <div className="absolute top-0 right-0 -mr-20 -mt-20 w-64 h-64 bg-camel-200/30 rounded-full blur-3xl animate-pulse"></div>
             
-            <div className="w-14 h-14 shrink-0 rounded-2xl bg-camel-500/20 border border-camel-500/30 flex items-center justify-center relative">
-              <div className="absolute inset-0 bg-camel-400 blur-xl opacity-20 rounded-2xl animate-pulse"></div>
-              <Sparkles className="text-camel-300 relative z-10" size={24} />
-            </div>
-            
-            <div className="relative z-10">
-              <h3 className="text-camel-300 text-xs font-bold uppercase tracking-widest mb-2 flex items-center gap-2">
-                Generative Health Insight <span className="w-1.5 h-1.5 rounded-full bg-camel-400 animate-pulse"></span>
-              </h3>
-              <p className="text-white text-sm md:text-base leading-relaxed font-medium">
-                {data.aiInsight}
-              </p>
+            <div className="relative z-10 flex flex-col md:flex-row gap-8 items-start">
+              {/* Custom CSS AI Orb (Replacing cheap icons) */}
+              <div className="flex-shrink-0 relative w-12 h-12 flex items-center justify-center">
+                <div className="absolute inset-0 bg-camel-400 rounded-full animate-ping opacity-20"></div>
+                <div className="absolute inset-2 bg-gradient-to-tr from-camel-600 to-camel-300 rounded-full shadow-[0_0_15px_rgba(186,127,72,0.5)]"></div>
+                <div className="absolute inset-3 bg-white rounded-full opacity-30 blur-[1px]"></div>
+              </div>
+              
+              <div>
+                <div className="flex items-center gap-3 mb-3">
+                  <span className="text-[10px] font-black tracking-[0.25em] text-camel-600 uppercase">
+                    Generative Health Synthesis
+                  </span>
+                  <div className="h-[1px] w-12 bg-camel-200"></div>
+                </div>
+                <p className="text-xl md:text-2xl font-display font-medium text-espresso-900 leading-relaxed tracking-tight">
+                  Buddy's weight has stabilized at <span className="font-bold border-b-2 border-camel-300">28.6 kg</span>, aligning perfectly with his reduced 850 kcal intake. This steady trajectory significantly reduces joint stress. <span className="text-camel-700 italic">Maintain current diet plan.</span>
+                </p>
+              </div>
             </div>
           </motion.div>
 
-          {/* Precision Trend Chart (Recharts) */}
-          <motion.div variants={itemVariant} className="bg-white rounded-[2rem] p-8 border border-camel-100 shadow-[0_8px_30px_rgb(90,56,37,0.03)] h-[400px] flex flex-col">
-            <div className="flex justify-between items-center mb-6">
-              <div>
-                <h3 className="text-xl font-display font-bold text-espresso-900">Nutrition & Weight Trajectory</h3>
-                <p className="text-espresso-500 text-sm font-medium">6-month macro correlation analysis.</p>
-              </div>
+          {/* Precision Trend Chart (Borderless & Seamless) */}
+          <motion.div 
+            variants={itemVariant} 
+            className="bg-white/60 backdrop-blur-xl rounded-[2.5rem] p-8 md:p-10 border border-white shadow-[0_10px_30px_rgba(90,56,37,0.03)]"
+          >
+            <div className="mb-8">
+              <h3 className="text-2xl font-display font-bold text-espresso-900 tracking-tight">Nutrition & Weight Trajectory</h3>
+              <p className="text-sm font-medium text-espresso-500 mt-1">6-month macro correlation analysis.</p>
             </div>
-            <div className="flex-1 w-full relative">
+            
+            {/* Chart Container */}
+            <div className="w-full h-[250px] relative">
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart data={data.chartData} margin={{ top: 10, right: 0, left: -20, bottom: 0 }}>
                   <defs>
@@ -175,7 +189,6 @@ export default function OwnerDashboard() {
                       <stop offset="95%" stopColor="#3E2A20" stopOpacity={0}/>
                     </linearGradient>
                   </defs>
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E7EB" />
                   <XAxis 
                     dataKey="month" 
                     axisLine={false} 
@@ -187,7 +200,7 @@ export default function OwnerDashboard() {
                     yAxisId="left" 
                     axisLine={false} 
                     tickLine={false} 
-                    tick={{ fill: '#9CA3AF', fontSize: 12, fontWeight: 500 }} 
+                    tick={false} 
                     domain={['dataMin - 1', 'dataMax + 1']}
                   />
                   <YAxis 
@@ -301,3 +314,4 @@ export default function OwnerDashboard() {
     </>
   );
 }
+

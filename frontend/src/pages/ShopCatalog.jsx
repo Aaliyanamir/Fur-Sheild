@@ -1,4 +1,6 @@
-﻿import React, { useState } from 'react';
+﻿import React, { useState, useEffect, useContext } from 'react';
+import shopService from '../services/shop.service';
+import { AuthContext } from '../context/AuthContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Search, ShoppingBag, ShieldCheck, Truck, ArrowRight, Plus, Minus, X, Package, RotateCcw } from 'lucide-react';
 import { cn } from '../lib/utils';
@@ -20,6 +22,31 @@ export default function ShopCatalog() {
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
   const [checkoutStep, setCheckoutStep] = useState(1);
   const [isHistoryExpanded, setIsHistoryExpanded] = useState(false);
+
+  // Add these new states
+  const [liveProducts, setLiveProducts] = useState([]);
+  const [isCatalogLoading, setIsCatalogLoading] = useState(true);
+  const [catalogError, setCatalogError] = useState('');
+
+  // Fetch products on mount
+  useEffect(() => {
+    const fetchCatalog = async () => {
+      try {
+        setIsCatalogLoading(true);
+        const data = await shopService.getProducts('All'); // Pass specific category if needed
+        if (data.success) {
+          setLiveProducts(data.data);
+        }
+      } catch (err) {
+        setCatalogError('Failed to load catalog. Please try again later.');
+        console.error(err);
+      } finally {
+        setIsCatalogLoading(false);
+      }
+    };
+
+    fetchCatalog();
+  }, []);
 
   // Advanced Cart Logic
   const addToCart = (product, qty, auto) => {
@@ -866,6 +893,7 @@ export default function ShopCatalog() {
     </div>
   );
 }
+
 
 
 

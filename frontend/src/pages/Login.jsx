@@ -9,8 +9,17 @@ export default function Login() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const { login } = useContext(AuthContext);
+  const { user, login } = useContext(AuthContext);
   const navigate = useNavigate();
+
+  // If user is already authenticated and validated, redirect them away from login
+  React.useEffect(() => {
+    if (user) {
+      if (user.role === 'VET') navigate('/vet');
+      else if (user.role === 'SHELTER_ADMIN') navigate('/shelter');
+      else navigate('/dashboard');
+    }
+  }, [user, navigate]);
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -102,3 +111,4 @@ export default function Login() {
     </div>
   );
 }
+

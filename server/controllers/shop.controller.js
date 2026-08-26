@@ -22,29 +22,53 @@ const getProducts = async (req, res) => {
 // @access  Private (Any authenticated user)
 const processCheckout = async (req, res) => {
   try {
-    const { cartItems, shippingAddress } = req.body;
-
-    if (!cartItems || cartItems.length === 0) {
-      return res.status(400).json({ success: false, message: 'Cart is empty' });
+    // 1. Verify User exists
+    if (!req.user || !req.user.id) {
+      return res.status(401).json({ success: false, message: 'Unauthorized: User not found in request' });
     }
 
-    // Calculate totals (in a real app, you'd re-verify prices against the DB)
+    const { cartItems, shippingAddress } = req.body;
+
+    // 2. Validate Cart Payload
+    if (!cartItems || !Array.isArray(cartItems) || cartItems.length === 0) {
+      return res.status(400).json({ success: false, message: 'Cart is empty or invalid format' });
+    }
+
+    // 3. Re-verify prices and stock against DB to prevent frontend manipulation
     let subtotal = 0;
-    const orderItems = cartItems.map(item => {
-      const price = item.isAutoShip ? item.price * 0.9 : item.price;
+    const orderItems = [];
+
+    for (const item of cartItems) {
+      const productId = item.productId || item._id || item.id;
+      if (!productId) {
+         return res.status(400).json({ success: false, message: 'Missing product ID in cart item' });
+      }
+
+      const dbProduct = await Product.findById(productId);
+      if (!dbProduct) {
+         return res.status(404).json({ success: false, message: `Product not found: ${productId}` });
+      }
+      if (dbProduct.stock < item.quantity) {
+         return res.status(400).json({ success: false, message: `Insufficient stock for product: ${dbProduct.name}` });
+      }
+
+      const price = item.isAutoShip ? dbProduct.price * 0.9 : dbProduct.price;
       subtotal += price * item.quantity;
-      return {
-        productId: item.id || item._id, // Support different mock frontend structures temporarily
+      
+      orderItems.push({
+        productId: dbProduct._id,
         quantity: item.quantity,
         priceAtPurchase: price,
         isAutoShip: item.isAutoShip || false
-      };
-    });
+      });
+    }
 
+    // 4. Calculate final totals
     const tax = subtotal * 0.08; // 8% mock tax
     const shipping = subtotal >= 49 ? 0 : 5.99;
     const totalAmount = subtotal + tax + shipping;
 
+    // 5. Create Order transaction
     const order = await Order.create({
       ownerId: req.user.id,
       items: orderItems,
@@ -57,7 +81,8 @@ const processCheckout = async (req, res) => {
 
     res.status(201).json({ success: true, data: order });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    console.error("Checkout Error:", error);
+    res.status(500).json({ success: false, message: 'Internal Server Error during checkout', error: error.message });
   }
 };
 
@@ -77,3 +102,4 @@ const getMyOrders = async (req, res) => {
 };
 
 module.exports = { getProducts, processCheckout, getMyOrders };
+

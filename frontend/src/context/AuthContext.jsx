@@ -1,5 +1,6 @@
 ﻿import React, { createContext, useState, useEffect } from 'react';
 import authService from '../services/auth.service';
+import api from '../services/api'; // to handle interceptors if needed
 
 export const AuthContext = createContext();
 
@@ -8,12 +9,31 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Check for user in local storage on initial load
-    const storedUser = localStorage.getItem('user');
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
-    }
-    setLoading(false);
+    const validateToken = async () => {
+      const storedUser = localStorage.getItem('user');
+      if (storedUser) {
+        try {
+          // Verify with backend
+          const data = await authService.getProfile();
+          if (data && data.success) {
+            setUser(JSON.parse(storedUser));
+          } else {
+            throw new Error("Invalid token");
+          }
+        } catch (error) {
+          // Token is stale or invalid
+          console.error("Auth validation failed:", error);
+          localStorage.removeItem('user');
+          sessionStorage.removeItem('user');
+          // Clear any cookies if they were used
+          document.cookie = "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+          setUser(null);
+        }
+      }
+      setLoading(false);
+    };
+
+    validateToken();
   }, []);
 
   const login = async (email, password) => {
@@ -26,6 +46,9 @@ export const AuthProvider = ({ children }) => {
 
   const logout = () => {
     authService.logout();
+    localStorage.removeItem('user');
+    sessionStorage.removeItem('user');
+    document.cookie = "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
     setUser(null);
     window.location.href = '/login';
   };

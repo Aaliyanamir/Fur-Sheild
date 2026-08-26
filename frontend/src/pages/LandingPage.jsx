@@ -4,6 +4,7 @@ import { LayoutDashboard, Stethoscope, HeartHandshake, ShoppingBag, ArrowRight, 
 import { motion } from 'framer-motion';
 import { cn } from '../lib/utils';
 import EcosystemSection from '../components/sections/EcosystemSection';
+import FeatureBentoSection from '../components/sections/FeatureBentoSection';
 
 export default function LandingPage() {
   const navItems = [
@@ -226,7 +227,9 @@ export default function LandingPage() {
       </div>
       </div>
       <EcosystemSection />
+      <FeatureBentoSection />
     </main>
   );
 }
+
 

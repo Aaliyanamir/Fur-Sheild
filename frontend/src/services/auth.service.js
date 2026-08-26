@@ -17,5 +17,14 @@ const getProfile = async () => {
   return response.data;
 };
 
-const authService = { login, logout, getProfile };
+const register = async (name, email, password, role = 'OWNER') => {
+  const response = await api.post('/auth/register', { name, email, password, role });
+  if (response.data.success) {
+    localStorage.setItem('user', JSON.stringify(response.data));
+  }
+  return response.data;
+};
+
+const authService = { login, register, logout, getProfile };
 export default authService;
+

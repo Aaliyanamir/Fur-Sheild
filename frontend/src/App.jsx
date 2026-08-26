@@ -7,6 +7,7 @@ import GlobalLayout from './components/organisms/GlobalLayout';
 // Pages
 import LandingPage from './pages/LandingPage';
 import Login from './pages/Login';
+import Signup from './pages/Signup';
 import OwnerDashboard from './pages/OwnerDashboard';
 import VetHub from './pages/VetHub';
 import ShelterHub from './pages/ShelterHub';
@@ -21,6 +22,7 @@ export default function App() {
           {/* Public Routes */}
           <Route path="/" element={<LandingPage />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<Signup />} />
           
           {/* App Routes wrapped in the Global Layout */}
           <Route element={<GlobalLayout />}>
@@ -49,3 +51,4 @@ export default function App() {
     </AuthProvider>
   );
 }
+

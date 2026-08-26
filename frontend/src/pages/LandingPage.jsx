@@ -134,9 +134,7 @@ export default function LandingPage() {
 
             {/* Right: Sign In Action */}
             <div className="flex items-center pr-1 md:pr-3 h-full shrink-0">
-              <Link 
-                to="/dashboard" 
-                className="px-5 py-2 md:px-7 md:py-2.5 bg-camel-600 hover:bg-camel-500 text-white rounded-full font-bold text-[13px] md:text-sm transition-all shadow-sm hover:shadow-md hover:-translate-y-0.5"
+              <Link to="/login" className="px-5 py-2 md:px-7 md:py-2.5 bg-camel-600 hover:bg-camel-500 text-white rounded-full font-bold text-[13px] md:text-sm transition-all shadow-sm hover:shadow-md hover:-translate-y-0.5"
               >
                 Sign In
               </Link>
@@ -171,7 +169,7 @@ export default function LandingPage() {
           <motion.div variants={fadeUp} className="flex flex-col sm:flex-row items-start sm:items-center gap-8 mt-4">
             
             {/* Primary CTA */}
-            <Link to="/dashboard" className="group relative px-8 py-4 bg-camel-600 hover:bg-camel-500 text-white rounded-full font-bold text-base transition-all shadow-[0_10px_30px_rgba(186,127,72,0.3)] hover:shadow-[0_15px_40px_rgba(186,127,72,0.5)] hover:-translate-y-1 flex items-center justify-center gap-3 overflow-hidden">
+            <Link to="/signup" className="group relative px-8 py-4 bg-camel-600 hover:bg-camel-500 text-white rounded-full font-bold text-base transition-all shadow-[0_10px_30px_rgba(186,127,72,0.3)] hover:shadow-[0_15px_40px_rgba(186,127,72,0.5)] hover:-translate-y-1 flex items-center justify-center gap-3 overflow-hidden">
               <span className="relative z-10">Get Started</span>
               <ArrowRight size={18} className="relative z-10 group-hover:translate-x-1 transition-transform" />
               <div className="absolute inset-0 bg-gradient-to-r from-camel-500 to-camel-400 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
@@ -231,6 +229,7 @@ export default function LandingPage() {
     </main>
   );
 }
+
 
 
 

@@ -1,18 +1,20 @@
 ﻿import React, { useState, useContext } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ShieldCheck, ArrowRight, AlertCircle } from 'lucide-react';
+import { ShieldCheck, ArrowRight, AlertCircle, UserPlus } from 'lucide-react';
 import { AuthContext } from '../context/AuthContext';
 
-export default function Login() {
+export default function Signup() {
+  const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [role, setRole] = useState('OWNER');
   const [error, setError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const { user, login } = useContext(AuthContext);
+  const { user, register } = useContext(AuthContext);
   const navigate = useNavigate();
 
-  // If user is already authenticated and validated, redirect them away from login
+  // If user is already authenticated, redirect
   React.useEffect(() => {
     if (user) {
       if (user.role === 'VET') navigate('/vet');
@@ -21,20 +23,19 @@ export default function Login() {
     }
   }, [user, navigate]);
 
-  const handleLogin = async (e) => {
+  const handleSignup = async (e) => {
     e.preventDefault();
     setError('');
     setIsSubmitting(true);
     try {
-      const data = await login(email, password);
+      const data = await register(name, email, password, role);
       if (data.success) {
-        // Route based on role
         if (data.role === 'VET') navigate('/vet');
         else if (data.role === 'SHELTER_ADMIN') navigate('/shelter');
         else navigate('/dashboard');
       }
     } catch (err) {
-      setError(err.response?.data?.message || 'Login failed. Please try again.');
+      setError(err.response?.data?.message || 'Registration failed. Please try again.');
     } finally {
       setIsSubmitting(false);
     }
@@ -54,13 +55,13 @@ export default function Login() {
       >
         <div className="flex justify-center mb-8">
           <div className="w-14 h-14 rounded-full bg-espresso-900 flex items-center justify-center shadow-lg">
-            <ShieldCheck className="text-camel-400" size={28} />
+            <UserPlus className="text-camel-400" size={28} />
           </div>
         </div>
         
         <div className="text-center mb-10">
-          <h2 className="text-3xl font-display font-black text-espresso-900 mb-2">Welcome Back</h2>
-          <p className="text-sm font-medium text-espresso-500">Sign in to your FurShield Ecosystem.</p>
+          <h2 className="text-3xl font-display font-black text-espresso-900 mb-2">Join FurShield</h2>
+          <p className="text-sm font-medium text-espresso-500">Create an account to access the ecosystem.</p>
         </div>
 
         {error && (
@@ -69,7 +70,18 @@ export default function Login() {
           </div>
         )}
 
-        <form onSubmit={handleLogin} className="space-y-5">
+        <form onSubmit={handleSignup} className="space-y-5">
+          <div>
+            <label className="block text-xs font-bold text-espresso-900 uppercase tracking-widest mb-2 px-1">Full Name</label>
+            <input 
+              type="text" 
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              className="w-full bg-white border border-camel-200 rounded-2xl px-5 py-3.5 text-sm font-medium focus:outline-none focus:border-camel-500 focus:ring-4 focus:ring-camel-50 transition-all shadow-sm"
+              placeholder="John Doe"
+              required
+            />
+          </div>
           <div>
             <label className="block text-xs font-bold text-espresso-900 uppercase tracking-widest mb-2 px-1">Email Address</label>
             <input 
@@ -77,7 +89,7 @@ export default function Login() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               className="w-full bg-white border border-camel-200 rounded-2xl px-5 py-3.5 text-sm font-medium focus:outline-none focus:border-camel-500 focus:ring-4 focus:ring-camel-50 transition-all shadow-sm"
-              placeholder="raza@furshield.com"
+              placeholder="you@example.com"
               required
             />
           </div>
@@ -92,27 +104,34 @@ export default function Login() {
               required
             />
           </div>
+          <div>
+            <label className="block text-xs font-bold text-espresso-900 uppercase tracking-widest mb-2 px-1">Account Type</label>
+            <select
+              value={role}
+              onChange={(e) => setRole(e.target.value)}
+              className="w-full bg-white border border-camel-200 rounded-2xl px-5 py-3.5 text-sm font-medium focus:outline-none focus:border-camel-500 focus:ring-4 focus:ring-camel-50 transition-all shadow-sm appearance-none"
+            >
+              <option value="OWNER">Pet Owner</option>
+              <option value="VET">Veterinarian</option>
+              <option value="SHELTER_ADMIN">Shelter Admin</option>
+            </select>
+          </div>
           
           <button 
             type="submit" 
             disabled={isSubmitting}
             className="w-full bg-espresso-900 hover:bg-espresso-800 disabled:opacity-70 text-white py-4 rounded-2xl font-bold text-sm tracking-wide transition-all shadow-md flex items-center justify-center gap-2 mt-4"
           >
-            {isSubmitting ? 'Authenticating...' : 'Sign In'} <ArrowRight size={16} />
+            {isSubmitting ? 'Creating Account...' : 'Sign Up'} <ArrowRight size={16} />
           </button>
         </form>
 
         <div className="mt-8 text-center">
-          <p className="text-xs font-medium text-espresso-500 mb-2">
-            For testing, use <span className="font-bold text-camel-600">raza@furshield.com</span> / <span className="font-bold text-camel-600">password123</span>
-          </p>
           <p className="text-xs font-medium text-espresso-500">
-            Don't have an account? <Link to="/signup" className="font-bold text-camel-600 hover:text-camel-700">Sign up</Link>
+            Already have an account? <Link to="/login" className="font-bold text-camel-600 hover:text-camel-700">Sign in</Link>
           </p>
         </div>
       </motion.div>
     </div>
   );
 }
-
-

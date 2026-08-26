@@ -1,6 +1,7 @@
 ﻿import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Calendar, Plus, Flame, Moon, Droplets, CheckCircle2, Circle, ArrowRight, Footprints, Loader2 } from 'lucide-react';
+import { Calendar, Plus, Flame, Moon, Droplets, CheckCircle2, Circle, ArrowRight, Footprints, Loader2, Sparkles } from 'lucide-react';
+import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip } from 'recharts';
 import { fetchDashboardData } from '../services/api';
 import AddRecordModal from '../components/organisms/AddRecordModal';
 import CustomSelect from '../components/molecules/CustomSelect';
@@ -54,6 +55,28 @@ export default function OwnerDashboard() {
     );
   };
 
+  const CustomTooltip = ({ active, payload, label }) => {
+    if (active && payload && payload.length) {
+      return (
+        <div className="bg-white px-4 py-3 shadow-[0_10px_30px_rgba(90,56,37,0.1)] rounded-2xl border-none">
+          <p className="font-bold text-espresso-900 mb-2">{label}</p>
+          <p className="text-sm font-medium text-camel-600">Weight: {payload[0].value} kg</p>
+          <p className="text-sm font-medium text-espresso-500">Calories: {payload[1].value} kcal</p>
+        </div>
+      );
+    }
+    return null;
+  };
+
+  const container = {
+    hidden: { opacity: 0 },
+    show: { opacity: 1, transition: { staggerChildren: 0.1 } }
+  };
+  const itemVariant = {
+    hidden: { opacity: 0, y: 20 },
+    show: { opacity: 1, y: 0, transition: { duration: 0.6, ease: [0.16, 1, 0.3, 1] } }
+  };
+
   if (loading) {
     return (
       <div className="flex-1 flex items-center justify-center min-h-[60vh]">
@@ -76,10 +99,10 @@ export default function OwnerDashboard() {
       </div>
 
       {/* Master Bento Grid */}
-      <motion.div initial="hidden" animate="show" className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+      <motion.div initial="hidden" animate="show" variants={container} className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         
-        {/* Portrait Card */}
-        <motion.div className="lg:col-span-4 relative h-[600px] rounded-[2rem] overflow-hidden group shadow-[0_15px_40px_rgba(90,56,37,0.08)]">
+        {/* LEFT COLUMN: Portrait Card (Col 4) */}
+        <motion.div variants={itemVariant} className="lg:col-span-4 lg:sticky lg:top-32 relative h-[600px] rounded-[2rem] overflow-hidden group shadow-[0_15px_40px_rgba(90,56,37,0.08)]">
           <img src={data.pet.image} alt={data.pet.name} className="absolute inset-0 w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105" />
           <div className="absolute inset-0 bg-gradient-to-t from-espresso-900 via-espresso-900/60 to-transparent h-full"></div>
           
@@ -109,10 +132,99 @@ export default function OwnerDashboard() {
           </div>
         </motion.div>
 
-        {/* Data Widgets */}
+        {/* RIGHT COLUMN: Data Widgets (Col 8) */}
         <div className="lg:col-span-8 flex flex-col gap-6">
+
+          {/* AI Predictor Module */}
+          <motion.div variants={itemVariant} className="bg-gradient-to-br from-espresso-900 to-espresso-800 rounded-[2rem] p-8 shadow-[0_15px_40px_rgba(90,56,37,0.15)] relative overflow-hidden flex flex-col md:flex-row gap-6 items-start md:items-center">
+            <div className="absolute -top-24 -right-24 w-64 h-64 bg-camel-500/20 blur-[80px] rounded-full pointer-events-none"></div>
+            
+            <div className="w-14 h-14 shrink-0 rounded-2xl bg-camel-500/20 border border-camel-500/30 flex items-center justify-center relative">
+              <div className="absolute inset-0 bg-camel-400 blur-xl opacity-20 rounded-2xl animate-pulse"></div>
+              <Sparkles className="text-camel-300 relative z-10" size={24} />
+            </div>
+            
+            <div className="relative z-10">
+              <h3 className="text-camel-300 text-xs font-bold uppercase tracking-widest mb-2 flex items-center gap-2">
+                Generative Health Insight <span className="w-1.5 h-1.5 rounded-full bg-camel-400 animate-pulse"></span>
+              </h3>
+              <p className="text-white text-sm md:text-base leading-relaxed font-medium">
+                {data.aiInsight}
+              </p>
+            </div>
+          </motion.div>
+
+          {/* Precision Trend Chart (Recharts) */}
+          <motion.div variants={itemVariant} className="bg-white rounded-[2rem] p-8 border border-camel-100 shadow-[0_8px_30px_rgb(90,56,37,0.03)] h-[400px] flex flex-col">
+            <div className="flex justify-between items-center mb-6">
+              <div>
+                <h3 className="text-xl font-display font-bold text-espresso-900">Nutrition & Weight Trajectory</h3>
+                <p className="text-espresso-500 text-sm font-medium">6-month macro correlation analysis.</p>
+              </div>
+            </div>
+            <div className="flex-1 w-full relative">
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={data.chartData} margin={{ top: 10, right: 0, left: -20, bottom: 0 }}>
+                  <defs>
+                    <linearGradient id="colorWeight" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#BA7F48" stopOpacity={0.3}/>
+                      <stop offset="95%" stopColor="#BA7F48" stopOpacity={0}/>
+                    </linearGradient>
+                    <linearGradient id="colorCals" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#3E2A20" stopOpacity={0.1}/>
+                      <stop offset="95%" stopColor="#3E2A20" stopOpacity={0}/>
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E7EB" />
+                  <XAxis 
+                    dataKey="month" 
+                    axisLine={false} 
+                    tickLine={false} 
+                    tick={{ fill: '#9CA3AF', fontSize: 12, fontWeight: 500 }} 
+                    dy={10}
+                  />
+                  <YAxis 
+                    yAxisId="left" 
+                    axisLine={false} 
+                    tickLine={false} 
+                    tick={{ fill: '#9CA3AF', fontSize: 12, fontWeight: 500 }} 
+                    domain={['dataMin - 1', 'dataMax + 1']}
+                  />
+                  <YAxis 
+                    yAxisId="right" 
+                    orientation="right" 
+                    axisLine={false} 
+                    tickLine={false} 
+                    tick={false} 
+                    domain={['dataMin - 100', 'dataMax + 100']}
+                  />
+                  <Tooltip content={<CustomTooltip />} cursor={{ stroke: '#BA7F48', strokeWidth: 1, strokeDasharray: '5 5' }} />
+                  <Area 
+                    yAxisId="left"
+                    type="monotone" 
+                    dataKey="weight" 
+                    stroke="#BA7F48" 
+                    strokeWidth={3}
+                    fillOpacity={1} 
+                    fill="url(#colorWeight)" 
+                  />
+                  <Area 
+                    yAxisId="right"
+                    type="monotone" 
+                    dataKey="calories" 
+                    stroke="#3E2A20" 
+                    strokeWidth={2}
+                    strokeDasharray="4 4"
+                    fillOpacity={1} 
+                    fill="url(#colorCals)" 
+                  />
+                </AreaChart>
+              </ResponsiveContainer>
+            </div>
+          </motion.div>
           
-          <motion.div className="bg-white rounded-[2rem] p-8 border border-camel-100 shadow-[0_8px_30px_rgb(90,56,37,0.03)] flex flex-col justify-between h-full">
+          {/* Health Overview Rings */}
+          <motion.div variants={itemVariant} className="bg-white rounded-[2rem] p-8 border border-camel-100 shadow-[0_8px_30px_rgb(90,56,37,0.03)] flex flex-col justify-between">
             <div className="flex justify-between items-center mb-8">
               <div>
                 <h3 className="text-xl font-display font-bold text-espresso-900">Health Overview</h3>
@@ -136,8 +248,9 @@ export default function OwnerDashboard() {
             </div>
           </motion.div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 h-full">
-            <motion.div className="bg-white rounded-[2rem] p-8 border border-camel-100 shadow-[0_8px_30px_rgb(90,56,37,0.03)]">
+          {/* Bottom Split: Timeline & Appointment */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <motion.div variants={itemVariant} className="bg-white rounded-[2rem] p-8 border border-camel-100 shadow-[0_8px_30px_rgb(90,56,37,0.03)]">
               <div className="flex justify-between items-center mb-8">
                 <h3 className="text-lg font-display font-bold text-espresso-900">Health Timeline</h3>
                 <button className="text-xs font-bold text-camel-600 hover:text-camel-800">View All</button>
@@ -157,7 +270,7 @@ export default function OwnerDashboard() {
               </div>
             </motion.div>
 
-            <motion.div className="flex flex-col gap-6">
+            <motion.div variants={itemVariant} className="flex flex-col gap-6">
               <div className="bg-camel-50 rounded-[2rem] p-8 border border-camel-100/50 flex flex-col justify-between h-full">
                 <div className="flex justify-between items-center mb-6">
                   <h3 className="text-lg font-display font-bold text-espresso-900">Next Appointment</h3>
@@ -182,7 +295,6 @@ export default function OwnerDashboard() {
         </div>
       </motion.div>
 
-      {/* Modals rendered outside the normal flow */}
       <AnimatePresence>
         <AddRecordModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
       </AnimatePresence>

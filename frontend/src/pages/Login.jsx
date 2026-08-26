@@ -12,15 +12,6 @@ export default function Login() {
   const { user, login } = useContext(AuthContext);
   const navigate = useNavigate();
 
-  // If user is already authenticated and validated, redirect them away from login
-  React.useEffect(() => {
-    if (user) {
-      if (user.role === 'VET') navigate('/vet');
-      else if (user.role === 'SHELTER_ADMIN') navigate('/shelter');
-      else navigate('/dashboard');
-    }
-  }, [user, navigate]);
-
   const handleLogin = async (e) => {
     e.preventDefault();
     setError('');
@@ -114,5 +105,6 @@ export default function Login() {
     </div>
   );
 }
+
 
 

@@ -14,15 +14,6 @@ export default function Signup() {
   const { user, register } = useContext(AuthContext);
   const navigate = useNavigate();
 
-  // If user is already authenticated, redirect
-  React.useEffect(() => {
-    if (user) {
-      if (user.role === 'VET') navigate('/vet');
-      else if (user.role === 'SHELTER_ADMIN') navigate('/shelter');
-      else navigate('/dashboard');
-    }
-  }, [user, navigate]);
-
   const handleSignup = async (e) => {
     e.preventDefault();
     setError('');
@@ -135,3 +126,4 @@ export default function Signup() {
     </div>
   );
 }
+

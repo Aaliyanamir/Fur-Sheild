@@ -126,9 +126,23 @@ export default function Navbar() {
                 <span className="absolute top-1 lg:top-1.5 right-1.5 lg:right-2 w-2 h-2 rounded-full bg-accent-500 border-2 border-[#f6e9de]"></span>
               </button>
               
-              <div className="w-8 h-8 lg:w-10 lg:h-10 rounded-full bg-white border border-camel-200 flex items-center justify-center ml-1 lg:ml-2 cursor-pointer hover:shadow-md transition-all">
+              <div className="group relative ml-1 lg:ml-2">
+              <div className="w-8 h-8 lg:w-10 lg:h-10 rounded-full bg-white border border-camel-200 flex items-center justify-center cursor-pointer hover:shadow-md transition-all">
                 <span className="text-[10px] lg:text-xs font-bold text-camel-800">RH</span>
               </div>
+              <div className="absolute top-full right-0 mt-2 w-32 bg-white rounded-xl shadow-lg border border-camel-100 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all flex flex-col overflow-hidden z-50">
+                <button 
+                  onClick={() => {
+                    localStorage.removeItem('user');
+                    sessionStorage.removeItem('user');
+                    window.location.href = '/login';
+                  }}
+                  className="w-full px-4 py-3 text-sm font-bold text-red-500 hover:bg-red-50 transition-colors text-left"
+                >
+                  Log Out
+                </button>
+              </div>
+            </div>
             </div>
 
             {/* Mobile Hamburger Button */}
@@ -223,4 +237,5 @@ export default function Navbar() {
     </>
   );
 }
+
 

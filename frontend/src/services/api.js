@@ -27,7 +27,13 @@ api.interceptors.response.use(
   (error) => {
     if (error.response && error.response.status === 401) {
       localStorage.removeItem('user');
-      window.location.href = '/login'; // Force redirect to login on expiry
+      sessionStorage.removeItem('user');
+      
+      // Only force redirect to login if they are NOT already on a public guest page
+      const publicPaths = ['/login', '/signup', '/'];
+      if (!publicPaths.includes(window.location.pathname)) {
+        window.location.href = '/login'; 
+      }
     }
     return Promise.reject(error);
   }
@@ -67,3 +73,4 @@ export const fetchDashboardData = async (petId) => {
     }, 800); // Simulate network latency
   });
 };
+

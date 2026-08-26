@@ -34,7 +34,7 @@ export default function Login() {
       <main className="flex-1 flex flex-col lg:flex-row mt-[88px] md:mt-[104px]">
         
         {/* Left Side: Form */}
-        <div className="w-full lg:w-1/2 flex items-center justify-center p-8 lg:p-16 relative z-10">
+        <div className="w-full md:w-1/2 flex items-center justify-center p-8 md:p-12 lg:p-16 relative z-10">
           <motion.div 
             initial={{ opacity: 0, x: -30 }}
             animate={{ opacity: 1, x: 0 }}
@@ -116,7 +116,7 @@ export default function Login() {
         </div>
 
         {/* Right Side: Image */}
-        <div className="hidden lg:block lg:w-1/2 relative p-6 pl-0 pb-6">
+        <div className="hidden md:block md:w-1/2 relative p-6 md:pl-0 md:py-12 lg:py-16">
           <motion.div 
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
@@ -137,5 +137,6 @@ export default function Login() {
     </div>
   );
 }
+
 
 

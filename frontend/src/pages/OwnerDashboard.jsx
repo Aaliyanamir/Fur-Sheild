@@ -1,6 +1,6 @@
 ﻿import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Calendar, Plus, Flame, Moon, Droplets, CheckCircle2, Circle, ArrowRight, Footprints, PawPrint, HeartHandshake, Syringe, Stethoscope, AlertCircle, X } from 'lucide-react';
+import { Calendar, Plus, Flame, Moon, Droplets, CheckCircle2, Circle, ArrowRight, Footprints, PawPrint, HeartHandshake, Syringe, Stethoscope, AlertCircle, X, Edit2, Trash2, Camera, Upload } from 'lucide-react';
 import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip } from 'recharts';
 import dashboardService from '../services/dashboard.service';
 
@@ -10,11 +10,23 @@ export default function OwnerDashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   
-  // Add Pet Modal State
+
+  // Add Pet / Edit Pet Modal State
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isEditMode, setIsEditMode] = useState(false);
+  const [petToEdit, setPetToEdit] = useState(null);
+  
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [newPet, setNewPet] = useState({ name: '', species: 'Dog', breed: '', weight: '' });
+  const [newPet, setNewPet] = useState({ name: '', species: 'Dog', breed: '', weight: '', gender: 'Male', age: '', microchipId: '' });
   const [modalError, setModalError] = useState('');
+  const [avatarFile, setAvatarFile] = useState(null);
+  const [avatarPreview, setAvatarPreview] = useState(null);
+
+  // Delete Modal State
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [petToDelete, setPetToDelete] = useState(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+
 
     // Update Vitals Modal State
   const [isVitalsModalOpen, setIsVitalsModalOpen] = useState(false);
@@ -24,6 +36,40 @@ export default function OwnerDashboard() {
 
   // Timeframe for charts (mock logic for now, but UI ready)
   const [timeframe, setTimeframe] = useState('This Week');
+
+
+  const openAddModal = () => {
+    setIsEditMode(false);
+    setPetToEdit(null);
+    setNewPet({ name: '', species: 'Dog', breed: '', weight: '', gender: 'Male', age: '', microchipId: '' });
+    setAvatarFile(null);
+    setAvatarPreview(null);
+    setModalError('');
+    setIsModalOpen(true);
+  };
+
+  const openEditModal = (pet) => {
+    setIsEditMode(true);
+    setPetToEdit(pet._id);
+    setNewPet({
+      name: pet.name || '',
+      species: pet.species || 'Dog',
+      breed: pet.breed || '',
+      weight: pet.weightHistory?.length > 0 ? pet.weightHistory[pet.weightHistory.length - 1].weight : '',
+      gender: pet.gender || 'Male',
+      age: pet.age || '',
+      microchipId: pet.microchipId || ''
+    });
+    setAvatarFile(null);
+    setAvatarPreview(pet.avatarUrl ? (pet.avatarUrl.startsWith('http') ? pet.avatarUrl : `http://localhost:5000${pet.avatarUrl}`) : null);
+    setModalError('');
+    setIsModalOpen(true);
+  };
+
+  const openDeleteModal = (pet) => {
+    setPetToDelete(pet);
+    setIsDeleteModalOpen(true);
+  };
 
   const fetchDashboardData = async () => {
     setLoading(true);
@@ -166,7 +212,7 @@ export default function OwnerDashboard() {
                {pets.length > 0 ? `${activePet?.name}'s Health` : 'Welcome to FurShield'}
              </h1>
            </div>
-           <button onClick={() => setIsModalOpen(true)} className="flex items-center gap-2 bg-espresso-900 hover:bg-espresso-800 text-white px-6 py-2.5 rounded-full font-bold text-sm transition-all shadow-md hover:-translate-y-0.5 w-max">
+           <button onClick={openAddModal} className="flex items-center gap-2 bg-espresso-900 hover:bg-espresso-800 text-white px-6 py-2.5 rounded-full font-bold text-sm transition-all shadow-md hover:-translate-y-0.5 w-max">
              <Plus size={18} /> Add Pet
            </button>
         </div>
@@ -200,7 +246,7 @@ export default function OwnerDashboard() {
            </div>
            <h2 className="text-2xl font-display font-black text-espresso-900 mb-2">No Pets Found</h2>
            <p className="text-espresso-500 font-medium max-w-md mb-8">Your dashboard is empty. Add your first pet to start tracking their health, managing appointments, and accessing the clinical ecosystem.</p>
-           <button onClick={() => setIsModalOpen(true)} className="bg-camel-600 hover:bg-camel-500 text-white px-8 py-3.5 rounded-full font-bold shadow-md shadow-camel-600/20 transition-all hover:-translate-y-0.5 flex items-center gap-2">
+           <button onClick={openAddModal} className="bg-camel-600 hover:bg-camel-500 text-white px-8 py-3.5 rounded-full font-bold shadow-md shadow-camel-600/20 transition-all hover:-translate-y-0.5 flex items-center gap-2">
              <Plus size={18} /> Register First Pet
            </button>
         </div>
@@ -319,8 +365,9 @@ export default function OwnerDashboard() {
             <div className="fixed inset-0 z-[210] flex items-center justify-center p-4 pointer-events-none">
               <motion.div initial={{ opacity: 0, scale: 0.95, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 20 }} className="bg-white rounded-[2rem] w-full max-w-lg shadow-2xl pointer-events-auto flex flex-col overflow-hidden">
                  
+                 
                  <div className="p-6 border-b border-camel-100 flex justify-between items-center bg-bg-secondary">
-                    <h2 className="text-xl font-display font-black text-espresso-900">Add New Pet</h2>
+                    <h2 className="text-xl font-display font-black text-espresso-900">{isEditMode ? 'Edit Pet Profile' : 'Add New Pet'}</h2>
                     <button onClick={() => setIsModalOpen(false)} className="w-8 h-8 rounded-full bg-white border border-camel-200 flex items-center justify-center text-espresso-400 hover:text-espresso-900 transition-colors shadow-sm"><X size={16}/></button>
                  </div>
 
@@ -332,6 +379,23 @@ export default function OwnerDashboard() {
                     )}
                     
                     <form onSubmit={handleAddPetSubmit} className="space-y-5">
+                       
+                       {/* Avatar Upload */}
+                       <div className="flex flex-col items-center justify-center mb-6">
+                         <div className="relative w-24 h-24 rounded-full border-2 border-dashed border-camel-300 flex items-center justify-center bg-camel-50 overflow-hidden group cursor-pointer">
+                           {avatarPreview ? (
+                             <img src={avatarPreview} alt="Preview" className="w-full h-full object-cover" />
+                           ) : (
+                             <Camera className="text-camel-400 group-hover:text-camel-600 transition-colors" size={32} />
+                           )}
+                           <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                              <Upload className="text-white" size={24} />
+                           </div>
+                           <input type="file" accept="image/*" onChange={handleImageChange} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" />
+                         </div>
+                         <span className="text-xs font-bold text-espresso-400 uppercase tracking-widest mt-3">Upload Photo</span>
+                       </div>
+
                        <div>
                          <label className="block text-xs font-bold text-espresso-900 uppercase tracking-widest mb-2 px-1">Pet Name</label>
                          <input type="text" value={newPet.name} onChange={(e) => setNewPet({...newPet, name: e.target.value})} className="w-full bg-white border border-camel-200 rounded-2xl px-5 py-3 text-sm font-medium focus:outline-none focus:border-camel-500 focus:ring-4 focus:ring-camel-50 transition-all" placeholder="E.g. Buddy" required />
@@ -353,15 +417,69 @@ export default function OwnerDashboard() {
                          </div>
                        </div>
 
-                       <div>
-                         <label className="block text-xs font-bold text-espresso-900 uppercase tracking-widest mb-2 px-1">Current Weight (kg)</label>
-                         <input type="number" step="0.1" value={newPet.weight} onChange={(e) => setNewPet({...newPet, weight: e.target.value})} className="w-full bg-white border border-camel-200 rounded-2xl px-5 py-3 text-sm font-medium focus:outline-none focus:border-camel-500 focus:ring-4 focus:ring-camel-50 transition-all" placeholder="E.g. 28.5" />
+                       <div className="grid grid-cols-2 gap-4">
+                         <div>
+                           <label className="block text-xs font-bold text-espresso-900 uppercase tracking-widest mb-2 px-1">Gender</label>
+                           <select value={newPet.gender} onChange={(e) => setNewPet({...newPet, gender: e.target.value})} className="w-full bg-white border border-camel-200 rounded-2xl px-5 py-3 text-sm font-medium focus:outline-none focus:border-camel-500 focus:ring-4 focus:ring-camel-50 transition-all appearance-none">
+                             <option value="Male">Male</option>
+                             <option value="Female">Female</option>
+                           </select>
+                         </div>
+                         <div>
+                           <label className="block text-xs font-bold text-espresso-900 uppercase tracking-widest mb-2 px-1">Age (Years)</label>
+                           <input type="number" step="0.1" value={newPet.age} onChange={(e) => setNewPet({...newPet, age: e.target.value})} className="w-full bg-white border border-camel-200 rounded-2xl px-5 py-3 text-sm font-medium focus:outline-none focus:border-camel-500 focus:ring-4 focus:ring-camel-50 transition-all" placeholder="E.g. 2.5" />
+                         </div>
+                       </div>
+
+                       <div className="grid grid-cols-2 gap-4">
+                         <div>
+                           <label className="block text-xs font-bold text-espresso-900 uppercase tracking-widest mb-2 px-1">Current Weight (kg)</label>
+                           <input type="number" step="0.1" value={newPet.weight} onChange={(e) => setNewPet({...newPet, weight: e.target.value})} className="w-full bg-white border border-camel-200 rounded-2xl px-5 py-3 text-sm font-medium focus:outline-none focus:border-camel-500 focus:ring-4 focus:ring-camel-50 transition-all" placeholder="E.g. 28.5" />
+                         </div>
+                         <div>
+                           <label className="block text-xs font-bold text-espresso-900 uppercase tracking-widest mb-2 px-1">Microchip ID</label>
+                           <input type="text" value={newPet.microchipId} onChange={(e) => setNewPet({...newPet, microchipId: e.target.value})} className="w-full bg-white border border-camel-200 rounded-2xl px-5 py-3 text-sm font-medium focus:outline-none focus:border-camel-500 focus:ring-4 focus:ring-camel-50 transition-all" placeholder="Optional" />
+                         </div>
                        </div>
                        
                        <button type="submit" disabled={isSubmitting} className="w-full bg-espresso-900 hover:bg-espresso-800 disabled:opacity-70 text-white py-4 rounded-2xl font-bold text-sm tracking-wide transition-all shadow-md flex items-center justify-center gap-2 mt-4">
-                         {isSubmitting ? 'Registering...' : 'Complete Registration'} <ArrowRight size={16} />
+                         {isSubmitting ? 'Saving...' : (isEditMode ? 'Save Changes' : 'Complete Registration')} <ArrowRight size={16} />
                        </button>
                     </form>
+                 </div>
+
+              </motion.div>
+            </div>
+          </>
+        )}
+      </AnimatePresence>
+
+      
+      {/* Delete Confirmation Modal */}
+      <AnimatePresence>
+        {isDeleteModalOpen && (
+          <>
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 bg-espresso-900/60 backdrop-blur-sm z-[200]" onClick={() => setIsDeleteModalOpen(false)} />
+            <div className="fixed inset-0 z-[210] flex items-center justify-center p-4 pointer-events-none">
+              <motion.div initial={{ opacity: 0, scale: 0.95, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 20 }} className="bg-white rounded-[2rem] w-full max-w-sm shadow-2xl pointer-events-auto flex flex-col overflow-hidden">
+                 
+                 <div className="p-8 flex flex-col items-center text-center">
+                    <div className="w-16 h-16 bg-rose-100 text-rose-500 rounded-full flex items-center justify-center mb-6">
+                      <AlertCircle size={32} />
+                    </div>
+                    <h2 className="text-xl font-display font-black text-espresso-900 mb-2">Remove Pet?</h2>
+                    <p className="text-sm font-medium text-espresso-600 mb-8">
+                      Are you sure you want to remove <strong>{petToDelete?.name}</strong> from your ecosystem? This action cannot be undone.
+                    </p>
+                    
+                    <div className="flex w-full gap-3">
+                      <button onClick={() => setIsDeleteModalOpen(false)} disabled={isDeleting} className="flex-1 bg-camel-50 hover:bg-camel-100 text-espresso-800 py-3.5 rounded-2xl font-bold text-sm tracking-wide transition-colors">
+                        Cancel
+                      </button>
+                      <button onClick={handleDeletePet} disabled={isDeleting} className="flex-1 bg-rose-500 hover:bg-rose-600 text-white py-3.5 rounded-2xl font-bold text-sm tracking-wide transition-colors shadow-md">
+                        {isDeleting ? 'Removing...' : 'Yes, Remove'}
+                      </button>
+                    </div>
                  </div>
               </motion.div>
             </div>

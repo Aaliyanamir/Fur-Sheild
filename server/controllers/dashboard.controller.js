@@ -18,7 +18,11 @@ const getMyPets = async (req, res) => {
 // @access  Private
 const addPet = async (req, res) => {
   try {
-    const { name, species, breed, dob, avatarUrl } = req.body;
+    const { name, species, breed, dob, gender, age, microchipId } = req.body;
+    let avatarUrl = req.body.avatarUrl;
+    if (req.file) {
+      avatarUrl = `/uploads/${req.file.filename}`;
+    }
     
     const pet = await Pet.create({
       ownerId: req.user.id, // Securely link pet to the active user
@@ -60,4 +64,52 @@ const updateVitals = async (req, res) => {
   }
 };
 
-module.exports = { getMyPets, addPet, updateVitals };
+
+// @desc    Update a pet profile
+// @route   PUT /api/v1/dashboard/pets/:id
+// @access  Private
+const updatePet = async (req, res) => {
+  try {
+    let pet = await Pet.findOne({ _id: req.params.id, ownerId: req.user.id });
+    
+    if (!pet) {
+      return res.status(404).json({ success: false, message: 'Pet not found' });
+    }
+
+    if (req.file) {
+      req.body.avatarUrl = `/uploads/${req.file.filename}`;
+    }
+
+    pet = await Pet.findByIdAndUpdate(req.params.id, req.body, {
+      new: true,
+      runValidators: true
+    });
+
+    res.status(200).json({ success: true, data: pet });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// @desc    Delete a pet profile
+// @route   DELETE /api/v1/dashboard/pets/:id
+// @access  Private
+const deletePet = async (req, res) => {
+  try {
+    const pet = await Pet.findOne({ _id: req.params.id, ownerId: req.user.id });
+    
+    if (!pet) {
+      return res.status(404).json({ success: false, message: 'Pet not found' });
+    }
+
+    await pet.deleteOne();
+
+    res.status(200).json({ success: true, data: {} });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+module.exports = { getMyPets, addPet, updateVitals, updatePet, deletePet };
+
+

@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { NavLink, Link, useLocation } from 'react-router-dom';
 import { AuthContext } from '../../context/AuthContext';
 import { LayoutDashboard, Stethoscope, HeartHandshake, ShoppingBag, Bell, Search, PawPrint, Menu, X, User, Settings, LogOut, Calendar, ClipboardList, Activity, Home } from 'lucide-react';
@@ -34,7 +34,7 @@ export default function Navbar() {
       case 'VET':
         return [
           { name: 'Clinical Queue', path: '/vet', icon: Stethoscope },
-          { name: 'Appointments', path: '/vet', icon: Calendar },
+          { name: 'Appointments', path: '/appointments', icon: Calendar },
           { name: 'Shop', path: '/shop', icon: ShoppingBag },
         ];
       case 'SHELTER_ADMIN':

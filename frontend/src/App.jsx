@@ -11,6 +11,7 @@ import Signup from './pages/Signup';
 import OwnerDashboard from './pages/OwnerDashboard';
 import MyPets from './pages/MyPets';
 import VetHub from './pages/VetHub';
+import VetAppointments from './pages/VetAppointments';
 import ShelterHub from './pages/ShelterHub';
 import ShopCatalog from './pages/ShopCatalog';
 import UserProfile from './pages/UserProfile';
@@ -44,6 +45,7 @@ export default function App() {
             {/* Protected Routes - Strictly for Vets */}
             <Route element={<ProtectedRoute allowedRoles={['VET']} />}>
               <Route path="/vet" element={<VetHub />} />
+              <Route path="/appointments" element={<VetAppointments />} />
             </Route>
 
             {/* Protected Routes - Strictly for Shelter Admins */}

@@ -4,6 +4,19 @@ import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 import { Activity, Download, Heart, Users, AlertCircle, Sparkles, TrendingUp, ChevronRight, Stethoscope, FileText, CheckCircle2 } from 'lucide-react';
 import shelterService from '../services/shelter.service';
 
+
+const Avatar = ({ src, alt, name, className }) => {
+  const [error, setError] = React.useState(false);
+  if (error || !src || src.includes('product-placeholder')) {
+    return (
+      <div className={`flex items-center justify-center font-bold text-espresso-500 bg-camel-100 ${className}`}>
+        {name ? name.charAt(0).toUpperCase() : 'U'}
+      </div>
+    );
+  }
+  return <img src={src} alt={alt} className={className} onError={() => setError(true)} />;
+};
+
 export default function ShelterDashboard() {
   const [pipelineData, setPipelineData] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -50,23 +63,15 @@ export default function ShelterDashboard() {
 
   // Helper for relative time
   const getRelativeTime = (dateString) => {
-    const diffDays = Math.round((new Date(dateString) - new Date()) / (1000 * 60 * 60 * 24));
+    if (!dateString) return 'Unknown';
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) return 'Unknown';
+    const diffDays = Math.round((date - new Date()) / (1000 * 60 * 60 * 24));
     if (diffDays === 0) return 'Today';
     return new Intl.RelativeTimeFormat('en', { numeric: 'auto' }).format(diffDays, 'day');
   };
 
-  // Avatar Fallback inline
-  const Avatar = ({ src, alt, name, className }) => {
-    const [error, setError] = useState(false);
-    if (error || !src || src.includes('product-placeholder')) {
-      return (
-        <div className={`flex items-center justify-center font-bold text-espresso-500 bg-camel-100 ${className}`}>
-          {name ? name.charAt(0).toUpperCase() : 'U'}
-        </div>
-      );
-    }
-    return <img src={src} alt={alt} className={className} onError={() => setError(true)} />;
-  };
+
 
   if (loading) {
     return (

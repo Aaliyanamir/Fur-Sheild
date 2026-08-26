@@ -167,9 +167,12 @@ export default function ShelterHub() {
   };
 
   const getRelativeTime = (dateString) => {
-    const rtf = new Intl.RelativeTimeFormat('en', { numeric: 'auto' });
-    const diffDays = Math.round((new Date(dateString) - new Date()) / (1000 * 60 * 60 * 24));
-    return diffDays === 0 ? 'Today' : rtf.format(diffDays, 'day');
+    if (!dateString) return 'Unknown';
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) return 'Unknown';
+    const diffDays = Math.round((date - new Date()) / (1000 * 60 * 60 * 24));
+    if (diffDays === 0) return 'Today';
+    return new Intl.RelativeTimeFormat('en', { numeric: 'auto' }).format(diffDays, 'day');
   };
 
   if (loading) {

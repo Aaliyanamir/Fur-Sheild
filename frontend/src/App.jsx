@@ -12,6 +12,9 @@ import OwnerDashboard from './pages/OwnerDashboard';
 import VetHub from './pages/VetHub';
 import ShelterHub from './pages/ShelterHub';
 import ShopCatalog from './pages/ShopCatalog';
+import UserProfile from './pages/UserProfile';
+import Settings from './pages/Settings';
+import MyOrders from './pages/MyOrders';
 import NotFound from './pages/NotFound';
 
 export default function App() {
@@ -28,9 +31,12 @@ export default function App() {
           <Route element={<GlobalLayout />}>
             <Route path="/shop" element={<ShopCatalog />} />
 
-            {/* Protected Routes - Only logged-in users */}
+                        {/* Protected Routes - Only logged-in users */}
             <Route element={<ProtectedRoute />}>
               <Route path="/dashboard" element={<OwnerDashboard />} />
+              <Route path="/profile" element={<UserProfile />} />
+              <Route path="/settings" element={<Settings />} />
+              <Route path="/orders" element={<MyOrders />} />
             </Route>
 
             {/* Protected Routes - Strictly for Vets */}
@@ -51,4 +57,5 @@ export default function App() {
     </AuthProvider>
   );
 }
+
 

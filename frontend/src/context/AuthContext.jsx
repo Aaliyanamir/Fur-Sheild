@@ -50,6 +50,12 @@ export const AuthProvider = ({ children }) => {
       setUser(data);
     }
     return data;
+  };  const updateProfile = async (profileData) => {
+    const data = await authService.updateProfile(profileData);
+    if (data.success) {
+      setUser(data);
+    }
+    return data;
   };
 
   const logout = () => {
@@ -62,9 +68,10 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, register, logout, loading }}>
+    <AuthContext.Provider value={{ user, login, register, logout, updateProfile, loading }}>
       {!loading && children}
     </AuthContext.Provider>
   );
 };
+
 

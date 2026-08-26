@@ -6,6 +6,20 @@ import authService from '../services/auth.service';
 import { AuthContext } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 
+
+const Avatar = ({ src, alt, name, className }) => {
+  const [error, setError] = useState(false);
+  
+  if (error || !src || src.includes('product-placeholder')) {
+    return (
+      <div className={`flex items-center justify-center font-bold text-espresso-500 bg-camel-100 ${className}`}>
+        {name ? name.charAt(0).toUpperCase() : 'U'}
+      </div>
+    );
+  }
+  return <img src={src} alt={alt} className={className} onError={() => setError(true)} />;
+};
+
 export default function VetHub() {
   const { user, dispatch } = useContext(AuthContext) || { user: {} };
   const [loading, setLoading] = useState(true);
@@ -284,7 +298,7 @@ export default function VetHub() {
           {/* Vet ID Card */}
           <div className="bg-white rounded-[2rem] p-6 border border-camel-100 shadow-sm flex flex-col items-center text-center">
             <div onClick={() => setIsVetProfileModalOpen(true)} className="w-24 h-24 rounded-full overflow-hidden mb-4 border-4 border-camel-50 shadow-sm relative flex items-center justify-center bg-camel-100 text-2xl font-black text-espresso-500 cursor-pointer group">
-               {user?.avatarUrl ? <img src={user.avatarUrl.startsWith('http') ? user.avatarUrl : `http://localhost:5000${user.avatarUrl}`} className="w-full h-full object-cover" alt="Vet" /> : (user?.name?.charAt(0) || 'V')}
+               <Avatar src={user?.avatarUrl ? (user.avatarUrl.startsWith('http') ? user.avatarUrl : `http://localhost:5000${user.avatarUrl}`) : null} name={user?.name || 'V'} className="w-full h-full object-cover" />
                <div className="absolute inset-0 bg-black/40 hidden group-hover:flex items-center justify-center text-white text-xs font-bold transition-all">Edit</div>
                <div className="absolute bottom-1 right-1 w-4 h-4 bg-emerald-500 border-2 border-white rounded-full z-10"></div>
             </div>
@@ -349,8 +363,8 @@ export default function VetHub() {
               
               <div className="flex justify-between items-start mb-4">
                  <div className="flex -space-x-3 items-center">
-                    <img src={patient.petImage} alt="Pet" className="w-12 h-12 rounded-full border-2 border-white object-cover shadow-sm relative z-10 bg-camel-50" />
-                    <img src={patient.ownerImage} alt="Owner" className="w-10 h-10 rounded-full border-2 border-white object-cover shadow-sm relative z-0 translate-y-1 bg-camel-50" />
+                    <Avatar src={patient.petImage} alt="Pet" name={patient.petName} className="w-12 h-12 rounded-full border-2 border-white object-cover shadow-sm relative z-10 bg-camel-50" />
+                    <Avatar src={patient.ownerImage} alt="Owner" name={patient.owner} className="w-10 h-10 rounded-full border-2 border-white object-cover shadow-sm relative z-0 translate-y-1 bg-camel-50" />
                  </div>
                  <div className="text-right">
                    <span className="text-xs font-bold text-espresso-500 flex items-center justify-end gap-1"><Clock size={12}/> {patient.time}</span>
@@ -383,7 +397,7 @@ export default function VetHub() {
               >
                 {/* Cover Image & Primary Info */}
                 <div className="h-56 relative shrink-0">
-                   <img src={activePatient.petImage} className="w-full h-full object-cover" alt="Pet Cover" />
+                   <Avatar src={activePatient.petImage} alt="Pet Cover" name={activePatient.petName} className="w-full h-full object-cover" />
                    <div className="absolute inset-0 bg-gradient-to-t from-espresso-900/90 via-espresso-900/40 to-transparent"></div>
                    
                    <div className="absolute top-4 right-4 flex gap-2">
@@ -418,7 +432,7 @@ export default function VetHub() {
                         </div>
                       </div>
                       <div className="text-right">
-                        <img src={activePatient.ownerImage} className="w-10 h-10 rounded-full border-2 border-white/20 ml-auto mb-1 object-cover bg-camel-50" alt="Owner" />
+                        <Avatar src={activePatient.ownerImage} alt="Owner" name={activePatient.owner} className="w-10 h-10 rounded-full border-2 border-white/20 ml-auto mb-1 object-cover bg-camel-50" />
                         <span className="text-[10px] font-bold uppercase tracking-widest text-white/70 block">{activePatient.owner}</span>
                       </div>
                    </div>

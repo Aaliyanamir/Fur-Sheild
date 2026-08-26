@@ -7,6 +7,7 @@ import EcosystemSection from '../components/sections/EcosystemSection';
 import FeatureBentoSection from '../components/sections/FeatureBentoSection';
 import TrustSection from '../components/sections/TrustSection';
 import FAQSection from '../components/sections/FAQSection';
+import Footer from '../components/molecules/Footer';
 
 export default function LandingPage() {
   const navItems = [
@@ -226,9 +227,11 @@ export default function LandingPage() {
       <FeatureBentoSection />
       <TrustSection />
       <FAQSection />
+      <Footer />
     </main>
   );
 }
+
 
 
 

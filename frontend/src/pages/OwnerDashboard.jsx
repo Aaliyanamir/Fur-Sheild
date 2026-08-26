@@ -16,6 +16,12 @@ export default function OwnerDashboard() {
   const [newPet, setNewPet] = useState({ name: '', species: 'Dog', breed: '', weight: '' });
   const [modalError, setModalError] = useState('');
 
+    // Update Vitals Modal State
+  const [isVitalsModalOpen, setIsVitalsModalOpen] = useState(false);
+  const [isVitalsSubmitting, setIsVitalsSubmitting] = useState(false);
+  const [vitalsWeight, setVitalsWeight] = useState('');
+  const [vitalsError, setVitalsError] = useState('');
+
   // Timeframe for charts (mock logic for now, but UI ready)
   const [timeframe, setTimeframe] = useState('This Week');
 
@@ -74,6 +80,28 @@ export default function OwnerDashboard() {
       setModalError("Error adding pet. Please try again.");
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  const handleVitalsSubmit = async (e) => {
+    e.preventDefault();
+    setVitalsError('');
+    setIsVitalsSubmitting(true);
+    
+    try {
+      const response = await dashboardService.updatePetVitals(pets[activePetIndex]._id, { weight: parseFloat(vitalsWeight) });
+      if (response.success) {
+        // Refresh dashboard data to sync charts and latest weight
+        await fetchDashboardData();
+        setIsVitalsModalOpen(false);
+        setVitalsWeight('');
+      } else {
+        setVitalsError(response.message || "Failed to update vitals.");
+      }
+    } catch (err) {
+      setVitalsError("An error occurred while updating vitals.");
+    } finally {
+      setIsVitalsSubmitting(false);
     }
   };
 
@@ -242,6 +270,9 @@ export default function OwnerDashboard() {
                     <h3 className="font-display font-bold text-xl text-espresso-900 mb-1">Weight Trajectory</h3>
                     <p className="text-xs font-bold text-espresso-400 uppercase tracking-widest">Historical Data</p>
                   </div>
+                  <button onClick={() => setIsVitalsModalOpen(true)} className="flex items-center justify-center gap-2 bg-camel-50 hover:bg-camel-100 text-camel-700 px-4 py-2.5 rounded-xl font-bold text-sm transition-colors border border-camel-200 shadow-sm shrink-0">
+                    <Plus size={16} /> Log Weight
+                  </button>
                 </div>
 
                 <div className="h-64 w-full">
@@ -337,6 +368,44 @@ export default function OwnerDashboard() {
           </>
         )}
       </AnimatePresence>
+
+      {/* Log Vitals Modal */}
+      <AnimatePresence>
+        {isVitalsModalOpen && (
+          <>
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 bg-espresso-900/60 backdrop-blur-sm z-[200]" onClick={() => setIsVitalsModalOpen(false)} />
+            <div className="fixed inset-0 z-[210] flex items-center justify-center p-4 pointer-events-none">
+              <motion.div initial={{ opacity: 0, scale: 0.95, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 20 }} className="bg-white rounded-[2rem] w-full max-w-sm shadow-2xl pointer-events-auto flex flex-col overflow-hidden">
+                 
+                 <div className="p-6 border-b border-camel-100 flex justify-between items-center bg-bg-secondary">
+                    <h2 className="text-xl font-display font-black text-espresso-900">Log Weight</h2>
+                    <button onClick={() => setIsVitalsModalOpen(false)} className="w-8 h-8 rounded-full bg-white border border-camel-200 flex items-center justify-center text-espresso-400 hover:text-espresso-900 transition-colors shadow-sm"><X size={16}/></button>
+                 </div>
+
+                 <div className="p-8">
+                    {vitalsError && (
+                      <div className="mb-6 bg-red-50 text-red-600 px-4 py-3 rounded-2xl text-sm font-bold border border-red-100 flex items-center gap-2">
+                        <AlertCircle size={16} /> {vitalsError}
+                      </div>
+                    )}
+                    
+                    <form onSubmit={handleVitalsSubmit} className="space-y-5">
+                       <div>
+                         <label className="block text-xs font-bold text-espresso-900 uppercase tracking-widest mb-2 px-1">New Weight (kg)</label>
+                         <input type="number" step="0.1" value={vitalsWeight} onChange={(e) => setVitalsWeight(e.target.value)} className="w-full bg-white border border-camel-200 rounded-2xl px-5 py-4 text-center text-2xl font-black text-espresso-900 focus:outline-none focus:border-camel-500 focus:ring-4 focus:ring-camel-50 transition-all shadow-inner" placeholder="29.5" required autoFocus />
+                       </div>
+                       
+                       <button type="submit" disabled={isVitalsSubmitting} className="w-full bg-espresso-900 hover:bg-espresso-800 disabled:opacity-70 text-white py-4 rounded-2xl font-bold text-sm tracking-wide transition-all shadow-md flex items-center justify-center gap-2 mt-4">
+                         {isVitalsSubmitting ? 'Saving...' : 'Update Vitals'} <ArrowRight size={16} />
+                       </button>
+                    </form>
+                 </div>
+              </motion.div>
+            </div>
+          </>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
+

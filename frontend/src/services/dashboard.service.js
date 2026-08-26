@@ -51,10 +51,38 @@ const updatePetVitals = async (petId, vitalsData) => {
   }
 };
 
+const updatePet = async (petId, updateData) => {
+  try {
+    const response = await api.put(`/dashboard/pets/${petId}`, updateData);
+    return response.data;
+  } catch (error) {
+    console.error("Error updating pet:", error);
+    return {
+      success: false,
+      message: error.response?.data?.message || 'Failed to update pet profile.'
+    };
+  }
+};
+
+const deletePet = async (petId) => {
+  try {
+    const response = await api.delete(`/dashboard/pets/${petId}`);
+    return response.data;
+  } catch (error) {
+    console.error("Error deleting pet:", error);
+    return {
+      success: false,
+      message: error.response?.data?.message || 'Failed to delete pet profile.'
+    };
+  }
+};
+
 const dashboardService = {
   getOwnerDashboardData,
   addNewPet,
-  updatePetVitals
+  updatePetVitals,
+  updatePet,
+  deletePet
 };
 
 export default dashboardService;

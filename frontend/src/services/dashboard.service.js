@@ -1,0 +1,60 @@
+﻿import api from './api';
+
+/**
+ * Fetches all pets and profile data for the logged-in owner.
+ */
+const getOwnerDashboardData = async () => {
+  try {
+    const response = await api.get('/dashboard/pets');
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching dashboard data:", error);
+    return {
+      success: false,
+      message: error.response?.data?.message || 'Failed to fetch dashboard data. Please try again later.'
+    };
+  }
+};
+
+/**
+ * Creates a new pet profile securely linked to the active user.
+ * @param {Object} petData - The payload containing name, species, breed, etc.
+ */
+const addNewPet = async (petData) => {
+  try {
+    const response = await api.post('/dashboard/pets', petData);
+    return response.data;
+  } catch (error) {
+    console.error("Error adding new pet:", error);
+    return {
+      success: false,
+      message: error.response?.data?.message || 'Failed to create pet profile.'
+    };
+  }
+};
+
+/**
+ * Appends new vitals (e.g., weight) to a specific pet's history.
+ * @param {string} petId - The ID of the pet to update.
+ * @param {Object} vitalsData - The payload (e.g., { weight: 29.5 }).
+ */
+const updatePetVitals = async (petId, vitalsData) => {
+  try {
+    const response = await api.patch(`/dashboard/pets/${petId}/vitals`, vitalsData);
+    return response.data;
+  } catch (error) {
+    console.error("Error updating pet vitals:", error);
+    return {
+      success: false,
+      message: error.response?.data?.message || 'Failed to update vitals.'
+    };
+  }
+};
+
+const dashboardService = {
+  getOwnerDashboardData,
+  addNewPet,
+  updatePetVitals
+};
+
+export default dashboardService;

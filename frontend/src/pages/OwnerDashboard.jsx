@@ -3,11 +3,13 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Calendar, Plus, Flame, Moon, Droplets, CheckCircle2, Circle, ArrowRight, Footprints, Loader2 } from 'lucide-react';
 import { fetchDashboardData } from '../services/api';
 import AddRecordModal from '../components/organisms/AddRecordModal';
+import CustomSelect from '../components/molecules/CustomSelect';
 
 export default function OwnerDashboard() {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [timeframe, setTimeframe] = useState('This Week');
 
   useEffect(() => {
     const loadData = async () => {
@@ -116,6 +118,14 @@ export default function OwnerDashboard() {
                 <h3 className="text-xl font-display font-bold text-espresso-900">Health Overview</h3>
                 <p className="text-espresso-500 text-sm font-medium">Live health insights & key stats.</p>
               </div>
+              <div className="w-36">
+                <CustomSelect 
+                  options={['This Week', 'This Month', 'This Year']}
+                  value={timeframe}
+                  onChange={setTimeframe}
+                  className="!py-2 !text-xs" 
+                />
+              </div>
             </div>
 
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 justify-items-center">
@@ -137,10 +147,12 @@ export default function OwnerDashboard() {
                 <div className="relative">
                   <div className="absolute -left-[25px] bg-white p-1 rounded-full"><CheckCircle2 className="text-emerald-500" size={18} /></div>
                   <p className="font-bold text-espresso-900 text-sm">Vaccination - DHPP</p>
+                  <p className="text-xs font-medium text-espresso-500 mt-1">Oct 20, 2024 • Dr. Emily Carter</p>
                 </div>
                 <div className="relative">
                   <div className="absolute -left-[25px] bg-white p-1 rounded-full"><Circle className="text-camel-500 fill-camel-100" size={18} /></div>
                   <p className="font-bold text-espresso-900 text-sm">Annual Checkup</p>
+                  <p className="text-xs font-medium text-camel-600 mt-1">Nov 10, 2024 • 10:30 AM</p>
                 </div>
               </div>
             </motion.div>
@@ -157,6 +169,7 @@ export default function OwnerDashboard() {
                   </div>
                   <div>
                     <p className="font-bold text-espresso-900 text-sm mb-1">General Checkup</p>
+                    <p className="text-xs font-medium text-espresso-600 flex items-center gap-1"><Calendar size={12}/> Dr. Mark Thorne</p>
                   </div>
                 </div>
                 

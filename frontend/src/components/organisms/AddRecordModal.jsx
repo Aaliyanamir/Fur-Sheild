@@ -1,8 +1,11 @@
-﻿import React from 'react';
+﻿import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { X, UploadCloud, FileType, Calendar } from 'lucide-react';
+import { X, UploadCloud, Calendar } from 'lucide-react';
+import CustomSelect from '../molecules/CustomSelect';
 
 export default function AddRecordModal({ isOpen, onClose }) {
+  const [recordType, setRecordType] = useState('Vaccination Certificate');
+
   if (!isOpen) return null;
 
   return (
@@ -47,15 +50,11 @@ export default function AddRecordModal({ isOpen, onClose }) {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
                 <label className="text-xs font-bold text-espresso-900 uppercase tracking-wide">Record Type</label>
-                <div className="relative">
-                  <select className="w-full appearance-none bg-bg-secondary border border-camel-100 rounded-xl px-4 py-3.5 text-sm font-medium text-espresso-900 focus:outline-none focus:border-camel-400 focus:ring-1 focus:ring-camel-400 transition-colors cursor-pointer">
-                    <option>Vaccination Certificate</option>
-                    <option>Lab Blood Work</option>
-                    <option>Surgical Notes</option>
-                    <option>General Prescription</option>
-                  </select>
-                  <FileType className="absolute right-4 top-1/2 -translate-y-1/2 text-camel-400 pointer-events-none" size={18} />
-                </div>
+                <CustomSelect 
+                  options={['Vaccination Certificate', 'Lab Blood Work', 'Surgical Notes', 'General Prescription']}
+                  value={recordType}
+                  onChange={setRecordType}
+                />
               </div>
 
               <div className="space-y-2">

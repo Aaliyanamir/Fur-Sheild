@@ -3,6 +3,7 @@ import { Link, NavLink } from 'react-router-dom';
 import { LayoutDashboard, Stethoscope, HeartHandshake, ShoppingBag, ArrowRight, Play, PawPrint } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { cn } from '../lib/utils';
+import EcosystemSection from '../components/sections/EcosystemSection';
 
 export default function LandingPage() {
   const navItems = [
@@ -26,6 +27,7 @@ export default function LandingPage() {
   };
 
   return (
+    <main>
     <div className="relative min-h-screen flex flex-col font-sans bg-espresso-900 overflow-hidden">
       
       {/* --- Local Cinematic Video Background --- */}
@@ -222,7 +224,9 @@ export default function LandingPage() {
 
         </div>
       </div>
-      
-    </div>
+      </div>
+      <EcosystemSection />
+    </main>
   );
 }
+

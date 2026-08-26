@@ -5,9 +5,12 @@ import { Search, Filter, Clock, Activity, Thermometer, FileDigit, Syringe, Calen
 export default function VetHub() {
   const [loading, setLoading] = useState(true);
   const [activePatient, setActivePatient] = useState(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [statusFilter, setStatusFilter] = useState("All");
+  const [queue, setQueue] = useState([]);
 
   // Deep, highly-detailed mock clinical data
-  const mockQueue = [
+  const initialMockQueue = [
     { 
       id: 'PT-101', 
       petName: 'Buddy', 
@@ -82,11 +85,48 @@ export default function VetHub() {
 
   useEffect(() => {
     // Simulate network fetch
+    // TODO: Replace with backend API call (e.g., fetch('/api/vet/queue'))
     setTimeout(() => {
+      setQueue(initialMockQueue);
       setLoading(false);
-      setActivePatient(mockQueue[0]); // Auto-select first patient
+      setActivePatient(initialMockQueue[0]); // Auto-select first patient
     }, 800);
   }, []);
+
+  // Filter Logic
+  const filteredQueue = queue.filter(patient => {
+    const matchesSearch = 
+      patient.petName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      patient.owner.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      patient.id.toLowerCase().includes(searchQuery.toLowerCase());
+    
+    const matchesFilter = statusFilter === "All" || patient.status === statusFilter;
+    
+    return matchesSearch && matchesFilter;
+  });
+
+  // Action Handlers
+  const handleFilterToggle = () => {
+    const filters = ["All", "Waiting", "In Progress", "Scheduled"];
+    const currentIndex = filters.indexOf(statusFilter);
+    setStatusFilter(filters[(currentIndex + 1) % filters.length]);
+  };
+
+  const handleBeginExamination = () => {
+    // TODO: Replace with backend API call (e.g., POST /api/vet/examine/{patient.id})
+    if (!activePatient) return;
+    
+    const updatedQueue = queue.map(p => 
+      p.id === activePatient.id ? { ...p, status: 'In Progress' } : p
+    );
+    setQueue(updatedQueue);
+    setActivePatient({ ...activePatient, status: 'In Progress' });
+    
+    alert(`Examination started for ${activePatient.petName}. Status updated to IN PROGRESS.`);
+  };
+
+  const handleOrderMeds = () => alert(`Opening pharmacy modal for ${activePatient?.petName}...`);
+  const handleViewLabs = () => alert(`Loading lab results for ${activePatient?.petName}...`);
 
   const getStatusDot = (status) => {
     switch (status) {
@@ -117,14 +157,11 @@ export default function VetHub() {
         <div className="flex gap-3">
           <div className="relative">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-espresso-300" size={18} />
-            <input 
-              type="text" 
-              placeholder="Search patients..." 
-              className="pl-12 pr-4 py-3 rounded-full border border-camel-100 bg-white text-sm font-medium focus:outline-none focus:border-camel-400 focus:ring-1 focus:ring-camel-400 w-full md:w-64 shadow-sm transition-all"
+            <input type="text" placeholder="Search patients..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="pl-12 pr-4 py-3 rounded-full border border-camel-100 bg-white text-sm font-medium focus:outline-none focus:border-camel-400 focus:ring-1 focus:ring-camel-400 w-full md:w-64 shadow-sm transition-all"
             />
           </div>
-          <button className="flex items-center justify-center w-12 h-12 rounded-full bg-white border border-camel-100 text-espresso-500 hover:text-camel-600 hover:border-camel-300 shadow-sm transition-colors">
-            <Filter size={18} />
+          <button onClick={handleFilterToggle} title={`Filter: ${statusFilter}`} className="flex items-center justify-center w-12 h-12 rounded-full bg-white border border-camel-100 text-espresso-500 hover:text-camel-600 hover:border-camel-300 shadow-sm transition-colors relative">
+            <Filter size={18} />{statusFilter !== "All" && <span className="absolute top-0 right-0 w-3 h-3 bg-camel-600 border-2 border-white rounded-full"></span>}
           </button>
         </div>
       </div>
@@ -187,10 +224,10 @@ export default function VetHub() {
         <motion.div initial="hidden" animate="show" variants={{ hidden: { opacity: 0 }, show: { opacity: 1, transition: { staggerChildren: 0.1 } } }} className="lg:col-span-4 flex flex-col gap-4">
           <div className="flex justify-between items-end mb-2 px-2">
             <h2 className="text-lg font-display font-bold text-espresso-900">Active Queue</h2>
-            <p className="text-xs font-bold text-camel-600">4 Waiting</p>
+            <p className="text-xs font-bold text-camel-600">{filteredQueue.length} {statusFilter === "All" ? "Patients" : statusFilter}</p>
           </div>
           
-          {mockQueue.map((patient) => (
+          {filteredQueue.map((patient) => (
             <motion.div 
               key={patient.id} variants={{ hidden: { opacity: 0, x: -20 }, show: { opacity: 1, x: 0 } }}
               onClick={() => setActivePatient(patient)}
@@ -324,16 +361,10 @@ export default function VetHub() {
 
                 {/* Fixed Action Footer */}
                 <div className="p-6 bg-white border-t border-camel-100 mt-auto shrink-0 space-y-3">
-                  <button className="w-full py-3.5 rounded-full bg-camel-600 text-white font-bold text-sm hover:bg-camel-700 shadow-md hover:shadow-lg transition-all hover:-translate-y-0.5 flex items-center justify-center gap-2">
-                    <ShieldAlert size={16} /> Begin Examination
-                  </button>
+                  <button onClick={handleBeginExamination} className="w-full py-3.5 rounded-full bg-camel-600 text-white font-bold text-sm hover:bg-camel-700 shadow-md hover:shadow-lg transition-all hover:-translate-y-0.5 flex items-center justify-center gap-2"><ShieldAlert size={16} /> Begin Examination</button>
                   <div className="grid grid-cols-2 gap-3">
-                    <button className="py-3 rounded-full bg-[#FAF8F5] border border-camel-200 text-espresso-900 font-bold text-sm hover:bg-camel-50 transition-all flex justify-center items-center gap-2">
-                      <Syringe size={16} className="text-camel-600"/> Order Meds
-                    </button>
-                    <button className="py-3 rounded-full bg-[#FAF8F5] border border-camel-200 text-espresso-900 font-bold text-sm hover:bg-camel-50 transition-all flex justify-center items-center gap-2">
-                      <FileDigit size={16} className="text-camel-600"/> View Labs
-                    </button>
+                    <button onClick={handleOrderMeds} className="py-3 rounded-full bg-[#FAF8F5] border border-camel-200 text-espresso-900 font-bold text-sm hover:bg-camel-50 transition-all flex justify-center items-center gap-2"><Syringe size={16} className="text-camel-600"/> Order Meds</button>
+                    <button onClick={handleViewLabs} className="py-3 rounded-full bg-[#FAF8F5] border border-camel-200 text-espresso-900 font-bold text-sm hover:bg-camel-50 transition-all flex justify-center items-center gap-2"><FileDigit size={16} className="text-camel-600"/> View Labs</button>
                   </div>
                 </div>
 
@@ -355,6 +386,7 @@ export default function VetHub() {
     </>
   );
 }
+
 
 
 

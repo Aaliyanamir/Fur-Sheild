@@ -40,7 +40,7 @@ export default function Navbar() {
       case 'SHELTER_ADMIN':
         return [
           { name: 'Shelter Portal', path: '/shelter', icon: HeartHandshake },
-          { name: 'Rescue Pipeline', path: '/shelter', icon: ClipboardList },
+          { name: 'Rescue Pipeline', path: '/pipeline', icon: ClipboardList },
           { name: 'Shop', path: '/shop', icon: ShoppingBag },
         ];
       default:

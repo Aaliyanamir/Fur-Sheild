@@ -13,6 +13,7 @@ import MyPets from './pages/MyPets';
 import VetHub from './pages/VetHub';
 import VetAppointments from './pages/VetAppointments';
 import ShelterHub from './pages/ShelterHub';
+import ShelterDashboard from './pages/ShelterDashboard';
 import ShopCatalog from './pages/ShopCatalog';
 import UserProfile from './pages/UserProfile';
 import Settings from './pages/Settings';
@@ -50,7 +51,8 @@ export default function App() {
 
             {/* Protected Routes - Strictly for Shelter Admins */}
             <Route element={<ProtectedRoute allowedRoles={['SHELTER_ADMIN']} />}>
-              <Route path="/shelter" element={<ShelterHub />} />
+              <Route path="/shelter" element={<ShelterDashboard />} />
+              <Route path="/pipeline" element={<ShelterHub />} />
             </Route>
           </Route>
 

@@ -2,7 +2,7 @@
 import GlobalLayout from './components/organisms/GlobalLayout';
 import LandingPage from './pages/LandingPage';
 import OwnerDashboard from './pages/OwnerDashboard';
-import VetWorkstation from './pages/VetWorkstation';
+import VetHub from './pages/VetHub';
 import ShelterHub from './pages/ShelterHub';
 import ShopCatalog from './pages/ShopCatalog';
 import NotFound from './pages/NotFound';
@@ -17,7 +17,7 @@ function App() {
         {/* App Routes wrapped in the Global Layout */}
         <Route element={<GlobalLayout />}>
           <Route path="/dashboard" element={<OwnerDashboard />} />
-          <Route path="/vet" element={<VetWorkstation />} />
+          <Route path="/vet" element={<VetHub />} />
           <Route path="/shelter" element={<ShelterHub />} />
           <Route path="/shop" element={<ShopCatalog />} />
         </Route>
@@ -30,3 +30,4 @@ function App() {
 }
 
 export default App;
+

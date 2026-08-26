@@ -184,7 +184,7 @@ export default function VetHub() {
         </div>
 
         {/* PANE 2: THE ACTIVE QUEUE (Col 4) */}
-        <div className="lg:col-span-4 flex flex-col gap-4">
+        <motion.div initial="hidden" animate="show" variants={{ hidden: { opacity: 0 }, show: { opacity: 1, transition: { staggerChildren: 0.1 } } }} className="lg:col-span-4 flex flex-col gap-4">
           <div className="flex justify-between items-end mb-2 px-2">
             <h2 className="text-lg font-display font-bold text-espresso-900">Active Queue</h2>
             <p className="text-xs font-bold text-camel-600">4 Waiting</p>
@@ -192,7 +192,7 @@ export default function VetHub() {
           
           {mockQueue.map((patient) => (
             <motion.div 
-              key={patient.id}
+              key={patient.id} variants={{ hidden: { opacity: 0, x: -20 }, show: { opacity: 1, x: 0 } }}
               onClick={() => setActivePatient(patient)}
               whileHover={{ scale: 1.01 }}
               whileTap={{ scale: 0.99 }}
@@ -222,7 +222,7 @@ export default function VetHub() {
               </div>
             </motion.div>
           ))}
-        </div>
+        </motion.div>
 
         {/* PANE 3: DEEP CLINICAL CHART (Col 5) */}
         <div className="lg:col-span-5 lg:sticky lg:top-32 h-[calc(100vh-10rem)] bg-white rounded-[2rem] border border-camel-100 shadow-sm overflow-hidden flex flex-col">
@@ -355,3 +355,7 @@ export default function VetHub() {
     </>
   );
 }
+
+
+
+

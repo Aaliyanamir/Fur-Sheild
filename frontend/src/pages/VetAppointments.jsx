@@ -1,65 +1,94 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Calendar as CalendarIcon, Clock, MoreHorizontal, Plus, Filter, FileText, ChevronLeft, ChevronRight, CheckCircle2, ShieldAlert } from 'lucide-react';
 
+
+const Avatar = ({ src, alt, name, className }) => {
+  const [error, setError] = useState(false);
+  if (error || !src || src.includes('product-placeholder')) {
+    return (
+      <div className={`flex items-center justify-center font-bold text-espresso-500 bg-camel-100 ${className}`}>
+        {name ? name.charAt(0).toUpperCase() : 'U'}
+      </div>
+    );
+  }
+  return <img src={src} alt={alt} className={className} onError={() => setError(true)} />;
+};
+
 export default function VetAppointments() {
-  const [selectedDate, setSelectedDate] = useState(new Date());
   
-  // Mock Data structured similarly to Mongoose Schema
-  const mockSchedule = [
-    {
-      _id: "appt1",
-      dateLabel: "Today, Aug 27",
-      appointments: [
-        {
-          id: "1",
-          time: "09:00 AM",
-          duration: "30 min",
-          patient: { name: "Bella", breed: "Golden Retriever", image: "https://images.unsplash.com/photo-1552053831-71594a27632d?auto=format&fit=crop&q=80&w=150" },
-          owner: { name: "Sarah Jenkins" },
-          reason: "Annual Vaccination",
-          severity: "ROUTINE",
-          status: "CONFIRMED"
-        },
-        {
-          id: "2",
-          time: "10:30 AM",
-          duration: "45 min",
-          patient: { name: "Max", breed: "German Shepherd", image: "https://images.unsplash.com/photo-1589924691995-400dc9ecc119?auto=format&fit=crop&q=80&w=150" },
-          owner: { name: "David Miller" },
-          reason: "Limping / Joint Pain",
-          severity: "URGENT",
-          status: "IN_PROGRESS"
+  const [selectedDate, setSelectedDate] = useState(new Date());
+  const [appointmentsData, setAppointmentsData] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchAppointments = async () => {
+      try {
+        const { default: vetService } = await import('../services/vet.service');
+        const res = await vetService.getQueue();
+        if (res.success) {
+          // Group by Date
+          const grouped = {};
+          res.data.forEach(appt => {
+            const date = new Date(appt.scheduledAt);
+            // Format as YYYY-MM-DD for grouping
+            const dateStr = date.toISOString().split('T')[0];
+            
+            if (!grouped[dateStr]) {
+              // Create friendly label
+              const today = new Date();
+              const tomorrow = new Date(today);
+              tomorrow.setDate(tomorrow.getDate() + 1);
+              
+              let label = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+              if (dateStr === today.toISOString().split('T')[0]) {
+                label = "Today, " + label;
+              } else if (dateStr === tomorrow.toISOString().split('T')[0]) {
+                label = "Tomorrow, " + label;
+              } else {
+                label = date.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' });
+              }
+              
+              grouped[dateStr] = {
+                _id: dateStr,
+                dateLabel: label,
+                timestamp: date.getTime(),
+                appointments: []
+              };
+            }
+            
+            const isWalkin = !appt.petId && appt.walkInDetails;
+            const petAvatarUrl = isWalkin ? appt.walkInDetails.petAvatarUrl : appt.petId?.avatarUrl;
+            
+            grouped[dateStr].appointments.push({
+              id: appt._id,
+              time: date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+              duration: "30 min", // default mock duration
+              patient: { 
+                name: isWalkin ? appt.walkInDetails.petName : (appt.petId?.name || 'Unknown'), 
+                breed: isWalkin ? appt.walkInDetails.breed : (appt.petId?.breed || 'Unknown'), 
+                image: petAvatarUrl ? (petAvatarUrl.startsWith('http') ? petAvatarUrl : `http://localhost:5000${petAvatarUrl}`) : '/images/product-placeholder.jpg'
+              },
+              owner: { name: isWalkin ? appt.walkInDetails.ownerName : (appt.ownerId?.name || 'Unknown') },
+              reason: appt.reason,
+              severity: appt.severity,
+              status: appt.status
+            });
+          });
+          
+          // Convert to array and sort by date
+          const groupedArray = Object.values(grouped).sort((a, b) => a.timestamp - b.timestamp);
+          setAppointmentsData(groupedArray);
         }
-      ]
-    },
-    {
-      _id: "appt2",
-      dateLabel: "Tomorrow, Aug 28",
-      appointments: [
-        {
-          id: "3",
-          time: "08:30 AM",
-          duration: "60 min",
-          patient: { name: "Luna", breed: "Persian Cat", image: "https://images.unsplash.com/photo-1513360371669-4adf3dd7dff8?auto=format&fit=crop&q=80&w=150" },
-          owner: { name: "Emily Clark" },
-          reason: "Dental Cleaning",
-          severity: "ROUTINE",
-          status: "CONFIRMED"
-        },
-        {
-          id: "4",
-          time: "11:00 AM",
-          duration: "30 min",
-          patient: { name: "Charlie", breed: "Beagle", image: "https://images.unsplash.com/photo-1537151608804-ea6f4bc1c9a0?auto=format&fit=crop&q=80&w=150" },
-          owner: { name: "Tom Harris" },
-          reason: "Allergy Check",
-          severity: "ROUTINE",
-          status: "PENDING"
-        }
-      ]
-    }
-  ];
+      } catch (error) {
+        console.error(error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchAppointments();
+  }, []);
+
 
   const getSeverityBadge = (severity) => {
     switch(severity) {
@@ -111,7 +140,12 @@ export default function VetAppointments() {
 
           {/* Agenda List */}
           <div className="space-y-8">
-            {mockSchedule.map((day) => (
+            {loading ? (
+              <div className="flex justify-center p-12"><div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-camel-600"></div></div>
+            ) : appointmentsData.length === 0 ? (
+              <div className="text-center p-8 bg-white border border-camel-100 rounded-[1.5rem] shadow-sm text-espresso-500 text-sm font-medium">No upcoming appointments.</div>
+            ) : null}
+            {appointmentsData.map((day) => (
               <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} key={day._id}>
                 <h3 className="text-sm font-black uppercase tracking-widest text-espresso-400 mb-4 px-2 border-l-2 border-camel-300 ml-1">
                   {day.dateLabel}
@@ -134,7 +168,7 @@ export default function VetAppointments() {
                         <div className="flex justify-between items-start">
                           <div className="flex items-center gap-4">
                             <div className="relative">
-                              <img src={appt.patient.image} alt={appt.patient.name} className="w-14 h-14 rounded-full object-cover border-2 border-camel-50 shadow-sm" />
+                              <Avatar src={appt.patient.image} alt={appt.patient.name} name={appt.patient.name} className="w-14 h-14 rounded-full object-cover border-2 border-camel-50 shadow-sm" />
                               <div className={`absolute bottom-0 right-0 w-3.5 h-3.5 rounded-full border-2 border-white ${appt.status === 'CONFIRMED' ? 'bg-emerald-400' : 'bg-amber-400'}`}></div>
                             </div>
                             <div>
@@ -207,35 +241,39 @@ export default function VetAppointments() {
             
             <h3 className="text-xs font-bold uppercase tracking-widest text-white/50 mb-6">Weekly Overview</h3>
             
+            
             <div className="space-y-5 relative z-10">
               <div>
-                <p className="text-3xl font-black tracking-tight">14</p>
-                <p className="text-sm font-medium text-white/70">Total Appointments</p>
+                <p className="text-3xl font-black tracking-tight">{appointmentsData.reduce((acc, day) => acc + day.appointments.length, 0)}</p>
+                <p className="text-sm font-medium text-white/70">Total Scheduled</p>
               </div>
               <div className="w-full h-px bg-white/10"></div>
               <div className="flex justify-between items-center">
                 <div className="flex items-center gap-2">
                   <div className="w-2 h-2 rounded-full bg-emerald-400"></div>
-                  <p className="text-sm font-medium text-white/90">Routine Exams</p>
+                  <p className="text-sm font-medium text-white/90">Routine</p>
                 </div>
-                <p className="text-sm font-bold">8</p>
+                <p className="text-sm font-bold">{appointmentsData.reduce((acc, day) => acc + day.appointments.filter(a => a.severity === 'ROUTINE').length, 0)}</p>
               </div>
               <div className="flex justify-between items-center">
                 <div className="flex items-center gap-2">
                   <div className="w-2 h-2 rounded-full bg-orange-400"></div>
-                  <p className="text-sm font-medium text-white/90">Surgeries</p>
+                  <p className="text-sm font-medium text-white/90">Urgent</p>
                 </div>
-                <p className="text-sm font-bold">2</p>
+                <p className="text-sm font-bold">{appointmentsData.reduce((acc, day) => acc + day.appointments.filter(a => a.severity === 'URGENT').length, 0)}</p>
               </div>
               <div className="flex justify-between items-center">
                 <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 rounded-full bg-camel-400"></div>
-                  <p className="text-sm font-medium text-white/90">Consultations</p>
+                  <div className="w-2 h-2 rounded-full bg-rose-400"></div>
+                  <p className="text-sm font-medium text-white/90">Emergency</p>
                 </div>
-                <p className="text-sm font-bold">4</p>
+                <p className="text-sm font-bold">{appointmentsData.reduce((acc, day) => acc + day.appointments.filter(a => a.severity === 'EMERGENCY').length, 0)}</p>
               </div>
             </div>
+
           </div>
+
+        </div>
 
         </div>
 

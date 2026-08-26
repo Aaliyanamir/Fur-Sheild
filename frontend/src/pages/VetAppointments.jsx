@@ -275,8 +275,6 @@ export default function VetAppointments() {
 
         </div>
 
-        </div>
-
       </div>
     </>
   );

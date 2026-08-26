@@ -1,6 +1,6 @@
 ﻿import React from 'react';
 import { Link, NavLink } from 'react-router-dom';
-import { ArrowRight, PlayCircle, PawPrint, LayoutDashboard, Stethoscope, HeartHandshake, ShoppingBag } from 'lucide-react';
+import { ArrowRight, PlayCircle, Play, PawPrint, LayoutDashboard, Stethoscope, HeartHandshake, ShoppingBag } from 'lucide-react';
 import { cn } from '../lib/utils';
 
 export default function LandingPage() {
@@ -132,38 +132,61 @@ export default function LandingPage() {
       </div>
 
       {/* --- Hero Content --- */}
-      <main className="relative z-10 flex-1 flex flex-col items-center justify-center text-center px-4 max-w-4xl mx-auto mt-24">
-        
-        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/10 border border-white/20 backdrop-blur-md mb-6">
-          <span className="w-2 h-2 rounded-full bg-camel-400 animate-pulse"></span>
-          <span className="text-xs font-bold text-white tracking-wide uppercase">Next-Gen Pet Care Platform</span>
-        </div>
-
-        <h1 className="text-5xl md:text-7xl font-display font-extrabold text-white tracking-tight leading-[1.1] mb-6 drop-shadow-lg">
-          For tails that tell <br/>
-          <span className="text-camel-400">beautiful stories.</span>
-        </h1>
-        
-        <p className="text-lg md:text-xl text-white/80 font-medium max-w-2xl mx-auto mb-10 drop-shadow-md leading-relaxed">
-          Comprehensive health tracking, veterinary integration, and unified shelter management. Experience the future of animal welfare today.
-        </p>
-
-        <div className="flex flex-col sm:flex-row items-center gap-4 w-full sm:w-auto">
-          <Link 
-            to="/dashboard" 
-            className="w-full sm:w-auto px-8 py-4 bg-camel-600 hover:bg-camel-500 text-white rounded-full font-bold text-base transition-all shadow-[0_0_40px_rgba(186,127,72,0.4)] hover:shadow-[0_0_60px_rgba(186,127,72,0.6)] hover:-translate-y-1 flex items-center justify-center gap-2"
-          >
-            Enter Dashboard <ArrowRight size={18} />
-          </Link>
+            {/* --- Editorial Hero Content --- */}
+      <main className="relative z-10 flex-1 flex items-center w-full max-w-7xl mx-auto px-6 lg:px-12 mt-20">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-end w-full pb-20">
           
-          <button className="w-full sm:w-auto px-8 py-4 bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/20 text-white rounded-full font-bold text-base transition-all flex items-center justify-center gap-2">
-            <PlayCircle size={18} /> Watch Demo
-          </button>
+          {/* Left Column: Massive Typography */}
+          <div className="lg:col-span-8 flex flex-col items-start pt-20">
+            {/* Elegant Accent instead of generic badge */}
+            <div className="flex items-center gap-4 mb-8">
+              <div className="h-[2px] w-12 bg-camel-400"></div>
+              <span className="tracking-[0.25em] text-xs font-bold text-camel-100 uppercase">
+                The Future of Animal Welfare
+              </span>
+            </div>
+
+            <h1 className="text-6xl sm:text-7xl lg:text-[6.5rem] font-display font-extrabold text-white tracking-tighter leading-[0.9] drop-shadow-xl">
+              Tails that <br />
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-camel-300 to-camel-500 italic font-medium pr-4">
+                tell stories.
+              </span>
+            </h1>
+          </div>
+
+          {/* Right Column: Narrative & Bespoke Actions */}
+          <div className="lg:col-span-4 flex flex-col items-start lg:pl-6 pb-4">
+            <p className="text-lg text-white/80 font-medium leading-relaxed mb-10 drop-shadow-md">
+              Comprehensive health tracking, veterinary integration, and unified shelter management. An ecosystem designed for the modern pet care professional.
+            </p>
+
+            <div className="flex flex-col sm:flex-row items-center gap-5 w-full">
+              {/* Primary Brutalist Button */}
+              <Link 
+                to="/dashboard" 
+                className="group relative w-full sm:w-auto inline-flex items-center justify-between gap-6 bg-camel-600 pl-8 pr-2 py-2 rounded-full overflow-hidden transition-all hover:bg-camel-500 shadow-[0_10px_40px_rgba(186,127,72,0.3)]"
+              >
+                <span className="text-white font-bold text-sm tracking-wide">ENTER APP</span>
+                <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center text-camel-700 transition-transform group-hover:scale-110">
+                  <ArrowRight size={18} strokeWidth={2.5} />
+                </div>
+              </Link>
+              
+              {/* Secondary Minimalist Play Button */}
+              <button className="group flex items-center gap-4 w-full sm:w-auto hover:opacity-80 transition-opacity">
+                <div className="w-12 h-12 rounded-full border border-white/30 backdrop-blur-sm flex items-center justify-center text-white group-hover:bg-white/10 transition-colors">
+                  <Play size={18} className="ml-1" fill="currentColor" />
+                </div>
+                <span className="text-white font-semibold text-sm tracking-wide">Watch Demo</span>
+              </button>
+            </div>
+          </div>
+
         </div>
-        
       </main>
       
     </div>
   );
 }
+
 

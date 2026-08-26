@@ -59,4 +59,18 @@ const authUser = async (req, res) => {
   }
 };
 
-module.exports = { registerUser, authUser };
+// @desc    Get current logged in user
+// @route   GET /api/v1/auth/me
+// @access  Private
+const getMe = async (req, res) => {
+  try {
+    // req.user is already populated by the protect middleware
+    const user = await User.findById(req.user.id);
+    res.status(200).json({ success: true, data: user });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+module.exports = { registerUser, authUser, getMe };
+

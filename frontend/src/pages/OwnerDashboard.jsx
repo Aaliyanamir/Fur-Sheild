@@ -1,11 +1,14 @@
 ﻿import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 import { Calendar, Plus, Flame, Moon, Droplets, CheckCircle2, Circle, ArrowRight, Footprints, PawPrint, HeartHandshake, Syringe, Stethoscope, AlertCircle, X, Edit2, Trash2, Camera, Upload } from 'lucide-react';
 import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip } from 'recharts';
 import dashboardService from '../services/dashboard.service';
 
 export default function OwnerDashboard() {
+  const navigate = useNavigate();
   const [pets, setPets] = useState([]);
+  const [appointments, setAppointments] = useState([]);
   const [activePetIndex, setActivePetIndex] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -75,9 +78,10 @@ export default function OwnerDashboard() {
     setLoading(true);
     setError(null);
     try {
-      const response = await dashboardService.getOwnerDashboardData();
+      const [response, apptRes] = await Promise.all([dashboardService.getOwnerDashboardData(), dashboardService.getMyAppointments()]);
       if (response.success) {
         setPets(response.data);
+        if (apptRes.success) setAppointments(apptRes.data);
       } else {
         setError(response.message || "Failed to load pets.");
       }

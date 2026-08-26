@@ -17,6 +17,7 @@ import ShelterDashboard from './pages/ShelterDashboard';
 import ShopCatalog from './pages/ShopCatalog';
 import UserProfile from './pages/UserProfile';
 import Settings from './pages/Settings';
+import BookAppointment from './pages/BookAppointment';
 import MyOrders from './pages/MyOrders';
 import NotFound from './pages/NotFound';
 
@@ -41,6 +42,7 @@ export default function App() {
               <Route path="/profile" element={<UserProfile />} />
               <Route path="/settings" element={<Settings />} />
               <Route path="/orders" element={<MyOrders />} />
+              <Route path="/book-appointment" element={<BookAppointment />} />
             </Route>
 
             {/* Protected Routes - Strictly for Vets */}

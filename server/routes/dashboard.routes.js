@@ -1,6 +1,6 @@
 ﻿const express = require('express');
 const router = express.Router();
-const { getMyPets, addPet, updateVitals, updatePet, deletePet } = require('../controllers/dashboard.controller');
+const { getMyPets, addPet, updateVitals, updatePet, deletePet, getVets, bookAppointment, getMyAppointments } = require('../controllers/dashboard.controller');
 const { protect } = require('../middlewares/auth.middleware');
 const multer = require('multer');
 const path = require('path');
@@ -25,6 +25,12 @@ router.route('/pets')
 
 router.patch('/pets/:id/vitals', updateVitals);
 router.route('/pets/:id').put(upload.single('avatar'), updatePet).delete(deletePet);
+
+
+router.get('/vets', getVets);
+router.route('/appointments')
+  .get(getMyAppointments)
+  .post(bookAppointment);
 
 module.exports = router;
 

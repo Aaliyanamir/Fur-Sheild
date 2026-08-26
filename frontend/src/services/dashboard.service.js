@@ -77,12 +77,31 @@ const deletePet = async (petId) => {
   }
 };
 
+
+const getVets = async () => {
+  const response = await api.get('/dashboard/vets');
+  return response.data;
+};
+
+const bookAppointment = async (data) => {
+  const response = await api.post('/dashboard/appointments', data);
+  return response.data;
+};
+
+const getMyAppointments = async () => {
+  const response = await api.get('/dashboard/appointments');
+  return response.data;
+};
+
 const dashboardService = {
   getOwnerDashboardData,
   addNewPet,
   updatePetVitals,
   updatePet,
-  deletePet
+  deletePet,
+  getVets,
+  bookAppointment,
+  getMyAppointments
 };
 
 export default dashboardService;

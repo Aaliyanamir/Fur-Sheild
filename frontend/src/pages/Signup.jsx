@@ -56,17 +56,11 @@ export default function Signup() {
             transition={{ duration: 0.8, ease: "easeOut", delay: 0.2 }}
             className="w-full h-full rounded-[40px] overflow-hidden relative shadow-2xl"
           >
-            <div className="absolute inset-0 bg-espresso-900/10 z-10 mix-blend-overlay"></div>
             <img 
               src="/images/signup-bg.jpg" 
-              alt="Cute Cat" 
+              alt="Join FurShield" 
               className="absolute inset-0 w-full h-full object-cover"
             />
-            {/* Minimalist Overlay Graphic */}
-            <div className="absolute bottom-12 left-12 right-12 z-20 bg-white/10 backdrop-blur-md border border-white/20 p-8 rounded-3xl">
-               <h3 className="text-white font-display font-black text-3xl mb-2">Every tail tells a story.</h3>
-               <p className="text-white/90 font-medium">Join thousands of pet lovers and professionals.</p>
-            </div>
           </motion.div>
         </div>
 
@@ -193,3 +187,5 @@ export default function Signup() {
     </div>
   );
 }
+
+

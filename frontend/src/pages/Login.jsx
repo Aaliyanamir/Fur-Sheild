@@ -123,17 +123,11 @@ export default function Login() {
             transition={{ duration: 0.8, ease: "easeOut", delay: 0.2 }}
             className="w-full h-full rounded-[40px] overflow-hidden relative shadow-2xl"
           >
-            <div className="absolute inset-0 bg-espresso-900/20 z-10 mix-blend-overlay"></div>
             <img 
               src="/images/login-bg.jpg" 
-              alt="Happy Dog" 
+              alt="Welcome to FurShield" 
               className="absolute inset-0 w-full h-full object-cover"
             />
-            {/* Minimalist Overlay Graphic */}
-            <div className="absolute bottom-12 left-12 right-12 z-20 bg-white/10 backdrop-blur-md border border-white/20 p-8 rounded-3xl">
-               <h3 className="text-white font-display font-black text-3xl mb-2">Uniting the Pet Care Ecosystem</h3>
-               <p className="text-white/80 font-medium">Owners, Vets, and Shelters on one unified platform.</p>
-            </div>
           </motion.div>
         </div>
 
@@ -143,3 +137,5 @@ export default function Login() {
     </div>
   );
 }
+
+

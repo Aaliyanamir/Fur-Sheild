@@ -6,11 +6,13 @@ import CustomSelect from '../components/molecules/CustomSelect';
 
 export default function ShopCatalog() {
   const [selectedProduct, setSelectedProduct] = useState(null);
-  const [cart, setCart] = useState(0);
+  const [cart, setCart] = useState([]);
   const [selectedVerificationPet, setSelectedVerificationPet] = useState('');
+  const [isCartOpen, setIsCartOpen] = useState(false);
 
   const addToCart = (product) => {
-    setCart(prev => prev + 1);
+    setCart([...cart, product]);
+    setIsCartOpen(true);
   };
 
   const container = {
@@ -45,7 +47,7 @@ export default function ShopCatalog() {
             />
           </div>
           <button className="flex items-center gap-2 bg-espresso-900 hover:bg-espresso-800 text-white px-5 py-2.5 rounded-full font-bold text-sm transition-all shadow-md">
-             <ShoppingBag size={16} /> Cart ({cart})
+             <ShoppingBag size={16} /> Cart ({cart.length})
           </button>
         </div>
       </div>
@@ -376,7 +378,7 @@ export default function ShopCatalog() {
               </div>
 
               {/* Right: Details & Rx Flow */}
-              <div className="w-full md:w-3/5 p-8 md:p-12 overflow-y-auto">
+              <div className="w-full md:w-3/5 p-8 md:p-12 overflow-y-auto pb-40">
                 <p className="text-xs font-bold text-espresso-400 uppercase tracking-widest mb-2">{selectedProduct.category}</p>
                 <h2 className="text-3xl font-display font-black text-espresso-900 leading-tight mb-4">{selectedProduct.name}</h2>
                 <div className="flex items-center gap-4 mb-6 pb-6 border-b border-camel-100/50">
@@ -417,7 +419,11 @@ export default function ShopCatalog() {
 
                         {/* Fixed Persistent Button */}
                         <button 
-                          onClick={() => { addToCart(selectedProduct); setSelectedProduct(null); }}
+                          onClick={() => { 
+                            addToCart(selectedProduct); 
+                            setSelectedProduct(null); 
+                            setSelectedVerificationPet(''); 
+                          }}
                           disabled={!selectedVerificationPet}
                           className="w-full bg-camel-600 hover:bg-camel-500 disabled:opacity-50 disabled:hover:bg-camel-600 text-white py-3 rounded-xl font-bold text-sm tracking-wide transition-all shadow-md shadow-camel-900/10"
                         >
@@ -453,4 +459,5 @@ export default function ShopCatalog() {
     </div>
   );
 }
+
 

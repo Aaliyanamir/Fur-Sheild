@@ -295,7 +295,7 @@ export default function ShopCatalog() {
                      <p className="text-[9px] font-bold text-espresso-400 uppercase tracking-widest mb-1">FurShield Lab</p>
                      <h4 className="font-display font-bold text-espresso-900 leading-tight mb-2">Advanced Joint Support</h4>
                      <div className="flex items-center gap-1 mb-4">
-                        <span className="flex text-accent-500 text-xs">â˜…â˜…â˜…â˜…â˜…</span>
+                        <span className="flex text-accent-500 text-xs">&#9733;&#9733;&#9733;&#9733;&#9733;</span>
                         <span className="text-[10px] font-bold text-espresso-400">(124)</span>
                      </div>
                      <div className="mt-auto flex justify-between items-end">
@@ -320,7 +320,7 @@ export default function ShopCatalog() {
                      <p className="text-[9px] font-bold text-espresso-400 uppercase tracking-widest mb-1">HeartSafe</p>
                      <h4 className="font-display font-bold text-espresso-900 leading-tight mb-2">Heartworm Medication (3-Month)</h4>
                      <div className="flex items-center gap-1 mb-4">
-                        <span className="flex text-accent-500 text-xs">â˜…â˜…â˜…â˜…â˜†</span>
+                        <span className="flex text-accent-500 text-xs">&#9733;&#9733;&#9733;&#9733;&#9733;</span>
                         <span className="text-[10px] font-bold text-espresso-400">(56)</span>
                      </div>
                      <div className="mt-auto flex justify-between items-end">
@@ -345,7 +345,7 @@ export default function ShopCatalog() {
                      <p className="text-[9px] font-bold text-espresso-400 uppercase tracking-widest mb-1">NatureVet</p>
                      <h4 className="font-display font-bold text-espresso-900 leading-tight mb-2">Hypoallergenic Salmon Diet</h4>
                      <div className="flex items-center gap-1 mb-4">
-                        <span className="flex text-accent-500 text-xs">â˜…â˜…â˜…â˜…â˜…</span>
+                        <span className="flex text-accent-500 text-xs">&#9733;&#9733;&#9733;&#9733;&#9733;</span>
                         <span className="text-[10px] font-bold text-espresso-400">(89)</span>
                      </div>
                      <div className="mt-auto flex justify-between items-end">
@@ -428,7 +428,7 @@ export default function ShopCatalog() {
                 <div className="flex items-center gap-4 mb-6 pb-6 border-b border-camel-100/50">
                   <span className="font-black text-camel-600 text-3xl">${selectedProduct.price.toFixed(2)}</span>
                   <div className="flex items-center gap-1 bg-camel-50 px-3 py-1.5 rounded-full border border-camel-100">
-                     <span className="flex text-accent-500 text-sm">â˜…â˜…â˜…â˜…â˜…</span>
+                     <span className="flex text-accent-500 text-sm">&#9733;&#9733;&#9733;&#9733;&#9733;</span>
                      <span className="text-xs font-bold text-espresso-600 ml-1">4.9</span>
                   </div>
                 </div>
@@ -665,4 +665,5 @@ export default function ShopCatalog() {
     </div>
   );
 }
+
 

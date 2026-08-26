@@ -1,20 +1,28 @@
-﻿import React, { useState } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Calendar, Plus, Activity, Moon, Droplets, CheckCircle2, Circle, ArrowRight } from 'lucide-react';
+import { Calendar, Plus, Flame, Moon, Droplets, CheckCircle2, Circle, ArrowRight, Footprints, Loader2 } from 'lucide-react';
+import { fetchDashboardData } from '../services/api';
 
 export default function OwnerDashboard() {
-  const [activePet] = useState('Buddy');
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  const container = {
-    hidden: { opacity: 0 },
-    show: { opacity: 1, transition: { staggerChildren: 0.1 } }
-  };
-  const itemVariant = {
-    hidden: { opacity: 0, y: 20 },
-    show: { opacity: 1, y: 0, transition: { duration: 0.6, ease: [0.16, 1, 0.3, 1] } }
-  };
+  useEffect(() => {
+    const loadData = async () => {
+      setLoading(true);
+      const result = await fetchDashboardData('buddy-123');
+      setData(result);
+      setLoading(false);
+    };
+    loadData();
+  }, []);
 
-  // Helper for Circular Progress
+  // Action Handlers
+  const handleAddRecord = () => alert("Opening 'Add New Record' Modal...");
+  const handleManageAppointment = () => alert("Navigating to Appointment Scheduler...");
+  const handleViewProfile = () => alert("Loading full pet profile...");
+
+  // Circular Progress Helper
   const CircularProgress = ({ percentage, colorClass, icon: Icon, label, trend }) => {
     const radius = 36;
     const circumference = 2 * Math.PI * radius;
@@ -23,16 +31,11 @@ export default function OwnerDashboard() {
     return (
       <div className="flex flex-col items-center">
         <div className="relative flex items-center justify-center w-24 h-24 mb-3">
-          {/* Background Track */}
           <svg className="absolute inset-0 w-full h-full transform -rotate-90">
             <circle cx="48" cy="48" r={radius} stroke="currentColor" strokeWidth="6" fill="transparent" className="text-camel-100" />
-            {/* Progress Track */}
             <circle 
-              cx="48" cy="48" r={radius} 
-              stroke="currentColor" strokeWidth="6" fill="transparent" 
-              strokeDasharray={circumference} 
-              strokeDashoffset={strokeDashoffset}
-              strokeLinecap="round"
+              cx="48" cy="48" r={radius} stroke="currentColor" strokeWidth="6" fill="transparent" 
+              strokeDasharray={circumference} strokeDashoffset={strokeDashoffset} strokeLinecap="round"
               className={`transition-all duration-1000 ease-out ${colorClass}`} 
             />
           </svg>
@@ -47,95 +50,82 @@ export default function OwnerDashboard() {
     );
   };
 
+  if (loading) {
+    return (
+      <div className="flex-1 flex items-center justify-center min-h-[60vh]">
+        <Loader2 className="animate-spin text-camel-600" size={48} />
+      </div>
+    );
+  }
+
   return (
     <>
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-end justify-between mb-8 gap-4 pt-4">
         <div>
           <p className="text-camel-600 font-bold text-sm tracking-widest uppercase mb-1">My Companion</p>
-          <h1 className="text-4xl font-display font-black text-espresso-900 tracking-tight">
-            Buddy
-          </h1>
+          <h1 className="text-4xl font-display font-black text-espresso-900 tracking-tight">{data.pet.name}</h1>
         </div>
-        <button className="flex items-center gap-2 bg-espresso-900 hover:bg-espresso-800 text-white px-6 py-2.5 rounded-full font-bold text-sm transition-all shadow-md">
+        <button onClick={handleAddRecord} className="flex items-center gap-2 bg-espresso-900 hover:bg-espresso-800 text-white px-6 py-2.5 rounded-full font-bold text-sm transition-all shadow-md">
           <Plus size={18} /> Add Record
         </button>
       </div>
 
       {/* Master Bento Grid */}
-      <motion.div 
-        variants={container}
-        initial="hidden"
-        animate="show"
-        className="grid grid-cols-1 lg:grid-cols-12 gap-6"
-      >
+      <motion.div initial="hidden" animate="show" className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         
-        {/* LEFT COLUMN: Portrait Card (Col 4) */}
-        <motion.div variants={itemVariant} className="lg:col-span-4 relative h-[600px] rounded-[2rem] overflow-hidden group shadow-[0_15px_40px_rgba(90,56,37,0.08)]">
-          <img 
-            src="/images/dash-dog-1.jpg" 
-            alt="Buddy" 
-            className="absolute inset-0 w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105"
-          />
-          {/* Deep Espresso Gradient at Bottom */}
+        {/* Portrait Card */}
+        <motion.div className="lg:col-span-4 relative h-[600px] rounded-[2rem] overflow-hidden group shadow-[0_15px_40px_rgba(90,56,37,0.08)]">
+          <img src={data.pet.image} alt={data.pet.name} className="absolute inset-0 w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105" />
           <div className="absolute inset-0 bg-gradient-to-t from-espresso-900 via-espresso-900/60 to-transparent h-full"></div>
           
           <div className="absolute inset-0 p-8 flex flex-col justify-end">
             <div className="bg-white/20 backdrop-blur-md border border-white/30 px-3 py-1 rounded-full w-fit mb-auto mt-2">
-              <span className="text-white text-xs font-bold tracking-wide">Golden Retriever</span>
+              <span className="text-white text-xs font-bold tracking-wide">{data.pet.breed}</span>
             </div>
             
             <div className="grid grid-cols-3 gap-4 mb-6 pt-4 border-t border-white/10">
               <div>
                 <p className="text-white/50 text-[10px] font-bold uppercase tracking-widest mb-1">Age</p>
-                <p className="text-white font-bold text-sm">3 Yrs 2 Mos</p>
+                <p className="text-white font-bold text-sm">{data.pet.age}</p>
               </div>
               <div>
                 <p className="text-white/50 text-[10px] font-bold uppercase tracking-widest mb-1">Weight</p>
-                <p className="text-white font-bold text-sm">28.6 kg</p>
+                <p className="text-white font-bold text-sm">{data.pet.weight}</p>
               </div>
               <div>
                 <p className="text-white/50 text-[10px] font-bold uppercase tracking-widest mb-1">Blood</p>
-                <p className="text-white font-bold text-sm">DEA 1.1</p>
+                <p className="text-white font-bold text-sm">{data.pet.blood}</p>
               </div>
             </div>
 
-            <button className="w-full bg-white text-espresso-900 py-4 rounded-full font-bold text-sm hover:bg-camel-50 transition-colors flex items-center justify-center gap-2">
+            <button onClick={handleViewProfile} className="w-full bg-white text-espresso-900 py-4 rounded-full font-bold text-sm hover:bg-camel-50 transition-colors flex items-center justify-center gap-2">
               View Full Profile <ArrowRight size={16} />
             </button>
           </div>
         </motion.div>
 
-        {/* RIGHT COLUMN: Data Widgets (Col 8) */}
+        {/* Data Widgets */}
         <div className="lg:col-span-8 flex flex-col gap-6">
           
-          {/* Health Overview Rings */}
-          <motion.div variants={itemVariant} className="bg-white rounded-[2rem] p-8 border border-camel-100 shadow-[0_8px_30px_rgb(90,56,37,0.03)] flex flex-col justify-between h-full">
+          <motion.div className="bg-white rounded-[2rem] p-8 border border-camel-100 shadow-[0_8px_30px_rgb(90,56,37,0.03)] flex flex-col justify-between h-full">
             <div className="flex justify-between items-center mb-8">
               <div>
                 <h3 className="text-xl font-display font-bold text-espresso-900">Health Overview</h3>
                 <p className="text-espresso-500 text-sm font-medium">Live health insights & key stats.</p>
               </div>
-              <select className="bg-bg-secondary text-xs font-bold text-espresso-600 px-4 py-2 rounded-lg outline-none cursor-pointer">
-                <option>This Week</option>
-                <option>This Month</option>
-              </select>
             </div>
 
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 justify-items-center">
-              <CircularProgress percentage={78} colorClass="text-emerald-500" icon={Activity} label="Activity" trend="+12% this week" />
-              <CircularProgress percentage={82} colorClass="text-indigo-500" icon={Moon} label="Sleep" trend="+5% this week" />
-              {/* Simulated Calories Ring */}
-              <CircularProgress percentage={90} colorClass="text-accent-500" icon={Activity} label="Calories" trend="On Track" />
-              <CircularProgress percentage={62} colorClass="text-blue-500" icon={Droplets} label="Hydration" trend="+8% this week" />
+              <CircularProgress percentage={data.health.activity} colorClass="text-emerald-500" icon={Footprints} label="Activity" trend="+12% this week" />
+              <CircularProgress percentage={data.health.sleep} colorClass="text-indigo-500" icon={Moon} label="Sleep" trend="+5% this week" />
+              <CircularProgress percentage={data.health.calories} colorClass="text-accent-500" icon={Flame} label="Calories" trend="On Track" />
+              <CircularProgress percentage={data.health.hydration} colorClass="text-blue-500" icon={Droplets} label="Hydration" trend="+8% this week" />
             </div>
           </motion.div>
 
-          {/* Bottom Split: Timeline & Appointment */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 h-full">
-            
-            {/* Health Timeline */}
-            <motion.div variants={itemVariant} className="bg-white rounded-[2rem] p-8 border border-camel-100 shadow-[0_8px_30px_rgb(90,56,37,0.03)]">
+            <motion.div className="bg-white rounded-[2rem] p-8 border border-camel-100 shadow-[0_8px_30px_rgb(90,56,37,0.03)]">
               <div className="flex justify-between items-center mb-8">
                 <h3 className="text-lg font-display font-bold text-espresso-900">Health Timeline</h3>
                 <button className="text-xs font-bold text-camel-600 hover:text-camel-800">View All</button>
@@ -152,21 +142,14 @@ export default function OwnerDashboard() {
                   <p className="font-bold text-espresso-900 text-sm">Annual Checkup</p>
                   <p className="text-xs font-medium text-camel-600 mt-1">Nov 10, 2024 • 10:30 AM</p>
                 </div>
-                <div className="relative">
-                  <div className="absolute -left-[25px] bg-white p-1 rounded-full"><Circle className="text-espresso-200" size={18} /></div>
-                  <p className="font-bold text-espresso-900 text-sm opacity-50">Deworming</p>
-                  <p className="text-xs font-medium text-espresso-500 mt-1 opacity-50">Dec 05, 2024 • Reminder</p>
-                </div>
               </div>
             </motion.div>
 
-            {/* Upcoming Appointment */}
-            <motion.div variants={itemVariant} className="flex flex-col gap-6">
+            <motion.div className="flex flex-col gap-6">
               <div className="bg-camel-50 rounded-[2rem] p-8 border border-camel-100/50 flex flex-col justify-between h-full">
                 <div className="flex justify-between items-center mb-6">
                   <h3 className="text-lg font-display font-bold text-espresso-900">Next Appointment</h3>
                 </div>
-                
                 <div className="flex gap-4 items-center bg-white p-4 rounded-2xl shadow-sm">
                   <div className="bg-camel-100 text-camel-800 rounded-xl px-4 py-2 text-center">
                     <span className="block text-[10px] font-bold uppercase">Nov</span>
@@ -178,15 +161,12 @@ export default function OwnerDashboard() {
                   </div>
                 </div>
                 
-                {/* Replaced ugly quick actions with a single elegant contextual action */}
-                <button className="w-full mt-6 bg-camel-600 text-white py-3 rounded-full font-bold text-sm hover:bg-camel-500 transition-colors">
+                <button onClick={handleManageAppointment} className="w-full mt-6 bg-camel-600 text-white py-3 rounded-full font-bold text-sm hover:bg-camel-500 transition-colors">
                   Manage Appointment
                 </button>
               </div>
             </motion.div>
-
           </div>
-
         </div>
       </motion.div>
     </>

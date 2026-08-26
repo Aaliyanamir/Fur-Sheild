@@ -28,7 +28,7 @@ export default function Navbar() {
       case 'OWNER':
         return [
           { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
-          { name: 'My Pets', path: '/dashboard', icon: PawPrint },
+          { name: 'My Pets', path: '/my-pets', icon: PawPrint },
           { name: 'Shop', path: '/shop', icon: ShoppingBag },
         ];
       case 'VET':

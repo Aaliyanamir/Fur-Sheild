@@ -9,6 +9,7 @@ import LandingPage from './pages/LandingPage';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
 import OwnerDashboard from './pages/OwnerDashboard';
+import MyPets from './pages/MyPets';
 import VetHub from './pages/VetHub';
 import ShelterHub from './pages/ShelterHub';
 import ShopCatalog from './pages/ShopCatalog';
@@ -34,6 +35,7 @@ export default function App() {
                         {/* Protected Routes - Only logged-in users */}
             <Route element={<ProtectedRoute />}>
               <Route path="/dashboard" element={<OwnerDashboard />} />
+              <Route path="/my-pets" element={<MyPets />} />
               <Route path="/profile" element={<UserProfile />} />
               <Route path="/settings" element={<Settings />} />
               <Route path="/orders" element={<MyOrders />} />

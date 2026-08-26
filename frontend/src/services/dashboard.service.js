@@ -93,6 +93,19 @@ const getMyAppointments = async () => {
   return response.data;
 };
 
+
+const addVaccine = async (petId, data) => {
+  const response = await api.post(`/dashboard/pets/${petId}/vaccinations`, data);
+  return response.data;
+};
+
+const addDocument = async (petId, formData) => {
+  const response = await api.post(`/dashboard/pets/${petId}/documents`, formData, {
+    headers: { 'Content-Type': 'multipart/form-data' }
+  });
+  return response.data;
+};
+
 const dashboardService = {
   getOwnerDashboardData,
   addNewPet,
@@ -101,7 +114,9 @@ const dashboardService = {
   deletePet,
   getVets,
   bookAppointment,
-  getMyAppointments
+  getMyAppointments,
+  addVaccine,
+  addDocument
 };
 
 export default dashboardService;

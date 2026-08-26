@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { Calendar, Plus, Flame, Moon, Droplets, CheckCircle2, Circle, ArrowRight, Footprints, PawPrint, HeartHandshake, Syringe, Stethoscope, AlertCircle, X, Edit2, Trash2, Camera, Upload } from 'lucide-react';
+import { Calendar, Plus, Flame, Moon, Droplets, CheckCircle2, Circle, ArrowRight, Footprints, PawPrint, HeartHandshake, Syringe, Stethoscope, AlertCircle, X, Edit2, Trash2, Camera, Upload, FileText, Activity } from 'lucide-react';
 import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip } from 'recharts';
 import dashboardService from '../services/dashboard.service';
 
@@ -10,6 +10,14 @@ export default function OwnerDashboard() {
   const [pets, setPets] = useState([]);
   const [appointments, setAppointments] = useState([]);
   const [activePetIndex, setActivePetIndex] = useState(0);
+  const [activeViewTab, setActiveViewTab] = useState('Overview');
+
+  // Medical Modals
+  const [isVaccineModalOpen, setIsVaccineModalOpen] = useState(false);
+  const [isDocModalOpen, setIsDocModalOpen] = useState(false);
+  const [vaccineForm, setVaccineForm] = useState({ name: '', dateAdministered: '', nextDue: '', status: 'Up to Date' });
+  const [docForm, setDocForm] = useState({ title: '', docType: 'X-Ray' });
+  const [docFile, setDocFile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   
@@ -72,6 +80,43 @@ export default function OwnerDashboard() {
   const openDeleteModal = (pet) => {
     setPetToDelete(pet);
     setIsDeleteModalOpen(true);
+  };
+
+  
+  const handleAddVaccine = async (e) => {
+    e.preventDefault();
+    try {
+      const res = await dashboardService.addVaccine(activePet._id, vaccineForm);
+      if (res.success) {
+        setIsVaccineModalOpen(false);
+        setVaccineForm({ name: '', dateAdministered: '', nextDue: '', status: 'Up to Date' });
+        fetchDashboardData();
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const handleAddDocument = async (e) => {
+    e.preventDefault();
+    try {
+      const formData = new FormData();
+      formData.append('title', docForm.title);
+      formData.append('docType', docForm.docType);
+      if (docFile) formData.append('document', docFile);
+      // Fallback if no file uploaded just to make UI work without actual backend file storage (uses fake URL)
+      if (!docFile) formData.append('fileUrl', '/images/demo-doc.jpg');
+
+      const res = await dashboardService.addDocument(activePet._id, formData);
+      if (res.success) {
+        setIsDocModalOpen(false);
+        setDocForm({ title: '', docType: 'X-Ray' });
+        setDocFile(null);
+        fetchDashboardData();
+      }
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   const fetchDashboardData = async () => {

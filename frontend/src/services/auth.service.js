@@ -34,3 +34,5 @@ const updateProfile = async (profileData) => {
 };
 
 const authService = { login, register, logout, getProfile, updateProfile };
+
+export default authService;

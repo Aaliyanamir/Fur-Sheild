@@ -1,6 +1,6 @@
 ﻿import React from 'react';
 import { motion } from 'framer-motion';
-import { Search, ShoppingBag, ShieldCheck, Truck, ArrowRight } from 'lucide-react';
+import { Search, ShoppingBag, ShieldCheck, Truck, ArrowRight, Plus } from 'lucide-react';
 import { cn } from '../lib/utils';
 
 export default function ShopCatalog() {
@@ -272,3 +272,4 @@ export default function ShopCatalog() {
     </div>
   );
 }
+

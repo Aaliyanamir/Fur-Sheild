@@ -1,6 +1,6 @@
-﻿import React, { useState } from 'react';
+import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, ShoppingBag, ShieldCheck, Truck, ArrowRight, Plus, Minus, X } from 'lucide-react';
+import { Search, ShoppingBag, ShieldCheck, Truck, ArrowRight, Plus, Minus, X, Package, RotateCcw } from 'lucide-react';
 import { cn } from '../lib/utils';
 import CustomSelect from '../components/molecules/CustomSelect';
 
@@ -9,18 +9,55 @@ export default function ShopCatalog() {
   const [cart, setCart] = useState([]);
   const [selectedVerificationPet, setSelectedVerificationPet] = useState('');
   const [isCartOpen, setIsCartOpen] = useState(false);
+  
+  // Phase 8: Auto-Ship & Promo State
+  const [isAutoShip, setIsAutoShip] = useState(false);
+  const [promoCode, setPromoCode] = useState('');
+  const [isPromoApplied, setIsPromoApplied] = useState(false);
 
-  const addToCart = (product) => {
-    setCart([...cart, product]);
+  // Advanced Cart Logic
+  const addToCart = (product, quantity = 1, autoShip = false) => {
+    setCart(prev => {
+      const existing = prev.find(item => item.id === product.id && item.isAutoShip === autoShip);
+      if (existing) {
+        return prev.map(item => item.id === product.id && item.isAutoShip === autoShip
+          ? { ...item, quantity: item.quantity + quantity } 
+          : item
+        );
+      }
+      return [...prev, { ...product, quantity, isAutoShip: autoShip }];
+    });
     setIsCartOpen(true);
   };
+
+  const updateCartQty = (id, autoShip, delta) => {
+    setCart(prev => prev.map(item => {
+      if (item.id === id && item.isAutoShip === autoShip) {
+        const newQ = item.quantity + delta;
+        return newQ > 0 ? { ...item, quantity: newQ } : item;
+      }
+      return item;
+    }).filter(item => item.quantity > 0));
+  };
+
+  // Cart Math
+  const cartSubtotal = cart.reduce((total, item) => {
+    const itemPrice = item.isAutoShip ? item.price * 0.9 : item.price;
+    return total + (itemPrice * item.quantity);
+  }, 0);
+  
+  const discountAmount = isPromoApplied ? cartSubtotal * 0.15 : 0; // Mock 15% promo
+  const cartTotal = cartSubtotal - discountAmount;
+  
+  const FREE_SHIPPING_THRESHOLD = 49.00;
+  const shippingProgress = Math.min((cartSubtotal / FREE_SHIPPING_THRESHOLD) * 100, 100);
 
   const container = {
     hidden: { opacity: 0 },
     show: { opacity: 1, transition: { staggerChildren: 0.1 } }
   };
 
-  const item = {
+  const itemAnim = {
     hidden: { opacity: 0, y: 20 },
     show: { opacity: 1, y: 0, transition: { duration: 0.6, ease: [0.16, 1, 0.3, 1] } }
   };
@@ -30,10 +67,10 @@ export default function ShopCatalog() {
   const product3 = { id: 3, name: 'Hypoallergenic Salmon Diet', price: 65.50, image: '', rxRequired: false, category: 'Nutrition' };
 
   return (
-    <div className="w-full font-sans flex flex-col pt-4">
+    <div className="w-full font-sans flex flex-col pt-4 overflow-x-hidden">
         
       {/* Top Utility Bar */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
+      <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4 px-2">
         <h1 className="text-4xl font-display font-black text-espresso-900 tracking-tight">
           Pharmacy & Store
         </h1>
@@ -46,8 +83,11 @@ export default function ShopCatalog() {
               className="pl-10 pr-4 py-2.5 rounded-full border border-camel-200 bg-white text-sm font-medium focus:outline-none focus:border-camel-500 w-64 shadow-sm"
             />
           </div>
-          <button className="flex items-center gap-2 bg-espresso-900 hover:bg-espresso-800 text-white px-5 py-2.5 rounded-full font-bold text-sm transition-all shadow-md">
-             <ShoppingBag size={16} /> Cart ({cart.length})
+          <button 
+            onClick={() => setIsCartOpen(true)}
+            className="flex items-center gap-2 bg-espresso-900 hover:bg-espresso-800 text-white px-5 py-2.5 rounded-full font-bold text-sm transition-all shadow-md"
+          >
+             <ShoppingBag size={16} /> Cart ({cart.reduce((acc, curr) => acc + curr.quantity, 0)})
           </button>
         </div>
       </div>
@@ -86,7 +126,7 @@ export default function ShopCatalog() {
         </div>
 
         {/* Floating Spatial Badges */}
-        <motion.div variants={item} className="absolute bottom-8 right-8 bg-white/80 backdrop-blur-xl border border-white/50 p-4 rounded-3xl shadow-xl flex items-center gap-3">
+        <motion.div variants={itemAnim} className="absolute bottom-8 right-8 bg-white/80 backdrop-blur-xl border border-white/50 p-4 rounded-3xl shadow-xl flex items-center gap-3">
            <div className="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center">
               <ShieldCheck className="text-emerald-600" size={20} />
            </div>
@@ -96,7 +136,7 @@ export default function ShopCatalog() {
            </div>
         </motion.div>
         
-        <motion.div variants={item} className="absolute top-8 right-1/4 hidden md:flex bg-white/80 backdrop-blur-xl border border-white/50 p-3 rounded-2xl shadow-lg items-center gap-3">
+        <motion.div variants={itemAnim} className="absolute top-8 right-1/4 hidden md:flex bg-white/80 backdrop-blur-xl border border-white/50 p-3 rounded-2xl shadow-lg items-center gap-3">
            <Truck className="text-camel-600" size={18} />
            <p className="text-xs font-bold text-espresso-900">Same-Day Delivery</p>
         </motion.div>
@@ -240,7 +280,7 @@ export default function ShopCatalog() {
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                  {/* Product Card 1 */}
                  <motion.div 
-                   onClick={() => setSelectedProduct(product1)}
+                   onClick={() => { setSelectedProduct(product1); setIsAutoShip(false); }}
                    className="bg-white rounded-[2rem] p-4 border border-transparent hover:border-camel-200 shadow-[0_4px_20px_rgba(90,56,37,0.03)] hover:shadow-[0_15px_40px_rgba(186,127,72,0.1)] transition-all duration-300 group cursor-pointer flex flex-col"
                  >
                    <div className="relative w-full h-48 rounded-3xl overflow-hidden bg-camel-50 mb-4">
@@ -256,7 +296,7 @@ export default function ShopCatalog() {
                      </div>
                      <div className="mt-auto flex justify-between items-end">
                        <span className="font-black text-espresso-900 text-lg">$45.00</span>
-                       <button onClick={(e) => { e.stopPropagation(); addToCart(product1); }} className="w-10 h-10 rounded-full border border-camel-200 flex items-center justify-center text-camel-600 group-hover:bg-camel-600 group-hover:text-white group-hover:border-transparent transition-all shadow-sm">
+                       <button onClick={(e) => { e.stopPropagation(); addToCart(product1, 1, false); }} className="w-10 h-10 rounded-full border border-camel-200 flex items-center justify-center text-camel-600 group-hover:bg-camel-600 group-hover:text-white group-hover:border-transparent transition-all shadow-sm">
                          <Plus size={18} />
                        </button>
                      </div>
@@ -265,7 +305,7 @@ export default function ShopCatalog() {
 
                  {/* Product Card 2 (Rx Required) */}
                  <motion.div 
-                   onClick={() => setSelectedProduct(product2)}
+                   onClick={() => { setSelectedProduct(product2); setIsAutoShip(false); }}
                    className="bg-white rounded-[2rem] p-4 border border-transparent hover:border-camel-200 shadow-[0_4px_20px_rgba(90,56,37,0.03)] hover:shadow-[0_15px_40px_rgba(186,127,72,0.1)] transition-all duration-300 group cursor-pointer flex flex-col"
                  >
                    <div className="relative w-full h-48 rounded-3xl overflow-hidden bg-camel-50 mb-4">
@@ -281,7 +321,7 @@ export default function ShopCatalog() {
                      </div>
                      <div className="mt-auto flex justify-between items-end">
                        <span className="font-black text-espresso-900 text-lg">$110.00</span>
-                       <button onClick={(e) => { e.stopPropagation(); addToCart(product2); }} className="w-10 h-10 rounded-full border border-camel-200 flex items-center justify-center text-camel-600 group-hover:bg-camel-600 group-hover:text-white group-hover:border-transparent transition-all shadow-sm">
+                       <button onClick={(e) => { e.stopPropagation(); addToCart(product2, 1, false); }} className="w-10 h-10 rounded-full border border-camel-200 flex items-center justify-center text-camel-600 group-hover:bg-camel-600 group-hover:text-white group-hover:border-transparent transition-all shadow-sm">
                          <Plus size={18} />
                        </button>
                      </div>
@@ -290,7 +330,7 @@ export default function ShopCatalog() {
                  
                  {/* Product Card 3 */}
                  <motion.div 
-                   onClick={() => setSelectedProduct(product3)}
+                   onClick={() => { setSelectedProduct(product3); setIsAutoShip(false); }}
                    className="bg-white rounded-[2rem] p-4 border border-transparent hover:border-camel-200 shadow-[0_4px_20px_rgba(90,56,37,0.03)] hover:shadow-[0_15px_40px_rgba(186,127,72,0.1)] transition-all duration-300 group cursor-pointer flex flex-col"
                  >
                    <div className="relative w-full h-48 rounded-3xl overflow-hidden bg-camel-50 mb-4 flex items-center justify-center">
@@ -306,7 +346,7 @@ export default function ShopCatalog() {
                      </div>
                      <div className="mt-auto flex justify-between items-end">
                        <span className="font-black text-espresso-900 text-lg">$65.50</span>
-                       <button onClick={(e) => { e.stopPropagation(); addToCart(product3); }} className="w-10 h-10 rounded-full border border-camel-200 flex items-center justify-center text-camel-600 group-hover:bg-camel-600 group-hover:text-white group-hover:border-transparent transition-all shadow-sm">
+                       <button onClick={(e) => { e.stopPropagation(); addToCart(product3, 1, false); }} className="w-10 h-10 rounded-full border border-camel-200 flex items-center justify-center text-camel-600 group-hover:bg-camel-600 group-hover:text-white group-hover:border-transparent transition-all shadow-sm">
                          <Plus size={18} />
                        </button>
                      </div>
@@ -389,14 +429,29 @@ export default function ShopCatalog() {
                   </div>
                 </div>
 
-                <p className="text-sm font-medium text-espresso-600 leading-relaxed mb-8">
+                <p className="text-sm font-medium text-espresso-600 leading-relaxed mb-6">
                   Premium, veterinary-formulated {selectedProduct.category.toLowerCase()} designed for optimal absorption and efficacy. Clinically tested to ensure the highest safety standards for your companion.
                 </p>
+
+                {/* Auto-Ship Toggle */}
+                <div 
+                  onClick={() => setIsAutoShip(!isAutoShip)}
+                  className={cn("p-4 rounded-2xl border-2 transition-all cursor-pointer mb-8 relative overflow-hidden", isAutoShip ? "border-accent-500 bg-accent-50/30" : "border-camel-100 bg-white hover:border-camel-300")}
+                >
+                  <div className="flex items-center gap-3">
+                    <div className={cn("w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 transition-colors", isAutoShip ? "border-accent-500" : "border-camel-300")}>
+                      {isAutoShip && <motion.div layoutId="autoship-dot" className="w-2.5 h-2.5 rounded-full bg-accent-500" />}
+                    </div>
+                    <div>
+                      <p className="font-bold text-espresso-900 text-sm">Subscribe & Save 10%</p>
+                      <p className="text-xs font-medium text-espresso-500">Auto-deliver every 4 weeks. Cancel anytime.</p>
+                    </div>
+                  </div>
+                </div>
 
                 {/* PHASE 5: Rx Verification Block (Conditional) */}
                 {selectedProduct.rxRequired ? (
                   <div className="bg-accent-50 border border-accent-200 rounded-2xl p-5 mb-8 relative">
-                    {/* Glow Wrapper to prevent bleed without clipping dropdown */}
                     <div className="absolute inset-0 overflow-hidden rounded-2xl pointer-events-none">
                       <div className="absolute right-0 top-0 w-32 h-32 bg-accent-200/30 rounded-full blur-2xl -mr-10 -mt-10"></div>
                     </div>
@@ -404,12 +459,11 @@ export default function ShopCatalog() {
                       <div className="w-10 h-10 rounded-full bg-accent-100 flex items-center justify-center flex-shrink-0 border border-accent-200">
                         <ShieldCheck className="text-accent-600" size={20} />
                       </div>
-                      <div>
+                      <div className="flex-1 w-full">
                         <h4 className="font-bold text-accent-900 text-sm mb-1">Prescription Verification Required</h4>
                         <p className="text-xs font-medium text-accent-700/80 mb-4">
                           This item requires an active prescription from your VetHub records.
                         </p>
-                        {/* Premium Dropdown using our existing CustomSelect */}
                         <div className="mb-4 w-full">
                           <CustomSelect 
                             options={['Buddy (Golden Retriever)', 'Luna (Maine Coon)']}
@@ -419,11 +473,9 @@ export default function ShopCatalog() {
                             className="!bg-white" 
                           />
                         </div>
-
-                        {/* Fixed Persistent Button */}
                         <button 
                           onClick={() => { 
-                            addToCart(selectedProduct); 
+                            addToCart(selectedProduct, 1, isAutoShip); 
                             setSelectedProduct(null); 
                             setSelectedVerificationPet(''); 
                           }}
@@ -443,7 +495,7 @@ export default function ShopCatalog() {
                       <button className="w-10 h-10 rounded-xl bg-white flex items-center justify-center text-espresso-500 hover:text-espresso-900 shadow-sm"><Plus size={16}/></button>
                     </div>
                     <button 
-                      onClick={() => { addToCart(selectedProduct); setSelectedProduct(null); }}
+                      onClick={() => { addToCart(selectedProduct, 1, isAutoShip); setSelectedProduct(null); }}
                       className="flex-1 bg-espresso-900 hover:bg-espresso-800 text-white py-4 rounded-2xl font-bold text-sm tracking-wide transition-all shadow-md shadow-espresso-900/20"
                     >
                       Add to Cart
@@ -459,9 +511,135 @@ export default function ShopCatalog() {
           </div>
         )}
       </AnimatePresence>
+
+      {/* PHASE 8: INTELLIGENT CART DRAWER */}
+      <AnimatePresence>
+        {isCartOpen && (
+          <>
+            <motion.div 
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+              onClick={() => setIsCartOpen(false)}
+              className="fixed inset-0 bg-espresso-900/40 backdrop-blur-sm z-[150]"
+            />
+            
+            <motion.div 
+              initial={{ x: '100%' }} animate={{ x: 0 }} exit={{ x: '100%' }}
+              transition={{ type: "spring", damping: 30, stiffness: 300 }}
+              className="fixed top-0 right-0 bottom-0 w-full max-w-md bg-white z-[160] shadow-2xl flex flex-col border-l border-camel-100"
+            >
+              {/* Header */}
+              <div className="p-6 border-b border-camel-100 flex items-center justify-between bg-white shrink-0">
+                <div className="flex items-center gap-3">
+                  <ShoppingBag size={24} className="text-espresso-900" />
+                  <h2 className="text-2xl font-display font-black text-espresso-900">Your Cart</h2>
+                </div>
+                <button onClick={() => setIsCartOpen(false)} className="w-10 h-10 rounded-full bg-camel-50 flex items-center justify-center text-espresso-400 hover:bg-camel-100 hover:text-espresso-900 transition-colors">
+                  <X size={20} />
+                </button>
+              </div>
+
+              {/* Dynamic Free Shipping Progress */}
+              <div className="p-6 bg-bg-secondary shrink-0 border-b border-camel-100">
+                <div className="flex justify-between items-end mb-2">
+                  <span className={cn("text-xs font-bold uppercase tracking-widest", shippingProgress >= 100 ? "text-emerald-600" : "text-espresso-600")}>
+                    {shippingProgress >= 100 ? "You've unlocked Free Shipping!" : `Add $${(FREE_SHIPPING_THRESHOLD - cartSubtotal).toFixed(2)} for Free Shipping`}
+                  </span>
+                  <Package size={16} className={shippingProgress >= 100 ? "text-emerald-500" : "text-camel-400"} />
+                </div>
+                <div className="w-full h-2 bg-camel-200 rounded-full overflow-hidden">
+                  <motion.div 
+                    initial={{ width: 0 }} animate={{ width: `${shippingProgress}%` }} transition={{ duration: 0.5, ease: "easeOut" }}
+                    className={cn("h-full rounded-full transition-colors", shippingProgress >= 100 ? "bg-emerald-500" : "bg-camel-500")}
+                  />
+                </div>
+              </div>
+              
+              {/* Cart Items */}
+              <div className="flex-1 overflow-y-auto p-6 flex flex-col gap-6 scrollbar-hide bg-[#FDFBF7]">
+                {cart.length === 0 ? (
+                  <div className="flex flex-col items-center justify-center h-full text-espresso-400">
+                    <ShoppingBag size={64} className="mb-6 opacity-10" />
+                    <p className="font-display font-bold text-2xl text-espresso-900 mb-2">Cart is empty</p>
+                    <p className="text-sm font-medium text-center">Looks like you haven't added any premium care products yet.</p>
+                  </div>
+                ) : (
+                  <AnimatePresence>
+                    {cart.map((item) => {
+                      const itemPrice = item.isAutoShip ? item.price * 0.9 : item.price;
+                      return (
+                        <motion.div layout initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95, height: 0 }} key={`${item.id}-${item.isAutoShip}`} className="flex gap-4 items-start bg-white p-4 rounded-3xl border border-camel-100 shadow-sm relative group">
+                          <img src={item.image} alt={item.name} className="w-20 h-20 rounded-2xl object-cover border border-camel-50" />
+                          <div className="flex-1 pr-6">
+                            <h4 className="font-bold text-espresso-900 text-sm leading-tight mb-1">{item.name}</h4>
+                            {item.isAutoShip && <p className="text-[10px] font-bold text-accent-600 uppercase tracking-widest mb-2 flex items-center gap-1"><RotateCcw size={10} /> Auto-Ship (-10%)</p>}
+                            <span className="font-black text-espresso-900">${itemPrice.toFixed(2)}</span>
+                            
+                            {/* Quantity Controls */}
+                            <div className="flex items-center gap-3 mt-3 w-max bg-bg-secondary p-1 rounded-full border border-camel-100">
+                              <button onClick={() => updateCartQty(item.id, item.isAutoShip, -1)} className="w-6 h-6 flex items-center justify-center rounded-full hover:bg-white shadow-sm text-espresso-600 transition-colors"><Minus size={12} /></button>
+                              <span className="text-xs font-bold w-4 text-center">{item.quantity}</span>
+                              <button onClick={() => updateCartQty(item.id, item.isAutoShip, 1)} className="w-6 h-6 flex items-center justify-center rounded-full hover:bg-white shadow-sm text-espresso-600 transition-colors"><Plus size={12} /></button>
+                            </div>
+                          </div>
+                          
+                          {/* Remove Button */}
+                          <button onClick={() => updateCartQty(item.id, item.isAutoShip, -item.quantity)} className="absolute top-4 right-4 w-8 h-8 rounded-full bg-camel-50 flex items-center justify-center text-espresso-400 hover:text-accent-500 hover:bg-accent-50 transition-colors">
+                            <X size={14} />
+                          </button>
+                        </motion.div>
+                      );
+                    })}
+                  </AnimatePresence>
+                )}
+              </div>
+              
+              {/* Promo Code Engine */}
+              <div className="p-6 bg-bg-secondary border-t border-camel-100">
+                 <div className="flex gap-2">
+                    <input 
+                      type="text" 
+                      placeholder="Promo Code" 
+                      value={promoCode}
+                      onChange={(e) => setPromoCode(e.target.value)}
+                      className="flex-1 bg-white border border-camel-200 rounded-xl px-4 py-2 text-sm font-bold focus:outline-none focus:border-camel-400"
+                    />
+                    <button 
+                      onClick={() => promoCode && setIsPromoApplied(true)}
+                      className="bg-espresso-900 text-white px-4 py-2 rounded-xl text-xs font-bold hover:bg-espresso-800 transition-colors"
+                    >
+                      Apply
+                    </button>
+                 </div>
+              </div>
+
+              {/* Footer */}
+              <div className="p-6 border-t border-camel-100 bg-white shrink-0">
+                <div className="flex justify-between items-center mb-2">
+                  <span className="font-bold text-espresso-500 text-sm">Subtotal</span>
+                  <span className="font-bold text-espresso-900">${cartSubtotal.toFixed(2)}</span>
+                </div>
+                {isPromoApplied && (
+                  <div className="flex justify-between items-center mb-2">
+                    <span className="font-bold text-emerald-500 text-sm">Promo (15%)</span>
+                    <span className="font-bold text-emerald-500">-${discountAmount.toFixed(2)}</span>
+                  </div>
+                )}
+                <div className="flex justify-between items-center mb-6 pb-6 border-b border-camel-100">
+                  <span className="font-bold text-espresso-500 text-sm">Shipping</span>
+                  <span className="font-bold text-emerald-500 text-sm">{shippingProgress >= 100 ? 'Free' : 'Calculated at checkout'}</span>
+                </div>
+                <button 
+                  disabled={cart.length === 0}
+                  className="w-full bg-espresso-900 hover:bg-espresso-800 disabled:opacity-50 text-white py-4.5 rounded-full font-bold text-sm tracking-wide transition-all shadow-xl flex justify-center items-center gap-2 h-14"
+                >
+                  Checkout <span className="font-black">${cartTotal.toFixed(2)}</span>
+                </button>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+
     </div>
   );
 }
-
-
-

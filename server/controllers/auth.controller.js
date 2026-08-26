@@ -6,7 +6,8 @@ const generateToken = require('../utils/generateToken');
 // @access  Public
 const registerUser = async (req, res) => {
   try {
-    const { name, email, password, role } = req.body;
+    let { name, email, password, role } = req.body;
+    email = email.toLowerCase();
 
     const userExists = await User.findOne({ email });
     if (userExists) {
@@ -28,7 +29,7 @@ const registerUser = async (req, res) => {
       res.status(400).json({ success: false, message: 'Invalid user data' });
     }
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    console.error("UPDATE ME ERROR:", error); res.status(500).json({ success: false, message: error.message, stack: error.stack });
   }
 };
 
@@ -37,12 +38,21 @@ const registerUser = async (req, res) => {
 // @access  Public
 const authUser = async (req, res) => {
   try {
-    const { email, password } = req.body;
+    let { email, password } = req.body;
+    email = email.toLowerCase();
 
     // We need to explicitly select the password because it was set to select: false in the schema
     const user = await User.findOne({ email }).select('+password');
 
-    if (user && (await user.matchPassword(password))) {
+    if (!user) {
+      return res.status(401).json({ success: false, message: 'No account found with this email. Please sign up.' });
+    }
+
+    if (!(await user.matchPassword(password))) {
+      return res.status(401).json({ success: false, message: 'Incorrect password.' });
+    }
+
+    if (user) {
       res.json({
         success: true,
         _id: user._id,
@@ -55,7 +65,7 @@ const authUser = async (req, res) => {
       res.status(401).json({ success: false, message: 'Invalid email or password' });
     }
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    console.error("UPDATE ME ERROR:", error); res.status(500).json({ success: false, message: error.message, stack: error.stack });
   }
 };
 
@@ -68,7 +78,7 @@ const getMe = async (req, res) => {
     const user = await User.findById(req.user.id);
     res.status(200).json({ success: true, data: user });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    console.error("UPDATE ME ERROR:", error); res.status(500).json({ success: false, message: error.message, stack: error.stack });
   }
 };
 
@@ -100,10 +110,12 @@ const updateMe = async (req, res) => {
       token: generateToken(updatedUser._id) // issue new token just in case
     });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    console.error("UPDATE ME ERROR:", error); res.status(500).json({ success: false, message: error.message, stack: error.stack });
   }
 };
 
 module.exports = { registerUser, authUser, getMe, updateMe };
+
+
 
 

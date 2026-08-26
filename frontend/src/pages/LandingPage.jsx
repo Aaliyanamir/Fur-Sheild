@@ -5,6 +5,7 @@ import { motion } from 'framer-motion';
 import { cn } from '../lib/utils';
 import EcosystemSection from '../components/sections/EcosystemSection';
 import FeatureBentoSection from '../components/sections/FeatureBentoSection';
+import TrustSection from '../components/sections/TrustSection';
 
 export default function LandingPage() {
   const navItems = [
@@ -14,13 +15,7 @@ export default function LandingPage() {
     { name: 'Shop', path: '/shop', icon: ShoppingBag },
   ];
 
-  const galleryImages = [
-    "https://images.unsplash.com/photo-1543466835-00a7907e9de1?auto=format&fit=crop&q=80&w=400",
-    "https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?auto=format&fit=crop&q=80&w=400",
-    "https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?auto=format&fit=crop&q=80&w=400",
-    "https://images.unsplash.com/photo-1495360010541-f48722b34f7d?auto=format&fit=crop&q=80&w=400",
-    "https://images.unsplash.com/photo-1553284965-83fd3e82fa5a?auto=format&fit=crop&q=80&w=400"
-  ];
+  const galleryImages = ["/images/pet-owner.jpg", "/images/vet-clinic.jpg", "/images/shelter-dogs.jpg", "/images/medical-records.jpg", "/images/pet-owner.jpg"];
 
   const fadeUp = {
     hidden: { opacity: 0, y: 30 },
@@ -228,8 +223,11 @@ export default function LandingPage() {
       </div>
       <EcosystemSection />
       <FeatureBentoSection />
+      <TrustSection />
     </main>
   );
 }
+
+
 
 

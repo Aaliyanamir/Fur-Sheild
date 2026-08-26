@@ -17,19 +17,19 @@ export default function EcosystemSection() {
     {
       title: "For Pet Parents",
       desc: "Complete medical history, real-time health tracking, and instant vet appointments in one unified space.",
-      image: "https://images.unsplash.com/photo-1583337130417-3346a1be7dee?q=80&w=1000&auto=format&fit=crop",
+      image: "/images/pet-owner.jpg",
       align: "left"
     },
     {
       title: "For Veterinarians",
       desc: "Streamlined clinical workflows, secure digital records, and effortless patient communication.",
-      image: "https://images.unsplash.com/photo-1628009368231-7bb7cfcb0def?q=80&w=1000&auto=format&fit=crop",
+      image: "/images/vet-clinic.jpg",
       align: "right"
     },
     {
       title: "For Rescue Shelters",
       desc: "Centralized adoption pipelines, intake management, and community integration.",
-      image: "https://images.unsplash.com/photo-1548199973-03cce0bbc87b?q=80&w=1000&auto=format&fit=crop",
+      image: "/images/shelter-dogs.jpg",
       align: "left"
     }
   ];
@@ -97,3 +97,4 @@ export default function EcosystemSection() {
     </section>
   );
 }
+

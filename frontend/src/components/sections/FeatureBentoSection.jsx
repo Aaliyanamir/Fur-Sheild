@@ -53,7 +53,7 @@ export default function FeatureBentoSection() {
           <motion.div variants={fadeUp} className="relative md:col-span-2 bg-bg-secondary rounded-3xl overflow-hidden group">
             <div className="absolute inset-0 bg-gradient-to-r from-espresso-900/90 to-transparent z-10"></div>
             <img 
-              src="https://images.unsplash.com/photo-1576201836106-db1758fd1c97?q=80&w=1000&auto=format&fit=crop" 
+              src="/images/medical-records.jpg" 
               alt="Medical Records" 
               className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
             />
@@ -102,7 +102,7 @@ export default function FeatureBentoSection() {
              <div className="absolute inset-y-0 right-0 w-1/2 bg-gradient-to-l from-transparent to-bg-secondary z-10 hidden md:block"></div>
              <div className="absolute inset-0 bg-bg-secondary/80 md:hidden z-10"></div>
              <img 
-              src="https://images.unsplash.com/photo-1583337130417-3346a1be7dee?q=80&w=1000&auto=format&fit=crop" 
+              src="/images/pet-owner.jpg" 
               alt="Pet Supplies" 
               className="absolute inset-0 md:inset-y-0 md:left-1/2 md:w-1/2 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
             />
@@ -123,3 +123,4 @@ export default function FeatureBentoSection() {
     </section>
   );
 }
+

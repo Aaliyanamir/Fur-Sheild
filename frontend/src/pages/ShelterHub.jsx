@@ -172,7 +172,7 @@ export default function ShelterHub() {
                 </div>
 
                 {/* Column Cards Container */}
-                <div className="flex-1 bg-[#FAF8F5] rounded-[2rem] p-3 border border-camel-100/50 flex flex-col gap-3 overflow-y-auto">
+                <div className="flex-1 bg-[#FAF8F5] rounded-[2rem] p-3 border border-camel-100/50 flex flex-col gap-3 overflow-y-auto scrollbar-hide">
                   <AnimatePresence>
                     {columnPets.map(pet => (
                       <motion.div 
@@ -385,3 +385,4 @@ export default function ShelterHub() {
     </div>
   );
 }
+

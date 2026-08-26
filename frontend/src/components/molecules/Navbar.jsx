@@ -1,11 +1,13 @@
-﻿import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect, useContext } from 'react';
 import { NavLink, Link, useLocation } from 'react-router-dom';
-import { LayoutDashboard, Stethoscope, HeartHandshake, ShoppingBag, Bell, Search, PawPrint, Menu, X } from 'lucide-react';
+import { AuthContext } from '../../context/AuthContext';
+import { LayoutDashboard, Stethoscope, HeartHandshake, ShoppingBag, Bell, Search, PawPrint, Menu, X, User, Settings, LogOut } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import { AnimatePresence, motion } from 'framer-motion';
 
 export default function Navbar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const { user, logout } = useContext(AuthContext);
   const location = useLocation();
 
   // Close mobile menu on route change
@@ -127,20 +129,52 @@ export default function Navbar() {
               </button>
               
               <div className="group relative ml-1 lg:ml-2">
-              <div className="w-8 h-8 lg:w-10 lg:h-10 rounded-full bg-white border border-camel-200 flex items-center justify-center cursor-pointer hover:shadow-md transition-all">
-                <span className="text-[10px] lg:text-xs font-bold text-camel-800">RH</span>
+              <div className="w-8 h-8 lg:w-10 lg:h-10 rounded-full bg-camel-100 border border-camel-200 flex items-center justify-center cursor-pointer hover:shadow-md transition-all">
+                <span className="text-[10px] lg:text-xs font-bold text-camel-900">
+                  {user ? user.name.substring(0, 2).toUpperCase() : 'RH'}
+                </span>
               </div>
-              <div className="absolute top-full right-0 mt-2 w-32 bg-white rounded-xl shadow-lg border border-camel-100 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all flex flex-col overflow-hidden z-50">
-                <button 
-                  onClick={() => {
-                    localStorage.removeItem('user');
-                    sessionStorage.removeItem('user');
-                    window.location.href = '/login';
-                  }}
-                  className="w-full px-4 py-3 text-sm font-bold text-red-500 hover:bg-red-50 transition-colors text-left"
-                >
-                  Log Out
-                </button>
+              
+              {/* Enhanced Desktop Dropdown Menu */}
+              <div className="absolute top-full right-0 mt-3 w-64 bg-white rounded-3xl shadow-[0_20px_60px_rgba(90,56,37,0.12)] border border-camel-100 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 flex flex-col overflow-hidden z-50 origin-top-right transform scale-95 group-hover:scale-100">
+                
+                {/* User Info Header */}
+                <div className="p-5 bg-bg-secondary border-b border-camel-100">
+                  <p className="font-display font-black text-espresso-900 truncate text-lg mb-0.5">{user ? user.name : 'Guest User'}</p>
+                  <p className="text-xs font-bold text-espresso-400 truncate mb-3">{user ? user.email : 'guest@example.com'}</p>
+                  <span className="inline-block px-2.5 py-1 bg-camel-200 text-camel-900 text-[10px] font-black uppercase tracking-widest rounded-full shadow-sm">
+                    {user ? user.role : 'GUEST'}
+                  </span>
+                </div>
+                
+                {/* Links */}
+                <div className="flex flex-col p-2">
+                  <Link to="/profile" className="px-4 py-2.5 text-sm font-bold text-espresso-700 hover:bg-camel-50 hover:text-camel-900 rounded-2xl transition-colors flex items-center gap-3">
+                    <User size={18} /> Edit Profile
+                  </Link>
+                  <Link to="/settings" className="px-4 py-2.5 text-sm font-bold text-espresso-700 hover:bg-camel-50 hover:text-camel-900 rounded-2xl transition-colors flex items-center gap-3">
+                    <Settings size={18} /> Settings
+                  </Link>
+                  {user?.role === 'OWNER' && (
+                    <Link to="/orders" className="px-4 py-2.5 text-sm font-bold text-espresso-700 hover:bg-camel-50 hover:text-camel-900 rounded-2xl transition-colors flex items-center gap-3">
+                      <ShoppingBag size={18} /> My Orders
+                    </Link>
+                  )}
+                </div>
+                
+                {/* Logout Button */}
+                <div className="p-2 border-t border-camel-100 bg-[#FAF8F5]">
+                  <button 
+                    onClick={logout || (() => {
+                      localStorage.removeItem('user');
+                      sessionStorage.removeItem('user');
+                      window.location.href = '/login';
+                    })}
+                    className="w-full px-4 py-2.5 text-sm font-bold text-red-600 hover:bg-red-100 hover:text-red-700 rounded-2xl transition-colors flex items-center gap-3"
+                  >
+                    <LogOut size={18} /> Log Out
+                  </button>
+                </div>
               </div>
             </div>
             </div>
@@ -216,18 +250,52 @@ export default function Navbar() {
                 })}
               </nav>
 
-              <div className="p-6 border-t border-camel-200/50 flex items-center justify-between">
-                 <div className="flex items-center gap-3">
-                   <button className="p-2.5 bg-white text-espresso-600 hover:text-camel-800 hover:bg-camel-50 transition-colors rounded-full shadow-sm border border-camel-100">
-                     <Search size={18} />
-                   </button>
-                   <button className="p-2.5 bg-white text-espresso-600 hover:text-camel-800 hover:bg-camel-50 transition-colors rounded-full shadow-sm border border-camel-100 relative">
-                     <Bell size={18} />
-                     <span className="absolute top-2 right-2 w-2 h-2 rounded-full bg-accent-500 border border-white"></span>
-                   </button>
+              <div className="p-6 border-t border-camel-200/50 flex flex-col gap-4">
+                 
+                 {/* Mobile User Profile Header */}
+                 <div className="flex items-center gap-4 mb-2">
+                   <div className="w-12 h-12 rounded-full bg-camel-100 flex items-center justify-center text-camel-900 font-black text-sm shadow-sm border border-camel-200">
+                     {user ? user.name.substring(0, 2).toUpperCase() : 'RH'}
+                   </div>
+                   <div className="flex-1 overflow-hidden">
+                     <p className="font-display font-black text-espresso-900 truncate text-base">{user ? user.name : 'Guest User'}</p>
+                     <p className="text-[11px] font-bold text-espresso-400 truncate">{user ? user.email : 'guest@example.com'}</p>
+                   </div>
                  </div>
-                 <div className="w-10 h-10 rounded-full bg-camel-100 flex items-center justify-center text-camel-800 font-bold text-sm shadow-sm border border-camel-200 cursor-pointer">
-                   RH
+
+                 {/* Mobile User Links */}
+                 <div className="grid grid-cols-2 gap-2">
+                    <Link to="/profile" onClick={() => setIsMobileMenuOpen(false)} className="flex items-center gap-2 justify-center p-3 bg-white border border-camel-100 rounded-2xl text-xs font-bold text-espresso-700 shadow-sm hover:bg-camel-50">
+                      <User size={16}/> Profile
+                    </Link>
+                    <Link to="/settings" onClick={() => setIsMobileMenuOpen(false)} className="flex items-center gap-2 justify-center p-3 bg-white border border-camel-100 rounded-2xl text-xs font-bold text-espresso-700 shadow-sm hover:bg-camel-50">
+                      <Settings size={16}/> Settings
+                    </Link>
+                 </div>
+
+                 {/* Mobile Actions */}
+                 <div className="flex items-center justify-between mt-2">
+                   <div className="flex items-center gap-2">
+                     <button className="p-3 bg-white text-espresso-600 hover:text-camel-800 hover:bg-camel-50 transition-colors rounded-xl shadow-sm border border-camel-100">
+                       <Search size={18} />
+                     </button>
+                     <button className="p-3 bg-white text-espresso-600 hover:text-camel-800 hover:bg-camel-50 transition-colors rounded-xl shadow-sm border border-camel-100 relative">
+                       <Bell size={18} />
+                       <span className="absolute top-2.5 right-2.5 w-2 h-2 rounded-full bg-accent-500 border border-white"></span>
+                     </button>
+                   </div>
+                   
+                   <button 
+                      onClick={logout || (() => {
+                        localStorage.removeItem('user');
+                        sessionStorage.removeItem('user');
+                        window.location.href = '/login';
+                      })}
+                      className="p-3 bg-red-50 text-red-600 hover:bg-red-100 rounded-xl transition-colors shadow-sm flex items-center justify-center"
+                      aria-label="Logout"
+                   >
+                     <LogOut size={18} />
+                   </button>
                  </div>
               </div>
             </motion.div>
@@ -237,5 +305,6 @@ export default function Navbar() {
     </>
   );
 }
+
 
 

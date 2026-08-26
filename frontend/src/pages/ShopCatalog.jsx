@@ -15,6 +15,11 @@ export default function ShopCatalog() {
   const [isAutoShip, setIsAutoShip] = useState(false);
   const [promoCode, setPromoCode] = useState('');
   const [isPromoApplied, setIsPromoApplied] = useState(false);
+  
+  // Phase 9 & 10 State
+  const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
+  const [checkoutStep, setCheckoutStep] = useState(1);
+  const [isHistoryExpanded, setIsHistoryExpanded] = useState(false);
 
   // Advanced Cart Logic
   const addToCart = (product, qty, auto) => {
@@ -269,6 +274,63 @@ export default function ShopCatalog() {
                      </button>
                    </div>
                  ))}
+              </div>
+              
+              {/* PHASE 10: Order History Vault */}
+              <div className="mt-6">
+                <div 
+                  onClick={() => setIsHistoryExpanded(!isHistoryExpanded)}
+                  className="w-full bg-white border border-camel-100 rounded-2xl p-4 flex items-center justify-between shadow-sm cursor-pointer hover:border-camel-300 transition-all"
+                >
+                   <div className="flex items-center gap-3">
+                     <div className="w-10 h-10 rounded-full bg-camel-50 flex items-center justify-center text-camel-600"><RotateCcw size={18} /></div>
+                     <div>
+                       <h4 className="font-bold text-espresso-900 text-sm">Order History Vault</h4>
+                       <p className="text-xs font-medium text-espresso-500">View past invoices and prescriptions</p>
+                     </div>
+                   </div>
+                   <Plus className={cn("text-camel-400 transition-transform", isHistoryExpanded && "rotate-45")} size={20} />
+                </div>
+
+                <AnimatePresence>
+                   {isHistoryExpanded && (
+                     <motion.div 
+                       initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }}
+                       className="overflow-hidden"
+                     >
+                        <div className="mt-4 bg-white border border-camel-100 rounded-3xl overflow-hidden shadow-sm">
+                           <table className="w-full text-left text-sm">
+                              <thead className="bg-bg-secondary border-b border-camel-100 text-xs uppercase tracking-widest text-espresso-500">
+                                 <tr>
+                                    <th className="p-4 font-bold">Order ID</th>
+                                    <th className="p-4 font-bold hidden sm:table-cell">Date</th>
+                                    <th className="p-4 font-bold">Status</th>
+                                    <th className="p-4 font-bold text-right">Action</th>
+                                 </tr>
+                              </thead>
+                              <tbody className="divide-y divide-camel-50 text-espresso-900 font-medium">
+                                 <tr className="hover:bg-camel-50/50 transition-colors">
+                                    <td className="p-4">#FS-8920</td>
+                                    <td className="p-4 text-espresso-600 hidden sm:table-cell">Aug 12, 2026</td>
+                                    <td className="p-4"><span className="bg-emerald-100 text-emerald-700 px-2 py-1 rounded-md text-[10px] font-black uppercase tracking-widest">Delivered</span></td>
+                                    <td className="p-4 text-right">
+                                       <button className="text-xs font-bold text-camel-600 hover:text-camel-800">Download PDF</button>
+                                    </td>
+                                 </tr>
+                                 <tr className="hover:bg-camel-50/50 transition-colors">
+                                    <td className="p-4">#FS-8815</td>
+                                    <td className="p-4 text-espresso-600 hidden sm:table-cell">Jul 14, 2026</td>
+                                    <td className="p-4"><span className="bg-emerald-100 text-emerald-700 px-2 py-1 rounded-md text-[10px] font-black uppercase tracking-widest">Delivered</span></td>
+                                    <td className="p-4 text-right">
+                                       <button className="text-xs font-bold text-camel-600 hover:text-camel-800">Download PDF</button>
+                                    </td>
+                                 </tr>
+                              </tbody>
+                           </table>
+                        </div>
+                     </motion.div>
+                   )}
+                </AnimatePresence>
               </div>
            </div>
 
@@ -525,6 +587,29 @@ export default function ShopCatalog() {
                   </div>
                 )}
                 
+                {/* AI Cross-Selling */}
+                <div className="mb-8 pt-8 border-t border-camel-100/50">
+                   <h4 className="font-bold text-espresso-900 text-sm mb-4 flex items-center gap-2">
+                     <span className="w-2 h-2 rounded-full bg-accent-500"></span> Complete the Regimen
+                   </h4>
+                   <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide">
+                      <div className="min-w-[160px] bg-camel-50/50 border border-camel-100 p-3 rounded-2xl shadow-sm flex items-center gap-3">
+                         <img src="/images/product-supplement.jpg" className="w-10 h-10 rounded-xl object-cover" />
+                         <div>
+                            <p className="font-bold text-espresso-900 text-[10px] leading-tight">Probiotic Chews</p>
+                            <p className="text-[10px] font-black text-camel-600 mt-0.5">+$24.00</p>
+                         </div>
+                      </div>
+                      <div className="min-w-[160px] bg-camel-50/50 border border-camel-100 p-3 rounded-2xl shadow-sm flex items-center gap-3">
+                         <img src="/images/product-meds.jpg" className="w-10 h-10 rounded-xl object-cover" />
+                         <div>
+                            <p className="font-bold text-espresso-900 text-[10px] leading-tight">Flea Shampoo</p>
+                            <p className="text-[10px] font-black text-camel-600 mt-0.5">+$18.50</p>
+                         </div>
+                      </div>
+                   </div>
+                </div>
+
                 <div className="text-xs font-bold text-espresso-400 flex items-center justify-center gap-2">
                   <ShieldCheck size={14} /> 100% Secure Checkout via FurShield
                 </div>
@@ -652,6 +737,7 @@ export default function ShopCatalog() {
                 </div>
                 <button 
                   disabled={cart.length === 0}
+                  onClick={() => { setIsCartOpen(false); setIsCheckoutOpen(true); }}
                   className="w-full bg-espresso-900 hover:bg-espresso-800 disabled:opacity-50 text-white py-4.5 rounded-full font-bold text-sm tracking-wide transition-all shadow-xl flex justify-center items-center gap-2 h-14"
                 >
                   Checkout <span className="font-black">${cartTotal.toFixed(2)}</span>
@@ -662,8 +748,125 @@ export default function ShopCatalog() {
         )}
       </AnimatePresence>
 
+      {/* PHASE 9: Glassmorphic Multi-Step Checkout Modal */}
+      <AnimatePresence>
+        {isCheckoutOpen && (
+          <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
+            <motion.div 
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+              className="absolute inset-0 bg-espresso-900/60 backdrop-blur-lg"
+            />
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.95, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              className="relative w-full max-w-2xl bg-white rounded-[2.5rem] shadow-2xl overflow-hidden flex flex-col"
+            >
+              {/* Checkout Header */}
+              <div className="p-6 border-b border-camel-100 flex items-center justify-between bg-bg-secondary">
+                 <div className="flex items-center gap-3">
+                    <ShieldCheck className="text-emerald-500" size={24} />
+                    <h2 className="text-xl font-display font-bold text-espresso-900">Secure Checkout</h2>
+                 </div>
+                 <button onClick={() => setIsCheckoutOpen(false)} className="w-8 h-8 rounded-full bg-white border border-camel-200 flex items-center justify-center text-espresso-400 hover:text-espresso-900 transition-colors shadow-sm">
+                   <X size={16} />
+                 </button>
+              </div>
+
+              {/* Progress Steps */}
+              <div className="flex items-center justify-center gap-4 sm:gap-8 p-6 bg-white border-b border-camel-50">
+                 {[1, 2, 3].map(step => (
+                   <div key={step} className="flex items-center gap-2 sm:gap-3">
+                      <div className={cn("w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs transition-colors shrink-0", checkoutStep >= step ? "bg-emerald-500 text-white shadow-md shadow-emerald-500/20" : "bg-camel-100 text-camel-400")}>
+                        {checkoutStep > step ? <ShieldCheck size={14} /> : step}
+                      </div>
+                      <span className={cn("text-[10px] sm:text-xs font-bold uppercase tracking-widest", checkoutStep >= step ? "text-espresso-900" : "text-camel-400")}>
+                        {step === 1 ? 'Shipping' : step === 2 ? 'Payment' : 'Complete'}
+                      </span>
+                      {step !== 3 && <div className={cn("w-6 sm:w-10 h-0.5 rounded-full ml-1 sm:ml-2", checkoutStep > step ? "bg-emerald-500" : "bg-camel-100")} />}
+                   </div>
+                 ))}
+              </div>
+
+              {/* Step Content */}
+              <div className="p-8 bg-white min-h-[300px] flex flex-col justify-center">
+                 {checkoutStep === 1 && (
+                    <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }}>
+                       <h3 className="font-bold text-lg text-espresso-900 mb-4">Select Shipping Address</h3>
+                       <div className="border-2 border-camel-400 bg-camel-50/50 p-4 rounded-2xl mb-4 relative overflow-hidden cursor-pointer shadow-sm">
+                          <div className="absolute top-4 right-4 w-4 h-4 rounded-full bg-camel-500 flex items-center justify-center border-4 border-camel-100 shadow-inner"></div>
+                          <p className="font-bold text-espresso-900 text-sm">Home (Default)</p>
+                          <p className="text-xs text-espresso-600 mt-1">123 TechViz Avenue, Suite 400<br/>San Francisco, CA 94105</p>
+                       </div>
+                       <button className="w-full border border-dashed border-camel-300 text-camel-600 font-bold text-xs py-3 rounded-2xl hover:bg-camel-50 transition-colors flex items-center justify-center gap-2">
+                         <Plus size={14} /> Add New Address
+                       </button>
+                    </motion.div>
+                 )}
+                 {checkoutStep === 2 && (
+                    <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }}>
+                       <h3 className="font-bold text-lg text-espresso-900 mb-4">Payment Method</h3>
+                       {/* Mock Credit Card */}
+                       <div className="w-full h-48 rounded-2xl bg-gradient-to-br from-espresso-900 to-espresso-800 p-6 text-white shadow-[0_20px_40px_rgba(90,56,37,0.2)] relative overflow-hidden mb-6">
+                          <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full blur-3xl -mr-20 -mt-20"></div>
+                          <ShieldCheck className="absolute top-6 right-6 text-white/30" size={24} />
+                          <p className="text-[10px] font-black tracking-widest uppercase text-white/50 mb-8">Credit Card</p>
+                          <p className="font-mono text-xl md:text-2xl tracking-widest mb-4">**** **** **** 4242</p>
+                          <div className="flex justify-between items-end">
+                             <div>
+                               <p className="text-[9px] uppercase tracking-widest text-white/50 mb-1">Cardholder</p>
+                               <p className="font-bold text-sm">Raza</p>
+                             </div>
+                             <div>
+                               <p className="text-[9px] uppercase tracking-widest text-white/50 mb-1">Expires</p>
+                               <p className="font-bold text-sm">12/28</p>
+                             </div>
+                          </div>
+                       </div>
+                    </motion.div>
+                 )}
+                 {checkoutStep === 3 && (
+                    <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="flex flex-col items-center justify-center text-center py-4">
+                       <div className="w-20 h-20 bg-emerald-100 rounded-full flex items-center justify-center mb-6">
+                          <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ delay: 0.2, type: "spring" }}>
+                             <ShieldCheck className="text-emerald-500" size={40} />
+                          </motion.div>
+                       </div>
+                       <h3 className="font-display font-black text-3xl text-espresso-900 mb-2">Order Confirmed!</h3>
+                       <p className="text-sm font-medium text-espresso-600 max-w-sm mb-6">Your premium care products are being prepared. Order <span className="font-bold text-espresso-900">#FS-9021</span> has been added to your delivery tracker.</p>
+                    </motion.div>
+                 )}
+              </div>
+
+              {/* Checkout Footer */}
+              <div className="p-6 border-t border-camel-100 bg-bg-secondary flex justify-end gap-4">
+                 {checkoutStep < 3 && (
+                   <button 
+                     onClick={() => setCheckoutStep(prev => prev + 1)}
+                     className="bg-emerald-600 hover:bg-emerald-500 text-white px-8 py-3 rounded-full font-bold text-sm transition-all shadow-md shadow-emerald-600/20 flex items-center gap-2"
+                   >
+                     {checkoutStep === 1 ? 'Continue to Payment' : `Pay Now`} <ArrowRight size={16} />
+                   </button>
+                 )}
+                 {checkoutStep === 3 && (
+                   <button 
+                     onClick={() => {
+                        setIsCheckoutOpen(false);
+                        setCheckoutStep(1);
+                        setCart([]); // Clear cart
+                     }}
+                     className="bg-espresso-900 hover:bg-espresso-800 text-white px-8 py-3 rounded-full font-bold text-sm transition-all shadow-md"
+                   >
+                     Return to Shop
+                   </button>
+                 )}
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
+
+
 
 

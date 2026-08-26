@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, Filter, Plus, MoreHorizontal, Clock, Heart, AlertCircle, LayoutGrid, List, Activity, Users, X, Sparkles, Loader2, QrCode, FileText, CheckCircle2, FileDigit, Trash2 } from 'lucide-react';
+import { Search, Filter, Plus, MoreHorizontal, Clock, Heart, AlertCircle, LayoutGrid, List, Activity, Users, X, Sparkles, Loader2, FileDigit, Trash2, Edit3 } from 'lucide-react';
 import shelterService from '../services/shelter.service';
 
 const Avatar = ({ src, alt, name, className }) => {
@@ -22,7 +22,7 @@ export default function ShelterHub() {
   // UI States
   const [activeFilter, setActiveFilter] = useState('All Rescues');
   const [searchQuery, setSearchQuery] = useState('');
-  const [isDropdownOpen, setIsDropdownOpen] = useState(null);
+  const [viewMode, setViewMode] = useState('board'); // 'board' or 'list'
   
   // Drawer/Modal States
   const [isIntakeDrawerOpen, setIsIntakeDrawerOpen] = useState(false);
@@ -34,7 +34,7 @@ export default function ShelterHub() {
   const [intakeImageFile, setIntakeImageFile] = useState(null);
   const [intakeImagePreview, setIntakeImagePreview] = useState(null);
 
-  const [editForm, setEditForm] = useState({ name: '', breed: '', species: 'Dog', behaviorNotes: '' });
+  const [editForm, setEditForm] = useState({ name: '', breed: '', species: 'Dog', behaviorNotes: '', status: 'INTAKE' });
   const [editImageFile, setEditImageFile] = useState(null);
   const [editImagePreview, setEditImagePreview] = useState(null);
 
@@ -66,6 +66,12 @@ export default function ShelterHub() {
     { id: 'ADOPTABLE', title: 'Ready for Adoption', color: 'bg-camel-50 text-camel-700' },
     { id: 'ADOPTED', title: 'Adopted', color: 'bg-emerald-50 text-emerald-700' }
   ];
+
+  const getStatusBadge = (statusId) => {
+    const col = columns.find(c => c.id === statusId);
+    if (!col) return null;
+    return <span className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest ${col.color}`}>{col.title}</span>;
+  };
 
   const filteredData = pipelineData.filter(pet => {
     let matchesSearch = pet.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
@@ -119,10 +125,15 @@ export default function ShelterHub() {
 
   const openEditModal = (pet) => {
     setSelectedPet(pet);
-    setEditForm({ name: pet.name, breed: pet.breed || '', species: pet.species || 'Dog', behaviorNotes: pet.behaviorNotes || '' });
+    setEditForm({ 
+      name: pet.name, 
+      breed: pet.breed || '', 
+      species: pet.species || 'Dog', 
+      behaviorNotes: pet.behaviorNotes || '',
+      status: pet.status || 'INTAKE'
+    });
     setEditImagePreview(pet.avatarUrl ? (pet.avatarUrl.startsWith('http') ? pet.avatarUrl : `http://localhost:5000${pet.avatarUrl}`) : null);
     setEditImageFile(null);
-    setIsDropdownOpen(null);
     setIsEditModalOpen(true);
   };
 
@@ -135,21 +146,22 @@ export default function ShelterHub() {
     formData.append('behaviorNotes', editForm.behaviorNotes);
     if (editImageFile) formData.append('avatar', editImageFile);
 
+    // Update basic info
     await shelterService.updateAnimal(selectedPet._id, formData);
+    
+    // Update status if changed
+    if (editForm.status !== selectedPet.status) {
+      await shelterService.updateStatus(selectedPet._id, editForm.status);
+    }
+    
     setIsEditModalOpen(false);
     fetchPipeline();
   };
 
-  const handleChangeStatus = async (id, status) => {
-    await shelterService.updateStatus(id, status);
-    setIsDropdownOpen(null);
-    fetchPipeline();
-  };
-
-  const handleDelete = async (id) => {
-    if(window.confirm("Are you sure you want to remove this rescue?")) {
-      await shelterService.deleteAnimal(id);
-      setIsDropdownOpen(null);
+  const handleDelete = async () => {
+    if(window.confirm("Are you sure you want to remove this rescue completely?")) {
+      await shelterService.deleteAnimal(selectedPet._id);
+      setIsEditModalOpen(false);
       fetchPipeline();
     }
   };
@@ -157,7 +169,7 @@ export default function ShelterHub() {
   const getRelativeTime = (dateString) => {
     const rtf = new Intl.RelativeTimeFormat('en', { numeric: 'auto' });
     const diffDays = Math.round((new Date(dateString) - new Date()) / (1000 * 60 * 60 * 24));
-    return rtf.format(diffDays, 'day');
+    return diffDays === 0 ? 'Today' : rtf.format(diffDays, 'day');
   };
 
   if (loading) {
@@ -168,8 +180,11 @@ export default function ShelterHub() {
     );
   }
 
+  // Scrollbar hiding utility classes
+  const noScrollbar = "[&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]";
+
   return (
-    <div className="flex-1 flex flex-col w-full font-sans">
+    <div className={`flex-1 flex flex-col w-full font-sans ${noScrollbar}`}>
       
       {/* Portal Header */}
       <div className="flex flex-col md:flex-row md:items-end justify-between mb-6 gap-4 shrink-0 pt-4">
@@ -181,11 +196,17 @@ export default function ShelterHub() {
         </div>
         
         <div className="flex items-center gap-4">
-          <div className="flex bg-bg-secondary p-1 rounded-full border border-camel-100">
-            <button className="px-4 py-1.5 rounded-full bg-white shadow-sm text-espresso-900 font-bold text-sm flex items-center gap-2">
+          <div className="flex bg-white p-1 rounded-full border border-camel-100 shadow-sm">
+            <button 
+              onClick={() => setViewMode('board')} 
+              className={`px-4 py-1.5 rounded-full font-bold text-sm flex items-center gap-2 transition-colors ${viewMode === 'board' ? 'bg-camel-50 text-espresso-900 shadow-sm' : 'text-espresso-500 hover:text-espresso-900'}`}
+            >
               <LayoutGrid size={16} /> Board
             </button>
-            <button className="px-4 py-1.5 rounded-full text-espresso-500 hover:text-espresso-900 font-bold text-sm flex items-center gap-2 transition-colors">
+            <button 
+              onClick={() => setViewMode('list')} 
+              className={`px-4 py-1.5 rounded-full font-bold text-sm flex items-center gap-2 transition-colors ${viewMode === 'list' ? 'bg-camel-50 text-espresso-900 shadow-sm' : 'text-espresso-500 hover:text-espresso-900'}`}
+            >
               <List size={16} /> List
             </button>
           </div>
@@ -201,7 +222,7 @@ export default function ShelterHub() {
             />
           </div>
           
-          <button onClick={() => setIsIntakeDrawerOpen(true)} className="flex items-center gap-2 bg-camel-600 hover:bg-camel-500 text-white px-5 py-2 rounded-full font-bold text-sm transition-all shadow-[0_5px_15px_rgba(186,127,72,0.3)]">
+          <button onClick={() => setIsIntakeDrawerOpen(true)} className="flex items-center gap-2 bg-camel-600 hover:bg-camel-500 text-white px-5 py-2.5 rounded-full font-bold text-sm transition-all shadow-[0_5px_15px_rgba(186,127,72,0.3)]">
             <Plus size={16} /> Intake Rescue
           </button>
         </div>
@@ -248,7 +269,7 @@ export default function ShelterHub() {
       </div>
 
       {/* Filter Tabs */}
-      <div className="flex gap-2 mb-6 overflow-x-auto pb-2 scrollbar-hide shrink-0">
+      <div className={`flex gap-2 mb-6 overflow-x-auto pb-2 shrink-0 ${noScrollbar}`}>
         {['All Rescues', 'Dogs Only', 'Cats Only', 'Urgent Medical'].map(filter => (
           <button 
             key={filter}
@@ -256,7 +277,7 @@ export default function ShelterHub() {
             className={`px-5 py-2 rounded-full text-xs font-bold whitespace-nowrap transition-all border ${
               activeFilter === filter 
                 ? 'bg-espresso-900 text-white border-espresso-900 shadow-md' 
-                : 'bg-white text-espresso-600 border-camel-100 hover:border-camel-300'
+                : 'bg-white text-espresso-600 border-camel-100 hover:border-camel-300 hover:bg-camel-50'
             }`}
           >
             {filter}
@@ -264,108 +285,144 @@ export default function ShelterHub() {
         ))}
       </div>
 
-      {/* Kanban Board Area */}
-      <div className="flex-1 overflow-x-auto min-h-0 pb-4">
-        <div className="flex gap-6 min-w-max h-full items-start px-1">
-          
-          {columns.map(col => {
-            const colPets = filteredData.filter(p => p.status === col.id);
-            return (
-              <div key={col.id} className="w-[320px] flex flex-col shrink-0 h-full max-h-[70vh]">
-                {/* Column Header */}
-                <div className="flex justify-between items-center mb-4 px-1 shrink-0">
-                  <div className="flex items-center gap-2">
-                    <h3 className="text-sm font-black text-espresso-900 tracking-tight">{col.title}</h3>
-                    <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${col.color}`}>{colPets.length}</span>
+      {/* BOARD VIEW */}
+      {viewMode === 'board' && (
+        <div className={`flex-1 overflow-x-auto min-h-0 pb-4 ${noScrollbar}`}>
+          <div className="flex gap-6 min-w-max h-full items-start px-1">
+            
+            {columns.map(col => {
+              const colPets = filteredData.filter(p => p.status === col.id);
+              return (
+                <div key={col.id} className="w-[320px] flex flex-col shrink-0 h-full max-h-[70vh]">
+                  {/* Column Header */}
+                  <div className="flex justify-between items-center mb-4 px-1 shrink-0">
+                    <div className="flex items-center gap-2">
+                      <h3 className="text-sm font-black text-espresso-900 tracking-tight">{col.title}</h3>
+                      <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${col.color}`}>{colPets.length}</span>
+                    </div>
                   </div>
-                  <MoreHorizontal size={16} className="text-camel-400" />
-                </div>
-                
-                {/* Cards Container */}
-                <div className="flex-1 overflow-y-auto space-y-4 pr-2 pb-10 scrollbar-thin scrollbar-thumb-camel-200">
-                  <AnimatePresence>
-                    {colPets.map((pet) => (
-                      <motion.div 
-                        layoutId={pet._id}
-                        initial={{ opacity: 0, scale: 0.95 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        exit={{ opacity: 0, scale: 0.95 }}
-                        key={pet._id} 
-                        className="bg-white p-5 rounded-[1.5rem] border border-camel-100 shadow-sm hover:shadow-md transition-shadow cursor-grab active:cursor-grabbing relative group"
-                      >
-                        <div className="flex gap-4">
-                          <Avatar 
-                             src={pet.avatarUrl ? (pet.avatarUrl.startsWith('http') ? pet.avatarUrl : `http://localhost:5000${pet.avatarUrl}`) : '/images/product-placeholder.jpg'} 
-                             alt={pet.name} 
-                             name={pet.name}
-                             className="w-16 h-16 rounded-2xl object-cover bg-camel-50 shrink-0 border border-camel-100" 
-                          />
-                          <div className="flex-1 min-w-0 pt-1">
-                            <div className="flex justify-between items-start mb-0.5">
-                              <h4 className="text-lg font-display font-black text-espresso-900 truncate">{pet.name}</h4>
-                              <span className="text-[9px] font-bold uppercase tracking-wider text-espresso-400 bg-[#FAF8F5] px-2 py-1 rounded-md">{pet._id.slice(-5).toUpperCase()}</span>
-                            </div>
-                            <p className="text-xs font-bold text-camel-600 truncate">{pet.breed || pet.species}</p>
-                            <div className="flex items-center gap-1.5 mt-2 text-[10px] font-bold uppercase tracking-widest text-espresso-400">
-                              <Clock size={10} /> {getRelativeTime(pet.intakeDate)}
+                  
+                  {/* Cards Container */}
+                  <div className={`flex-1 overflow-y-auto space-y-4 pr-2 pb-10 ${noScrollbar}`}>
+                    <AnimatePresence>
+                      {colPets.map((pet) => (
+                        <motion.div 
+                          layoutId={pet._id}
+                          initial={{ opacity: 0, scale: 0.95 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          exit={{ opacity: 0, scale: 0.95 }}
+                          key={pet._id} 
+                          onClick={() => openEditModal(pet)}
+                          className="bg-white p-5 rounded-[1.5rem] border border-camel-100 shadow-sm hover:shadow-md hover:border-camel-400 transition-all cursor-pointer relative group"
+                        >
+                          <div className="flex gap-4">
+                            <Avatar 
+                               src={pet.avatarUrl ? (pet.avatarUrl.startsWith('http') ? pet.avatarUrl : `http://localhost:5000${pet.avatarUrl}`) : '/images/product-placeholder.jpg'} 
+                               alt={pet.name} 
+                               name={pet.name}
+                               className="w-16 h-16 rounded-2xl object-cover bg-camel-50 shrink-0 border border-camel-100" 
+                            />
+                            <div className="flex-1 min-w-0 pt-1">
+                              <div className="flex justify-between items-start mb-0.5">
+                                <h4 className="text-lg font-display font-black text-espresso-900 truncate">{pet.name}</h4>
+                                <span className="text-[9px] font-bold uppercase tracking-wider text-espresso-400 bg-[#FAF8F5] px-2 py-1 rounded-md">{pet._id.slice(-5).toUpperCase()}</span>
+                              </div>
+                              <p className="text-xs font-bold text-camel-600 truncate">{pet.breed || pet.species}</p>
+                              <div className="flex items-center gap-1.5 mt-2 text-[10px] font-bold uppercase tracking-widest text-espresso-400">
+                                <Clock size={10} /> {getRelativeTime(pet.intakeDate)}
+                              </div>
                             </div>
                           </div>
-                        </div>
 
-                        {/* Status/Health Indicators */}
-                        {pet.aiTriageLog && pet.aiTriageLog.length > 0 && (
-                           <div className="mt-4 pt-3 border-t border-camel-50 flex items-center justify-between">
-                             <div className="flex items-center gap-1.5">
-                               <AlertCircle size={14} className="text-rose-500" />
-                               <span className="text-xs font-bold text-espresso-700">Needs Vet Review</span>
+                          {/* Status/Health Indicators */}
+                          {pet.aiTriageLog && pet.aiTriageLog.length > 0 && (
+                             <div className="mt-4 pt-3 border-t border-camel-50 flex items-center justify-between">
+                               <div className="flex items-center gap-1.5">
+                                 <AlertCircle size={14} className="text-rose-500" />
+                                 <span className="text-xs font-bold text-espresso-700">Needs Vet Review</span>
+                               </div>
                              </div>
-                           </div>
-                        )}
+                          )}
 
-                        {/* Dropdown Menu */}
-                        <div className="absolute top-4 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                            <button onClick={() => setIsDropdownOpen(isDropdownOpen === pet._id ? null : pet._id)} className="w-8 h-8 rounded-full bg-white/80 backdrop-blur border border-camel-100 flex items-center justify-center text-espresso-500 hover:bg-camel-50">
-                              <MoreHorizontal size={14} />
-                            </button>
-                            
-                            <AnimatePresence>
-                              {isDropdownOpen === pet._id && (
-                                <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} className="absolute right-0 top-10 w-48 bg-white rounded-2xl shadow-xl border border-camel-100 overflow-hidden z-50">
-                                  <div className="px-4 py-2 border-b border-camel-50 bg-camel-50/50">
-                                    <p className="text-[10px] font-bold uppercase tracking-widest text-espresso-400">Move To</p>
-                                  </div>
-                                  <button onClick={() => handleChangeStatus(pet._id, 'INTAKE')} className="w-full text-left px-4 py-2 text-xs font-bold text-espresso-700 hover:bg-camel-50 transition-colors">New Intake</button>
-                                  <button onClick={() => handleChangeStatus(pet._id, 'VET_HOLD')} className="w-full text-left px-4 py-2 text-xs font-bold text-espresso-700 hover:bg-camel-50 transition-colors">Medical Hold</button>
-                                  <button onClick={() => handleChangeStatus(pet._id, 'ADOPTABLE')} className="w-full text-left px-4 py-2 text-xs font-bold text-espresso-700 hover:bg-camel-50 transition-colors">Ready for Adoption</button>
-                                  <button onClick={() => handleChangeStatus(pet._id, 'ADOPTED')} className="w-full text-left px-4 py-2 text-xs font-bold text-emerald-600 hover:bg-emerald-50 transition-colors">Adopted</button>
-                                  
-                                  <div className="border-t border-camel-100 my-1"></div>
-                                  <div className="px-4 py-2 border-b border-camel-50 bg-camel-50/50">
-                                    <p className="text-[10px] font-bold uppercase tracking-widest text-espresso-400">Actions</p>
-                                  </div>
-                                  <button onClick={() => openEditModal(pet)} className="w-full text-left px-4 py-2 text-xs font-bold text-espresso-700 hover:bg-camel-50 flex items-center gap-2"><FileDigit size={12}/> Edit Details</button>
-                                  <button onClick={() => handleDelete(pet._id)} className="w-full text-left px-4 py-2 text-xs font-bold text-rose-600 hover:bg-rose-50 flex items-center gap-2"><Trash2 size={12}/> Remove</button>
-                                </motion.div>
-                              )}
-                            </AnimatePresence>
-                        </div>
+                          {/* Hover Edit Hint */}
+                          <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity text-camel-500 bg-white/80 rounded-full p-1 backdrop-blur-sm">
+                            <Edit3 size={14} />
+                          </div>
 
-                      </motion.div>
-                    ))}
-                  </AnimatePresence>
+                        </motion.div>
+                      ))}
+                    </AnimatePresence>
+                  </div>
                 </div>
-              </div>
-            );
-          })}
+              );
+            })}
+          </div>
         </div>
-      </div>
+      )}
+
+      {/* LIST VIEW */}
+      {viewMode === 'list' && (
+        <div className="bg-white rounded-[2rem] border border-camel-100 shadow-sm overflow-hidden flex-1 flex flex-col">
+          <div className={`overflow-auto flex-1 ${noScrollbar}`}>
+            <table className="w-full text-left border-collapse">
+              <thead className="bg-[#FAF8F5] sticky top-0 z-10 border-b border-camel-100">
+                <tr>
+                  <th className="py-4 px-6 text-[10px] font-bold uppercase tracking-widest text-espresso-400">Animal</th>
+                  <th className="py-4 px-6 text-[10px] font-bold uppercase tracking-widest text-espresso-400">ID</th>
+                  <th className="py-4 px-6 text-[10px] font-bold uppercase tracking-widest text-espresso-400">Status</th>
+                  <th className="py-4 px-6 text-[10px] font-bold uppercase tracking-widest text-espresso-400">Intake Date</th>
+                  <th className="py-4 px-6 text-[10px] font-bold uppercase tracking-widest text-espresso-400 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-camel-50">
+                {filteredData.length === 0 ? (
+                  <tr>
+                     <td colSpan="5" className="py-12 text-center text-sm font-medium text-espresso-500">No rescues found matching your criteria.</td>
+                  </tr>
+                ) : filteredData.map(pet => (
+                  <tr key={pet._id} onClick={() => openEditModal(pet)} className="hover:bg-camel-50/50 transition-colors cursor-pointer group">
+                    <td className="py-4 px-6">
+                      <div className="flex items-center gap-4">
+                        <Avatar 
+                           src={pet.avatarUrl ? (pet.avatarUrl.startsWith('http') ? pet.avatarUrl : `http://localhost:5000${pet.avatarUrl}`) : '/images/product-placeholder.jpg'} 
+                           alt={pet.name} 
+                           name={pet.name}
+                           className="w-10 h-10 rounded-full object-cover bg-camel-100 border border-camel-200 shrink-0" 
+                        />
+                        <div>
+                          <p className="text-sm font-black text-espresso-900">{pet.name}</p>
+                          <p className="text-xs font-bold text-camel-600">{pet.breed || pet.species}</p>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="py-4 px-6">
+                      <span className="text-[10px] font-bold uppercase tracking-widest text-espresso-500 bg-[#FAF8F5] px-2 py-1 rounded-md">{pet._id.slice(-5).toUpperCase()}</span>
+                    </td>
+                    <td className="py-4 px-6">
+                      {getStatusBadge(pet.status)}
+                    </td>
+                    <td className="py-4 px-6">
+                      <span className="text-xs font-bold text-espresso-600 flex items-center gap-1"><Clock size={12}/> {getRelativeTime(pet.intakeDate)}</span>
+                    </td>
+                    <td className="py-4 px-6 text-right">
+                      <button className="text-camel-500 hover:text-espresso-900 font-bold text-xs flex items-center gap-1 ml-auto opacity-0 group-hover:opacity-100 transition-opacity">
+                        <Edit3 size={14}/> Edit
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
 
       {/* Intake Drawer / Modal */}
       <AnimatePresence>
         {isIntakeDrawerOpen && (
           <>
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setIsIntakeDrawerOpen(false)} className="fixed inset-0 bg-espresso-900/40 backdrop-blur-sm z-[200]" />
-            <motion.div initial={{ x: '100%', opacity: 0.5 }} animate={{ x: 0, opacity: 1 }} exit={{ x: '100%', opacity: 0.5 }} transition={{ type: 'spring', damping: 30, stiffness: 300 }} className="fixed inset-y-0 right-0 w-full md:w-[600px] bg-[#FAF8F5] shadow-2xl z-[210] flex flex-col border-l border-camel-200">
+            <motion.div initial={{ x: '100%', opacity: 0.5 }} animate={{ x: 0, opacity: 1 }} exit={{ x: '100%', opacity: 0.5 }} transition={{ type: 'spring', damping: 30, stiffness: 300 }} className={`fixed inset-y-0 right-0 w-full md:w-[600px] bg-[#FAF8F5] shadow-2xl z-[210] flex flex-col border-l border-camel-200 ${noScrollbar}`}>
               
               <div className="flex justify-between items-center p-6 border-b border-camel-100 bg-white shrink-0">
                 <div>
@@ -377,7 +434,7 @@ export default function ShelterHub() {
                 </button>
               </div>
 
-              <div className="flex-1 overflow-y-auto p-8">
+              <div className={`flex-1 overflow-y-auto p-8 ${noScrollbar}`}>
                 
                 {/* Photo Upload Area */}
                 <div className="flex flex-col items-center mb-8">
@@ -420,7 +477,7 @@ export default function ShelterHub() {
                         <Sparkles size={16} className="text-camel-500" />
                       </div>
                       
-                      <textarea rows={4} value={intakeForm.behaviorNotes} onChange={e => setIntakeForm({...intakeForm, behaviorNotes: e.target.value})} placeholder="Describe condition, behavior, injuries..." className="w-full bg-[#FAF8F5] border border-camel-200 rounded-xl px-4 py-3 text-sm focus:border-camel-500 focus:ring-4 focus:ring-camel-50 transition-all mb-4"></textarea>
+                      <textarea rows={4} value={intakeForm.behaviorNotes} onChange={e => setIntakeForm({...intakeForm, behaviorNotes: e.target.value})} placeholder="Describe condition, behavior, injuries..." className={`w-full bg-[#FAF8F5] border border-camel-200 rounded-xl px-4 py-3 text-sm focus:border-camel-500 focus:ring-4 focus:ring-camel-50 transition-all mb-4 ${noScrollbar}`}></textarea>
                       
                       <AnimatePresence mode="wait">
                         {!aiResult && !isAnalyzing && (
@@ -476,15 +533,15 @@ export default function ShelterHub() {
             <div className="fixed inset-0 z-[210] flex items-center justify-center p-4 pointer-events-none">
               <motion.div initial={{ opacity: 0, scale: 0.95, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 20 }} className="bg-white rounded-[2rem] w-full max-w-md shadow-2xl pointer-events-auto flex flex-col overflow-hidden">
                  <div className="p-6 border-b border-camel-100 flex justify-between items-center bg-[#FAF8F5]">
-                    <h2 className="text-xl font-display font-black text-espresso-900">Edit Rescue Details</h2>
+                    <h2 className="text-xl font-display font-black text-espresso-900">Manage Rescue</h2>
                     <button onClick={() => setIsEditModalOpen(false)} className="w-8 h-8 rounded-full bg-white border border-camel-200 flex items-center justify-center text-espresso-400 hover:text-espresso-900 transition-colors shadow-sm"><X size={16}/></button>
                  </div>
-                 <div className="p-6 flex-1 overflow-y-auto max-h-[80vh]">
-                    <form onSubmit={handleEditSubmit} className="space-y-4">
+                 <div className={`p-6 flex-1 overflow-y-auto max-h-[80vh] ${noScrollbar}`}>
+                    <form onSubmit={handleEditSubmit} className="space-y-5">
                        
-                       <div className="flex flex-col items-center mb-4">
+                       <div className="flex flex-col items-center mb-6">
                          <div className="relative w-24 h-24 rounded-full border border-camel-200 overflow-hidden mb-2 bg-camel-50">
-                           {editImagePreview ? <img src={editImagePreview} className="w-full h-full object-cover" alt="Preview"/> : <div className="w-full h-full flex items-center justify-center text-camel-300 font-medium">Upload</div>}
+                           {editImagePreview ? <img src={editImagePreview} className="w-full h-full object-cover" alt="Preview"/> : <div className="w-full h-full flex items-center justify-center text-camel-300 font-medium text-xs">Upload</div>}
                            <input type="file" accept="image/*" onChange={(e) => {
                              const file = e.target.files[0];
                              if(file) {
@@ -494,6 +551,16 @@ export default function ShelterHub() {
                            }} className="absolute inset-0 opacity-0 cursor-pointer" />
                          </div>
                          <p className="text-[10px] text-camel-600 font-bold uppercase tracking-widest">Change Photo</p>
+                       </div>
+
+                       <div>
+                         <label className="block text-xs font-bold text-espresso-900 uppercase tracking-widest mb-2 px-1">Pipeline Status</label>
+                         <select value={editForm.status} onChange={(e) => setEditForm({...editForm, status: e.target.value})} className="w-full bg-camel-50 border border-camel-200 rounded-xl px-4 py-3 text-sm font-bold text-espresso-900 focus:border-camel-500 focus:ring-4 focus:ring-camel-50 transition-all appearance-none shadow-sm">
+                           <option value="INTAKE">New Intake</option>
+                           <option value="VET_HOLD">Medical Hold</option>
+                           <option value="ADOPTABLE">Ready for Adoption</option>
+                           <option value="ADOPTED">Adopted</option>
+                         </select>
                        </div>
 
                        <div>
@@ -516,8 +583,11 @@ export default function ShelterHub() {
                          </div>
                        </div>
                        
-                       <div className="pt-4">
-                         <button type="submit" className="w-full bg-espresso-900 hover:bg-espresso-800 text-white py-4 rounded-xl font-bold text-sm tracking-wide transition-all shadow-md">Save Changes</button>
+                       <div className="pt-6 space-y-3">
+                         <button type="submit" className="w-full bg-espresso-900 hover:bg-espresso-800 text-white py-3.5 rounded-xl font-bold text-sm tracking-wide transition-all shadow-md">Save Changes</button>
+                         <button type="button" onClick={handleDelete} className="w-full bg-white border-2 border-rose-100 hover:border-rose-500 hover:bg-rose-50 text-rose-600 py-3 rounded-xl font-bold text-sm tracking-wide transition-all flex items-center justify-center gap-2">
+                           <Trash2 size={16}/> Remove Rescue
+                         </button>
                        </div>
                     </form>
                  </div>

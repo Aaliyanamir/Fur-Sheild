@@ -17,7 +17,8 @@ const appointmentSchema = new mongoose.Schema({
     species: String,
     age: String,
     ownerName: String,
-    petAvatarUrl: String
+    petAvatarUrl: String,
+    ownerAvatarUrl: String
   },
   vetId: { 
     type: mongoose.Schema.Types.ObjectId, 

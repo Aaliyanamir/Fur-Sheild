@@ -24,19 +24,25 @@ export default function VetHub() {
   
   // Forms state
   const [vitalsForm, setVitalsForm] = useState({ temp: '', hr: '', weight: '', notes: '' });
-  const [walkinForm, setWalkinForm] = useState({ 
-    petName: '', breed: '', species: 'Dog', age: '', ownerName: '', reason: '', severity: 'ROUTINE' 
-  });
+  
+  // Walkin Modal
+  const [walkinForm, setWalkinForm] = useState({ petName: '', breed: '', species: 'Dog', age: '', ownerName: '', reason: '', severity: 'ROUTINE' });
   const [walkinImageFile, setWalkinImageFile] = useState(null);
   const [walkinImagePreview, setWalkinImagePreview] = useState(null);
+  const [walkinOwnerImageFile, setWalkinOwnerImageFile] = useState(null);
+  const [walkinOwnerImagePreview, setWalkinOwnerImagePreview] = useState(null);
 
+  // Vet Profile Modal
   const [vetProfileForm, setVetProfileForm] = useState({ name: user?.name || '' });
   const [vetImageFile, setVetImageFile] = useState(null);
   const [vetImagePreview, setVetImagePreview] = useState(user?.avatarUrl ? (user.avatarUrl.startsWith('http') ? user.avatarUrl : `http://localhost:5000${user.avatarUrl}`) : null);
 
+  // Edit Patient Modal
   const [editPatientForm, setEditPatientForm] = useState({ petName: '', breed: '', species: 'Dog', age: '', ownerName: '' });
   const [editPatientImageFile, setEditPatientImageFile] = useState(null);
   const [editPatientImagePreview, setEditPatientImagePreview] = useState(null);
+  const [editOwnerImageFile, setEditOwnerImageFile] = useState(null);
+  const [editOwnerImagePreview, setEditOwnerImagePreview] = useState(null);
 
   const fetchQueue = async () => {
     try {
@@ -46,10 +52,11 @@ export default function VetHub() {
         const mappedQueue = res.data.map(appt => {
           const isWalkin = !appt.petId && appt.walkInDetails;
           const petAvatarUrl = isWalkin ? appt.walkInDetails.petAvatarUrl : appt.petId?.avatarUrl;
+          const ownerAvatarUrl = isWalkin ? appt.walkInDetails.ownerAvatarUrl : appt.ownerId?.avatarUrl;
           
           return {
             id: appt._id,
-            displayId: appt._id.slice(-6).toUpperCase(), // Short ID
+            displayId: appt._id.slice(-6).toUpperCase(),
             petId: appt.petId?._id || null,
             petName: isWalkin ? appt.walkInDetails.petName : (appt.petId?.name || 'Unknown Pet'),
             breed: isWalkin ? appt.walkInDetails.breed : (appt.petId?.breed || 'Unknown'),
@@ -57,7 +64,7 @@ export default function VetHub() {
             age: isWalkin ? appt.walkInDetails.age : 'Adult', 
             petImage: petAvatarUrl ? (petAvatarUrl.startsWith('http') ? petAvatarUrl : `http://localhost:5000${petAvatarUrl}`) : '/images/product-placeholder.jpg',
             owner: isWalkin ? appt.walkInDetails.ownerName : (appt.ownerId?.name || 'Unknown Owner'),
-            ownerImage: '/images/product-placeholder.jpg',
+            ownerImage: ownerAvatarUrl ? (ownerAvatarUrl.startsWith('http') ? ownerAvatarUrl : `http://localhost:5000${ownerAvatarUrl}`) : '/images/product-placeholder.jpg',
             time: new Date(appt.scheduledAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
             status: appt.status === 'EXAM' ? 'In Progress' : (appt.status === 'WAITING' ? 'Waiting' : 'Discharged'),
             rawStatus: appt.status,
@@ -163,12 +170,15 @@ export default function VetHub() {
     formData.append('age', walkinForm.age);
     formData.append('ownerName', walkinForm.ownerName);
     if (walkinImageFile) formData.append('petAvatar', walkinImageFile);
+    if (walkinOwnerImageFile) formData.append('ownerAvatar', walkinOwnerImageFile);
 
     await vetService.createAppointment(formData);
     
     setWalkinForm({ petName: '', breed: '', species: 'Dog', age: '', ownerName: '', reason: '', severity: 'ROUTINE' });
     setWalkinImageFile(null);
     setWalkinImagePreview(null);
+    setWalkinOwnerImageFile(null);
+    setWalkinOwnerImagePreview(null);
     setIsWalkinModalOpen(false);
     await fetchQueue();
   };
@@ -183,7 +193,6 @@ export default function VetHub() {
     const res = await authService.updateProfile(formData);
     if (res.success) {
       window.location.reload();
-      setIsVetProfileModalOpen(false);
     }
   };
 
@@ -207,7 +216,9 @@ export default function VetHub() {
       ownerName: activePatient.owner
     });
     setEditPatientImagePreview(activePatient.petImage);
+    setEditOwnerImagePreview(activePatient.ownerImage);
     setEditPatientImageFile(null);
+    setEditOwnerImageFile(null);
     setIsEditPatientModalOpen(true);
     setIsStatusDropdownOpen(false);
   };
@@ -221,6 +232,7 @@ export default function VetHub() {
     formData.append('age', editPatientForm.age);
     formData.append('ownerName', editPatientForm.ownerName);
     if (editPatientImageFile) formData.append('petAvatar', editPatientImageFile);
+    if (editOwnerImageFile) formData.append('ownerAvatar', editOwnerImageFile);
 
     await vetService.updateWalkin(activePatient.id, formData);
     await fetchQueue();
@@ -549,18 +561,33 @@ export default function VetHub() {
                  </div>
                  <div className="p-6 flex-1 overflow-y-auto max-h-[80vh]">
                     <form onSubmit={handleEditPatient} className="space-y-4">
-                       <div className="flex flex-col items-center mb-4">
-                         <div className="relative w-24 h-24 rounded-full border border-camel-200 overflow-hidden mb-2 bg-camel-50">
-                           {editPatientImagePreview ? <img src={editPatientImagePreview} className="w-full h-full object-cover" alt="Pet"/> : <div className="w-full h-full flex items-center justify-center text-camel-300 font-medium">Upload</div>}
-                           <input type="file" accept="image/*" onChange={(e) => {
-                             const file = e.target.files[0];
-                             if(file) {
-                               setEditPatientImageFile(file);
-                               setEditPatientImagePreview(URL.createObjectURL(file));
-                             }
-                           }} className="absolute inset-0 opacity-0 cursor-pointer" />
+                       <div className="flex flex-row justify-center gap-8 mb-6">
+                         <div className="flex flex-col items-center">
+                           <div className="relative w-20 h-20 rounded-full border border-camel-200 overflow-hidden mb-2 bg-camel-50">
+                             {editPatientImagePreview ? <img src={editPatientImagePreview} className="w-full h-full object-cover" alt="Pet"/> : <div className="w-full h-full flex items-center justify-center text-camel-300 font-medium text-[10px]">Pet</div>}
+                             <input type="file" accept="image/*" onChange={(e) => {
+                               const file = e.target.files[0];
+                               if(file) {
+                                 setEditPatientImageFile(file);
+                                 setEditPatientImagePreview(URL.createObjectURL(file));
+                               }
+                             }} className="absolute inset-0 opacity-0 cursor-pointer" />
+                           </div>
+                           <p className="text-[10px] text-camel-600 font-bold uppercase tracking-widest">Pet Photo</p>
                          </div>
-                         <p className="text-[10px] text-camel-600 font-bold uppercase tracking-widest">Change Pet Photo</p>
+                         <div className="flex flex-col items-center">
+                           <div className="relative w-20 h-20 rounded-full border border-camel-200 overflow-hidden mb-2 bg-camel-50">
+                             {editOwnerImagePreview ? <img src={editOwnerImagePreview} className="w-full h-full object-cover" alt="Owner"/> : <div className="w-full h-full flex items-center justify-center text-camel-300 font-medium text-[10px]">Owner</div>}
+                             <input type="file" accept="image/*" onChange={(e) => {
+                               const file = e.target.files[0];
+                               if(file) {
+                                 setEditOwnerImageFile(file);
+                                 setEditOwnerImagePreview(URL.createObjectURL(file));
+                               }
+                             }} className="absolute inset-0 opacity-0 cursor-pointer" />
+                           </div>
+                           <p className="text-[10px] text-camel-600 font-bold uppercase tracking-widest">Owner Photo</p>
+                         </div>
                        </div>
 
                        <div className="grid grid-cols-2 gap-4">
@@ -683,18 +710,33 @@ export default function VetHub() {
                  </div>
                  <div className="p-6 flex-1 overflow-y-auto max-h-[80vh]">
                     <form onSubmit={handleAddWalkin} className="space-y-4">
-                       <div className="flex flex-col items-center mb-4">
-                         <div className="relative w-24 h-24 rounded-full border border-camel-200 overflow-hidden mb-2 bg-camel-50">
-                           {walkinImagePreview ? <img src={walkinImagePreview} className="w-full h-full object-cover" alt="Pet"/> : <div className="w-full h-full flex items-center justify-center text-camel-300 font-medium">Upload</div>}
-                           <input type="file" accept="image/*" onChange={(e) => {
-                             const file = e.target.files[0];
-                             if(file) {
-                               setWalkinImageFile(file);
-                               setWalkinImagePreview(URL.createObjectURL(file));
-                             }
-                           }} className="absolute inset-0 opacity-0 cursor-pointer" />
+                       <div className="flex flex-row justify-center gap-8 mb-6">
+                         <div className="flex flex-col items-center">
+                           <div className="relative w-20 h-20 rounded-full border border-camel-200 overflow-hidden mb-2 bg-camel-50">
+                             {walkinImagePreview ? <img src={walkinImagePreview} className="w-full h-full object-cover" alt="Pet"/> : <div className="w-full h-full flex items-center justify-center text-camel-300 font-medium text-[10px]">Pet</div>}
+                             <input type="file" accept="image/*" onChange={(e) => {
+                               const file = e.target.files[0];
+                               if(file) {
+                                 setWalkinImageFile(file);
+                                 setWalkinImagePreview(URL.createObjectURL(file));
+                               }
+                             }} className="absolute inset-0 opacity-0 cursor-pointer" />
+                           </div>
+                           <p className="text-[10px] text-camel-600 font-bold uppercase tracking-widest">Pet Photo</p>
                          </div>
-                         <p className="text-[10px] text-camel-600 font-bold uppercase tracking-widest">Pet Photo</p>
+                         <div className="flex flex-col items-center">
+                           <div className="relative w-20 h-20 rounded-full border border-camel-200 overflow-hidden mb-2 bg-camel-50">
+                             {walkinOwnerImagePreview ? <img src={walkinOwnerImagePreview} className="w-full h-full object-cover" alt="Owner"/> : <div className="w-full h-full flex items-center justify-center text-camel-300 font-medium text-[10px]">Owner</div>}
+                             <input type="file" accept="image/*" onChange={(e) => {
+                               const file = e.target.files[0];
+                               if(file) {
+                                 setWalkinOwnerImageFile(file);
+                                 setWalkinOwnerImagePreview(URL.createObjectURL(file));
+                               }
+                             }} className="absolute inset-0 opacity-0 cursor-pointer" />
+                           </div>
+                           <p className="text-[10px] text-camel-600 font-bold uppercase tracking-widest">Owner Photo</p>
+                         </div>
                        </div>
                        <div className="grid grid-cols-2 gap-4">
                          <div>

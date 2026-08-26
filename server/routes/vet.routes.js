@@ -22,8 +22,8 @@ router.use(authorize('VET'));
 router.get('/queue', getQueue);
 router.patch('/queue/:id/status', updateAppointmentStatus);
 router.patch('/queue/:id/vitals', updateVitalsAndNotes);
-router.patch('/queue/:id/walkin', upload.single('petAvatar'), updateWalkin);
-router.post('/queue', upload.single('petAvatar'), createAppointment);
+router.patch('/queue/:id/walkin', upload.fields([{ name: 'petAvatar' }, { name: 'ownerAvatar' }]), updateWalkin);
+router.post('/queue', upload.fields([{ name: 'petAvatar' }, { name: 'ownerAvatar' }]), createAppointment);
 router.delete('/queue/:id', deleteAppointment);
 
 module.exports = router;

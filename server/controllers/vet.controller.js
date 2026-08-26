@@ -94,8 +94,9 @@ const createAppointment = async (req, res) => {
       };
     }
 
-    if (req.file && walkInDetails) {
-      walkInDetails.petAvatarUrl = `/uploads/${req.file.filename}`;
+    if (req.files && walkInDetails) {
+      if (req.files['petAvatar']) walkInDetails.petAvatarUrl = '/uploads/' + req.files['petAvatar'][0].filename;
+      if (req.files['ownerAvatar']) walkInDetails.ownerAvatarUrl = '/uploads/' + req.files['ownerAvatar'][0].filename;
     }
 
     const mongoose = require('mongoose');
@@ -174,8 +175,9 @@ const updateWalkin = async (req, res) => {
 
     if (appointment.walkInDetails) {
       appointment.walkInDetails = { ...appointment.walkInDetails, ...walkInDetails };
-      if (req.file) {
-        appointment.walkInDetails.petAvatarUrl = '/uploads/' + req.file.filename;
+      if (req.files) {
+        if (req.files['petAvatar']) appointment.walkInDetails.petAvatarUrl = '/uploads/' + req.files['petAvatar'][0].filename;
+        if (req.files['ownerAvatar']) appointment.walkInDetails.ownerAvatarUrl = '/uploads/' + req.files['ownerAvatar'][0].filename;
       }
       await appointment.save();
     } else if (appointment.petId) {
@@ -188,8 +190,17 @@ const updateWalkin = async (req, res) => {
         pet.breed = walkInDetails.breed || pet.breed;
         pet.species = walkInDetails.species || pet.species;
         pet.age = walkInDetails.age || pet.age;
-        if (req.file) {
-          pet.avatarUrl = '/uploads/' + req.file.filename;
+        if (req.files) {
+          if (req.files['petAvatar']) pet.avatarUrl = '/uploads/' + req.files['petAvatar'][0].filename;
+        }
+        
+        if (req.files && req.files['ownerAvatar'] && appointment.ownerId) {
+          const User = mongoose.model('User');
+          const owner = await User.findById(appointment.ownerId);
+          if (owner) {
+            owner.avatarUrl = '/uploads/' + req.files['ownerAvatar'][0].filename;
+            await owner.save();
+          }
         }
         await pet.save();
       }

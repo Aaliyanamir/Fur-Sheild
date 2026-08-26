@@ -1,7 +1,7 @@
 ﻿import React, { useState, useEffect, useContext } from 'react';
 import { NavLink, Link, useLocation } from 'react-router-dom';
 import { AuthContext } from '../../context/AuthContext';
-import { LayoutDashboard, Stethoscope, HeartHandshake, ShoppingBag, Bell, Search, PawPrint, Menu, X, User, Settings, LogOut } from 'lucide-react';
+import { LayoutDashboard, Stethoscope, HeartHandshake, ShoppingBag, Bell, Search, PawPrint, Menu, X, User, Settings, LogOut, Calendar, ClipboardList, Activity, Home } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import { AnimatePresence, motion } from 'framer-motion';
 
@@ -15,12 +15,43 @@ export default function Navbar() {
     setIsMobileMenuOpen(false);
   }, [location]);
 
-  const navItems = [
-    { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
-    { name: 'Veterinarian', path: '/vet', icon: Stethoscope },
-    { name: 'Shelter', path: '/shelter', icon: HeartHandshake },
-    { name: 'Shop', path: '/shop', icon: ShoppingBag },
-  ];
+    const getNavItems = (user) => {
+    if (!user) {
+      return [
+        { name: 'Home', path: '/', icon: Home },
+        { name: 'Shop', path: '/shop', icon: ShoppingBag },
+        { name: 'Find a Vet', path: '/vet', icon: Stethoscope },
+      ];
+    }
+    
+    switch (user.role) {
+      case 'OWNER':
+        return [
+          { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
+          { name: 'My Pets', path: '/dashboard', icon: PawPrint },
+          { name: 'Shop', path: '/shop', icon: ShoppingBag },
+        ];
+      case 'VET':
+        return [
+          { name: 'Clinical Queue', path: '/vet', icon: Stethoscope },
+          { name: 'Appointments', path: '/vet', icon: Calendar },
+          { name: 'Shop', path: '/shop', icon: ShoppingBag },
+        ];
+      case 'SHELTER_ADMIN':
+        return [
+          { name: 'Shelter Portal', path: '/shelter', icon: HeartHandshake },
+          { name: 'Rescue Pipeline', path: '/shelter', icon: ClipboardList },
+          { name: 'Shop', path: '/shop', icon: ShoppingBag },
+        ];
+      default:
+        return [
+          { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
+          { name: 'Shop', path: '/shop', icon: ShoppingBag },
+        ];
+    }
+  };
+
+  const navItems = getNavItems(user);
 
   return (
     <>
@@ -326,6 +357,7 @@ export default function Navbar() {
     </>
   );
 }
+
 
 
 

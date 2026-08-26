@@ -259,7 +259,7 @@ export default function OwnerDashboard() {
                   <motion.div layoutId="activeTab" className="absolute inset-0 bg-camel-100 rounded-full -z-10" />
                 )}
                 <div className="w-6 h-6 rounded-full bg-camel-200 overflow-hidden">
-                   <img src={pet.avatarUrl || '/images/product-placeholder.jpg'} alt={pet.name} className="w-full h-full object-cover mix-blend-multiply" />
+                   <img src={pet.avatarUrl ? (pet.avatarUrl.startsWith('http') ? pet.avatarUrl : `http://localhost:5000${pet.avatarUrl}`) : '/images/product-placeholder.jpg'} alt={pet.name} className="w-full h-full object-cover mix-blend-multiply" />
                 </div>
                 <span className="text-sm">{pet.name}</span>
               </button>
@@ -294,7 +294,7 @@ export default function OwnerDashboard() {
             <div className="lg:col-span-4 lg:sticky lg:top-32 flex flex-col gap-6">
               <div className="bg-white rounded-[2rem] p-6 border border-camel-100 shadow-sm flex flex-col">
                 <div className="w-full aspect-[4/5] rounded-[1.5rem] overflow-hidden mb-6 relative group bg-camel-50 flex items-center justify-center">
-                  <img src={activePet.avatarUrl ? (activePet.avatarUrl.startsWith('http') ? activePet.avatarUrl : \http://localhost:5000\\) : '/images/product-placeholder.jpg'} alt={activePet.name} className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 mix-blend-multiply" />
+                  <img src={activePet.avatarUrl ? (activePet.avatarUrl.startsWith('http') ? activePet.avatarUrl : `http://localhost:5000${activePet.avatarUrl}`) : '/images/product-placeholder.jpg'} alt={activePet.name} className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 mix-blend-multiply" />
                 </div>
                 
                                   <div className="flex justify-between items-start mb-6">

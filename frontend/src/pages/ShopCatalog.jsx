@@ -23,7 +23,9 @@ export default function ShopCatalog() {
   const [checkoutStep, setCheckoutStep] = useState(1);
   const [isHistoryExpanded, setIsHistoryExpanded] = useState(false);
 
-  // Add these new states
+    // Add these new states
+  const [isCheckingOut, setIsCheckingOut] = useState(false);
+  const [checkoutSuccess, setCheckoutSuccess] = useState(false);
   const [liveProducts, setLiveProducts] = useState([]);
   const [isCatalogLoading, setIsCatalogLoading] = useState(true);
   const [catalogError, setCatalogError] = useState('');
@@ -47,6 +49,39 @@ export default function ShopCatalog() {
 
     fetchCatalog();
   }, []);
+
+  const handleCheckout = async () => {
+    if (cart.length === 0) return;
+    
+    setIsCheckingOut(true);
+    try {
+      // Create a mock shipping address for now
+      const mockAddress = {
+        street: '456 Innovation Drive',
+        city: 'Karachi',
+        state: 'Sindh',
+        zip: '75000'
+      };
+
+      const response = await shopService.checkout(cart, mockAddress);
+      
+      if (response.success) {
+        setCheckoutSuccess(true);
+        // Clear cart after a short delay for cinematic effect
+        setTimeout(() => {
+          setCart([]);
+          setCheckoutSuccess(false);
+          setIsCartOpen(false);
+          // Optional: You could trigger a refresh of the Order History vault here
+        }, 2000);
+      }
+    } catch (error) {
+      console.error("Checkout failed:", error);
+      alert("Checkout failed. Please try again.");
+    } finally {
+      setIsCheckingOut(false);
+    }
+  };
 
   // Advanced Cart Logic
   const addToCart = (product, qty, auto) => {
@@ -762,13 +797,23 @@ export default function ShopCatalog() {
                   <span className="font-bold text-espresso-500 text-sm">Shipping</span>
                   <span className="font-bold text-emerald-500 text-sm">{shippingProgress >= 100 ? 'Free' : 'Calculated at checkout'}</span>
                 </div>
-                <button 
-                  disabled={cart.length === 0}
-                  onClick={() => { setIsCartOpen(false); setIsCheckoutOpen(true); }}
-                  className="w-full bg-espresso-900 hover:bg-espresso-800 disabled:opacity-50 text-white py-4.5 rounded-full font-bold text-sm tracking-wide transition-all shadow-xl flex justify-center items-center gap-2 h-14"
-                >
-                  Checkout <span className="font-black">${cartTotal.toFixed(2)}</span>
-                </button>
+                                  <button 
+                    onClick={handleCheckout}
+                    disabled={isCheckingOut || checkoutSuccess || cart.length === 0}
+                    className={`w-full py-4.5 rounded-full font-bold text-sm tracking-wide transition-all shadow-xl flex justify-center items-center gap-2 h-14 ${
+                      checkoutSuccess 
+                        ? 'bg-emerald-500 hover:bg-emerald-600 text-white shadow-emerald-500/20' 
+                        : 'bg-espresso-900 hover:bg-espresso-800 text-white shadow-espresso-900/20 disabled:opacity-50'
+                    }`}
+                  >
+                    {isCheckingOut ? (
+                      <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                    ) : checkoutSuccess ? (
+                      <>Order Confirmed! <ShieldCheck size={16} /></>
+                    ) : (
+                      <>Checkout <span className="font-black">${cartTotal.toFixed(2)}</span></>
+                    )}
+                  </button>
               </div>
             </motion.div>
           </>
@@ -893,6 +938,8 @@ export default function ShopCatalog() {
     </div>
   );
 }
+
+
 
 
 

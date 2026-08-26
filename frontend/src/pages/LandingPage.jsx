@@ -1,6 +1,6 @@
 ﻿import React from 'react';
 import { Link, NavLink } from 'react-router-dom';
-import { LayoutDashboard, Stethoscope, HeartHandshake, ShoppingBag, ArrowRight, Play, PawPrint, Activity, ShieldCheck } from 'lucide-react';
+import { LayoutDashboard, Stethoscope, HeartHandshake, ShoppingBag, ArrowRight, PawPrint } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { cn } from '../lib/utils';
 
@@ -12,28 +12,38 @@ export default function LandingPage() {
     { name: 'Shop', path: '/shop', icon: ShoppingBag },
   ];
 
-  const marqueeItems = [
-    "NEXT-GEN VETERINARY DIAGNOSTICS", "•",
-    "UNIFIED SHELTER MANAGEMENT", "•",
-    "SEAMLESS ADOPTION PIPELINE", "•",
-    "REAL-TIME PET HEALTH TRACKING", "•",
-    "SECURE MEDICAL RECORDS", "•",
-  ];
+  // Animation variants for staggered text reveal
+  const container = {
+    hidden: { opacity: 0 },
+    show: { opacity: 1, transition: { staggerChildren: 0.15, delayChildren: 0.3 } }
+  };
+  const item = {
+    hidden: { opacity: 0, y: 40 },
+    show: { opacity: 1, y: 0, transition: { duration: 0.8, ease: [0.16, 1, 0.3, 1] } }
+  };
 
   return (
-    <div className="relative min-h-screen flex flex-col font-sans overflow-hidden bg-espresso-900">
+    <div className="relative min-h-screen flex flex-col font-sans bg-espresso-900 selection:bg-camel-500 selection:text-white overflow-hidden">
       
       {/* --- Immersive Cinematic Video Background --- */}
       <div className="absolute inset-0 z-0">
-        <video autoPlay loop muted playsInline className="w-full h-full object-cover scale-[1.02]">
+        <video autoPlay loop muted playsInline className="w-full h-full object-cover scale-[1.02] opacity-80">
           <source src="https://cdn.pixabay.com/video/2021/08/04/83908-584742637_large.mp4" type="video/mp4" />
         </video>
-        {/* Complex Gradient Overlays for High-Contrast Text */}
         <div className="absolute inset-0 bg-espresso-900/60 mix-blend-multiply"></div>
-        <div className="absolute inset-0 bg-gradient-to-b from-espresso-900/80 via-transparent to-espresso-900/95"></div>
+        <div className="absolute inset-0 bg-gradient-to-r from-espresso-900/95 via-espresso-900/70 to-transparent"></div>
+        <div className="absolute inset-0 bg-gradient-to-t from-espresso-900/90 via-transparent to-transparent"></div>
       </div>
 
-      {/* --- Premium Public Navbar (Kept from Final Approval) --- */}
+      {/* --- Architectural Grid Overlay --- */}
+      <div className="absolute inset-0 z-0 pointer-events-none flex justify-between px-6 lg:px-12">
+        <div className="w-[1px] h-full bg-white/5"></div>
+        <div className="w-[1px] h-full bg-white/5 hidden md:block"></div>
+        <div className="w-[1px] h-full bg-white/5 hidden lg:block"></div>
+        <div className="w-[1px] h-full bg-white/5"></div>
+      </div>
+
+      {/* --- Premium Public Navbar (Pristine Approved Version) --- */}
       <motion.div 
         initial={{ y: -100, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
@@ -140,97 +150,67 @@ export default function LandingPage() {
         </header>
       </motion.div>
 
-      {/* --- Spatial / Kinetic Hero Content --- */}
-      <main className="relative z-10 flex-1 flex flex-col items-center justify-center w-full max-w-7xl mx-auto px-6 lg:px-12 mt-32 mb-24">
+      {/* --- Vertical Typographic Accent (Editorial Detail) --- */}
+      <motion.div 
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 1, duration: 1 }}
+        className="hidden xl:block absolute left-8 top-1/2 -translate-y-1/2 -rotate-90 origin-left z-20"
+      >
+        <p className="text-[10px] tracking-[0.4em] uppercase text-white/40 font-bold whitespace-nowrap">
+          FurShield Architecture v1.0
+        </p>
+      </motion.div>
+
+      {/* --- Architectural Hero Content --- */}
+      <main className="relative z-10 flex-1 flex flex-col justify-center w-full max-w-7xl mx-auto px-6 lg:px-12 pt-32 pb-20">
         
-        {/* Floating Glassmorphic Widgets (Scroll Activated) */}
         <motion.div 
-          initial={{ x: -100, opacity: 0 }}
-          whileInView={{ x: 0, opacity: 1 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.8, delay: 0.2 }}
-          className="hidden lg:flex absolute left-8 top-1/4 animate-float flex-col gap-2 p-4 rounded-2xl bg-white/5 backdrop-blur-xl border border-white/10"
+          variants={container}
+          initial="hidden"
+          animate="show"
+          className="max-w-4xl"
         >
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-full bg-emerald-500/20 flex items-center justify-center"><Activity size={16} className="text-emerald-400" /></div>
-            <div>
-              <p className="text-[10px] text-white/50 uppercase tracking-widest font-bold">System Status</p>
-              <p className="text-sm text-white font-medium">All APIs Operational</p>
-            </div>
-          </div>
-        </motion.div>
+          {/* Subtle Overline */}
+          <motion.div variants={item} className="flex items-center gap-4 mb-8">
+            <span className="w-12 h-[1px] bg-camel-400"></span>
+            <span className="text-[11px] font-bold tracking-[0.3em] text-camel-300 uppercase">
+              Next-Generation Platform
+            </span>
+          </motion.div>
 
-        <motion.div 
-          initial={{ x: 100, opacity: 0 }}
-          whileInView={{ x: 0, opacity: 1 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.8, delay: 0.4 }}
-          className="hidden lg:flex absolute right-8 bottom-1/3 animate-float flex-col gap-2 p-4 rounded-2xl bg-white/5 backdrop-blur-xl border border-white/10"
-          style={{ animationDelay: '2s' }}
-        >
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-full bg-camel-500/20 flex items-center justify-center"><ShieldCheck size={16} className="text-camel-400" /></div>
-            <div>
-              <p className="text-[10px] text-white/50 uppercase tracking-widest font-bold">Data Security</p>
-              <p className="text-sm text-white font-medium">End-to-End Encrypted</p>
-            </div>
-          </div>
-        </motion.div>
-
-        {/* Central Core Content (Slide Up) */}
-        <motion.div 
-          initial={{ y: 50, opacity: 0 }}
-          whileInView={{ y: 0, opacity: 1 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.8 }}
-          className="flex flex-col items-center text-center max-w-4xl z-10"
-        >
-          <h1 className="text-[3.5rem] sm:text-7xl lg:text-[7rem] font-display font-black text-white tracking-tighter leading-[0.95] drop-shadow-2xl">
-            Beyond <span className="text-transparent bg-clip-text bg-gradient-to-r from-camel-300 via-camel-400 to-camel-600">Standard</span><br/>Pet Care.
-          </h1>
+          {/* Massive Minimalist Typography */}
+          <motion.h1 variants={item} className="text-[4rem] sm:text-[5.5rem] lg:text-[7rem] font-display font-bold text-white tracking-tighter leading-[0.9] mb-8">
+            Beyond <br/>
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-camel-300 to-camel-600 italic font-medium pr-4">Standard</span><br/>
+            Pet Care.
+          </motion.h1>
           
-          <p className="mt-8 text-lg md:text-xl text-white/70 font-medium max-w-2xl leading-relaxed drop-shadow-md">
-            An enterprise-grade ecosystem uniting pet owners, clinical veterinarians, and rescue shelters into one synchronized reality.
-          </p>
+          <motion.p variants={item} className="text-base sm:text-lg text-white/70 font-medium max-w-xl leading-relaxed mb-12 pl-1 border-l border-white/20 ml-2">
+            An enterprise-grade ecosystem uniting pet owners, clinical veterinarians, and rescue shelters into one meticulously engineered reality.
+          </motion.p>
 
-          {/* Bespoke Interactive Portal CTA */}
-          <motion.div 
-            initial={{ scale: 0.9, opacity: 0 }}
-            whileInView={{ scale: 1, opacity: 1 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.5, delay: 0.3 }}
-            className="mt-12"
-          >
+          {/* Bespoke Expanding-Line CTA */}
+          <motion.div variants={item} className="flex flex-col sm:flex-row items-start sm:items-center gap-8 pl-3">
             <Link 
               to="/dashboard" 
-              className="group relative inline-flex items-center gap-6 bg-white/5 backdrop-blur-xl border border-white/20 pl-8 pr-2 py-2 rounded-full overflow-hidden transition-all hover:bg-white/10 hover:border-camel-400/50 hover:shadow-[0_0_40px_rgba(186,127,72,0.2)]"
+              className="group flex items-center gap-5 cursor-pointer"
             >
-              <span className="text-white font-bold text-sm tracking-widest uppercase">Initialize Workspace</span>
-              <div className="w-12 h-12 bg-camel-500 rounded-full flex items-center justify-center text-white transition-all duration-300 group-hover:scale-105 group-hover:bg-camel-400">
-                <ArrowRight size={20} strokeWidth={2.5} className="group-hover:translate-x-1 transition-transform" />
+              <div className="flex items-center justify-center w-12 h-12 rounded-full border border-camel-500 text-camel-400 group-hover:bg-camel-500 group-hover:text-white transition-all duration-300">
+                <ArrowRight size={18} strokeWidth={2} className="group-hover:-rotate-45 transition-transform duration-300" />
+              </div>
+              <div className="flex flex-col">
+                <span className="text-[11px] font-black tracking-[0.2em] uppercase text-white group-hover:text-camel-300 transition-colors">
+                  Initialize Workspace
+                </span>
+                {/* Animated underline */}
+                <div className="h-[2px] w-8 bg-camel-500 mt-1 group-hover:w-full transition-all duration-500 ease-out"></div>
               </div>
             </Link>
           </motion.div>
+
         </motion.div>
       </main>
-
-      {/* --- Infinite Animated Ticker (Marquee) --- */}
-      <div className="absolute bottom-0 w-full overflow-hidden bg-espresso-900/80 backdrop-blur-md border-t border-white/10 py-3 z-20">
-        <div className="flex whitespace-nowrap animate-marquee">
-          {/* Render twice for seamless looping */}
-          {[...marqueeItems, ...marqueeItems, ...marqueeItems, ...marqueeItems].map((text, i) => (
-            <span 
-              key={i} 
-              className={cn(
-                "mx-4 text-xs font-black tracking-[0.2em] uppercase",
-                text === "•" ? "text-camel-500" : "text-white/60"
-              )}
-            >
-              {text}
-            </span>
-          ))}
-        </div>
-      </div>
       
     </div>
   );

@@ -1,11 +1,13 @@
 ﻿import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Calendar, Plus, Flame, Moon, Droplets, CheckCircle2, Circle, ArrowRight, Footprints, Loader2 } from 'lucide-react';
 import { fetchDashboardData } from '../services/api';
+import AddRecordModal from '../components/organisms/AddRecordModal';
 
 export default function OwnerDashboard() {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
     const loadData = async () => {
@@ -18,7 +20,7 @@ export default function OwnerDashboard() {
   }, []);
 
   // Action Handlers
-  const handleAddRecord = () => alert("Opening 'Add New Record' Modal...");
+  const handleAddRecord = () => setIsModalOpen(true);
   const handleManageAppointment = () => alert("Navigating to Appointment Scheduler...");
   const handleViewProfile = () => alert("Loading full pet profile...");
 
@@ -135,12 +137,10 @@ export default function OwnerDashboard() {
                 <div className="relative">
                   <div className="absolute -left-[25px] bg-white p-1 rounded-full"><CheckCircle2 className="text-emerald-500" size={18} /></div>
                   <p className="font-bold text-espresso-900 text-sm">Vaccination - DHPP</p>
-                  <p className="text-xs font-medium text-espresso-500 mt-1">Oct 20, 2024 • Dr. Emily Carter</p>
                 </div>
                 <div className="relative">
                   <div className="absolute -left-[25px] bg-white p-1 rounded-full"><Circle className="text-camel-500 fill-camel-100" size={18} /></div>
                   <p className="font-bold text-espresso-900 text-sm">Annual Checkup</p>
-                  <p className="text-xs font-medium text-camel-600 mt-1">Nov 10, 2024 • 10:30 AM</p>
                 </div>
               </div>
             </motion.div>
@@ -157,7 +157,6 @@ export default function OwnerDashboard() {
                   </div>
                   <div>
                     <p className="font-bold text-espresso-900 text-sm mb-1">General Checkup</p>
-                    <p className="text-xs font-medium text-espresso-600 flex items-center gap-1"><Calendar size={12}/> Dr. Mark Thorne</p>
                   </div>
                 </div>
                 
@@ -169,6 +168,11 @@ export default function OwnerDashboard() {
           </div>
         </div>
       </motion.div>
+
+      {/* Modals rendered outside the normal flow */}
+      <AnimatePresence>
+        <AddRecordModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
+      </AnimatePresence>
     </>
   );
 }

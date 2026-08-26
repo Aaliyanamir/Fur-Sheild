@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, Legend, Cell, PieChart, Pie } from 'recharts';
-import { Activity, Download, Heart, Users, AlertCircle, Sparkles, TrendingUp, ChevronRight, Stethoscope, FileText, CheckCircle2 } from 'lucide-react';
+import { Activity, Download, Heart, Users, AlertCircle, Sparkles, TrendingUp, ChevronRight, Stethoscope, FileText, CheckCircle2, LayoutGrid } from 'lucide-react';
 import shelterService from '../services/shelter.service';
 
 

@@ -75,7 +75,7 @@ const updateVitalsAndNotes = async (req, res) => {
 // @access  Private/Vet
 const createAppointment = async (req, res) => {
   try {
-    const { petId, reason, severity, ownerId: reqOwnerId } = req.body;
+    const { petId, reason, severity, ownerId: reqOwnerId, walkInDetails } = req.body;
     const mongoose = require('mongoose');
     let ownerId = reqOwnerId;
     
@@ -85,11 +85,13 @@ const createAppointment = async (req, res) => {
       if (pet) ownerId = pet.ownerId;
     }
 
-    if (!ownerId) ownerId = req.user.id; 
+    // if no petId, it's a pure walkin
+    if (!ownerId && !walkInDetails) ownerId = req.user.id; 
 
     const appointment = await Appointment.create({
-      petId,
-      ownerId,
+      petId: petId || undefined,
+      ownerId: ownerId || undefined,
+      walkInDetails,
       vetId: req.user.id,
       status: 'WAITING',
       severity: severity || 'ROUTINE',

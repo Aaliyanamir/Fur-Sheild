@@ -1,15 +1,22 @@
-﻿const mongoose = require('mongoose');
+const mongoose = require('mongoose');
 
 const appointmentSchema = new mongoose.Schema({
   petId: { 
     type: mongoose.Schema.Types.ObjectId, 
-    ref: 'Pet', 
-    required: true 
+    ref: 'Pet',
+    required: false
   },
   ownerId: { 
     type: mongoose.Schema.Types.ObjectId, 
-    ref: 'User', 
-    required: true 
+    ref: 'User',
+    required: false
+  },
+  walkInDetails: {
+    petName: String,
+    breed: String,
+    species: String,
+    age: String,
+    ownerName: String
   },
   vetId: { 
     type: mongoose.Schema.Types.ObjectId, 
@@ -37,4 +44,3 @@ const appointmentSchema = new mongoose.Schema({
 }, { timestamps: true });
 
 module.exports = mongoose.model('Appointment', appointmentSchema);
-

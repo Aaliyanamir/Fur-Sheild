@@ -27,8 +27,14 @@ const appointmentSchema = new mongoose.Schema({
   },
   reason: { type: String, required: true },
   medicalNotes: { type: String },
+  vitals: {
+    weight: Number,
+    temperature: Number,
+    heartRate: Number
+  },
   scheduledAt: { type: Date, required: true },
   completedAt: { type: Date }
 }, { timestamps: true });
 
 module.exports = mongoose.model('Appointment', appointmentSchema);
+

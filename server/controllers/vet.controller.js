@@ -67,4 +67,4 @@ const addMedicalNotes = async (req, res) => {
   }
 };
 
-module.exports = { getQueue, updateAppointmentStatus, addMedicalNotes };
+module.exports = { getQueue, updateAppointmentStatus, updateVitalsAndNotes, createAppointment, deleteAppointment };

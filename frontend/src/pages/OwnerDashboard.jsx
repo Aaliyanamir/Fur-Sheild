@@ -1,6 +1,6 @@
 ﻿import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Calendar, Plus, Flame, Moon, Droplets, CheckCircle2, Circle, ArrowRight, Footprints, Loader2, PawPrint, HeartHandshake, Syringe } from 'lucide-react';
+import { Calendar, Plus, Flame, Moon, Droplets, CheckCircle2, Circle, ArrowRight, Footprints, Loader2, PawPrint, HeartHandshake, Syringe, Stethoscope } from 'lucide-react';
 import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip } from 'recharts';
 import { fetchDashboardData } from '../services/api';
 import AddRecordModal from '../components/organisms/AddRecordModal';
@@ -90,7 +90,7 @@ export default function OwnerDashboard() {
       </div>
 
       {/* Master Grid - Clean & Warm */}
-      <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }} className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.6 }} className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
         
         {/* LEFT COLUMN: Clean ID Card (Col 4) */}
         <div className="lg:col-span-4 lg:sticky lg:top-32 flex flex-col gap-6">
@@ -129,21 +129,25 @@ export default function OwnerDashboard() {
         {/* RIGHT COLUMN: Warm Data Widgets (Col 8) */}
         <div className="lg:col-span-8 flex flex-col gap-8">
           
-          {/* Pet-Centric Health Summary */}
-          <div className="bg-camel-600 rounded-[2rem] p-8 md:p-10 text-white relative overflow-hidden flex flex-col md:flex-row gap-8 items-center shadow-md">
-            <div className="absolute top-0 right-0 w-64 h-64 bg-camel-500 rounded-full blur-3xl opacity-50 pointer-events-none"></div>
-            
-            <div className="w-20 h-20 shrink-0 bg-white/20 backdrop-blur-sm rounded-[1.5rem] flex items-center justify-center relative z-10 border border-white/20 shadow-inner">
-              <HeartHandshake size={36} className="text-white" />
+                    {/* Clinical Insight (Doctor's Note Style) */}
+          <div className="bg-[#FAF8F5] rounded-[2rem] p-8 md:p-10 border border-camel-100 shadow-sm flex flex-col md:flex-row gap-8 items-start relative overflow-hidden">
+            <div className="w-16 h-16 shrink-0 bg-white rounded-full flex items-center justify-center border border-camel-200 shadow-sm z-10 relative">
+              <Stethoscope size={28} className="text-camel-600" />
             </div>
             
             <div className="relative z-10">
-              <h3 className="text-camel-200 text-xs font-bold uppercase tracking-widest mb-2 flex items-center gap-2">
-                Veterinary Summary
+              <h3 className="text-espresso-900 text-xs font-bold uppercase tracking-widest mb-3 flex items-center gap-2">
+                Clinical Insight
+                <span className="w-1.5 h-1.5 rounded-full bg-camel-500"></span>
               </h3>
-              <p className="text-lg md:text-xl font-medium leading-relaxed">
-                Buddy's weight has stabilized perfectly at 28.6 kg. The reduced calorie intake is working, relieving joint stress. Keep up the great work!
+              <p className="text-lg md:text-xl font-medium leading-relaxed text-espresso-800 italic">
+                "Buddy's weight has stabilized perfectly at 28.6 kg. The reduced calorie intake is working, relieving joint stress. Keep up the great work!"
               </p>
+              <p className="text-sm font-bold text-camel-600 mt-4">— Dr. Mark Thorne</p>
+            </div>
+            
+            <div className="absolute -bottom-10 -right-10 text-camel-200 opacity-30 pointer-events-none">
+              <Stethoscope size={160} strokeWidth={0.5} className="-rotate-12" />
             </div>
           </div>
 
@@ -264,3 +268,4 @@ export default function OwnerDashboard() {
     </>
   );
 }
+

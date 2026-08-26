@@ -30,7 +30,10 @@ export default function ShelterHub() {
   const [selectedPet, setSelectedPet] = useState(null);
 
   // Forms
-  const [intakeForm, setIntakeForm] = useState({ name: '', breed: '', species: 'Dog', behaviorNotes: '' });
+  const [intakeForm, setIntakeForm] = useState({ name: '', breed: '', species: 'Dog', age: '', behaviorNotes: '' });
+  const [isLogModalOpen, setIsLogModalOpen] = useState(false);
+  const [logForm, setLogForm] = useState({ activityType: 'Feeding', notes: '' });
+  const [logPetId, setLogPetId] = useState(null);
   const [intakeImageFile, setIntakeImageFile] = useState(null);
   const [intakeImagePreview, setIntakeImagePreview] = useState(null);
 
@@ -109,6 +112,7 @@ export default function ShelterHub() {
     formData.append('name', intakeForm.name);
     formData.append('breed', intakeForm.breed);
     formData.append('species', intakeForm.species);
+      if(intakeForm.age) formData.append('age', intakeForm.age);
     formData.append('behaviorNotes', intakeForm.behaviorNotes);
     if (intakeImageFile) formData.append('avatar', intakeImageFile);
     if (aiResult) formData.append('aiTriageLog', JSON.stringify({ log: intakeForm.behaviorNotes, severity: aiResult.severity }));
@@ -328,6 +332,7 @@ export default function ShelterHub() {
                             <div className="flex-1 min-w-0 pt-1">
                               <div className="flex justify-between items-start mb-0.5">
                                 <h4 className="text-lg font-display font-black text-espresso-900 truncate">{pet.name}</h4>
+                                  <button onClick={(e) => openLogModal(e, pet)} className="w-6 h-6 rounded-full bg-camel-50 hover:bg-camel-200 text-camel-600 flex items-center justify-center transition-colors" title="Add Daily Log"><FileDigit size={12}/></button>
                                 <span className="text-[9px] font-bold uppercase tracking-wider text-espresso-400 bg-[#FAF8F5] px-2 py-1 rounded-md">{pet._id.slice(-5).toUpperCase()}</span>
                               </div>
                               <p className="text-xs font-bold text-camel-600 truncate">{pet.breed || pet.species}</p>
@@ -460,12 +465,23 @@ export default function ShelterHub() {
                        <label className="block text-xs font-bold text-espresso-900 uppercase tracking-widest mb-2 px-1">Animal Name</label>
                        <input type="text" required value={intakeForm.name} onChange={e => setIntakeForm({...intakeForm, name: e.target.value})} className="w-full bg-white border border-camel-200 rounded-xl px-4 py-3 text-sm focus:border-camel-500 focus:ring-4 focus:ring-camel-50 transition-all" placeholder="e.g. Max" />
                      </div>
-                     <div>
-                       <label className="block text-xs font-bold text-espresso-900 uppercase tracking-widest mb-2 px-1">Species</label>
-                       <select value={intakeForm.species} onChange={e => setIntakeForm({...intakeForm, species: e.target.value})} className="w-full bg-white border border-camel-200 rounded-xl px-4 py-3 text-sm focus:border-camel-500 focus:ring-4 focus:ring-camel-50 transition-all appearance-none">
-                         <option>Dog</option><option>Cat</option><option>Other</option>
-                       </select>
+                     
+                     <div className="grid grid-cols-2 gap-4">
+                       <div>
+                         <label className="block text-xs font-bold text-espresso-900 uppercase tracking-widest mb-2 px-1">Species</label>
+                         <select value={intakeForm.species} onChange={e => setIntakeForm({...intakeForm, species: e.target.value})} className="w-full bg-white border border-camel-200 rounded-xl px-4 py-3 text-sm focus:border-camel-500 transition-all appearance-none">
+                           <option>Dog</option>
+                           <option>Cat</option>
+                           <option>Bird</option>
+                           <option>Other</option>
+                         </select>
+                       </div>
+                       <div>
+                         <label className="block text-xs font-bold text-espresso-900 uppercase tracking-widest mb-2 px-1">Estimated Age</label>
+                         <input type="text" value={intakeForm.age} onChange={e => setIntakeForm({...intakeForm, age: e.target.value})} className="w-full bg-white border border-camel-200 rounded-xl px-4 py-3 text-sm focus:border-camel-500 transition-all" placeholder="e.g. 2 yrs" />
+                       </div>
                      </div>
+
                    </div>
                    
                    <div>
@@ -592,6 +608,45 @@ export default function ShelterHub() {
                            <Trash2 size={16}/> Remove Rescue
                          </button>
                        </div>
+                    </form>
+                 </div>
+              </motion.div>
+            </div>
+          </>
+        )}
+      </AnimatePresence>
+
+
+      {/* Daily Log Modal */}
+      <AnimatePresence>
+        {isLogModalOpen && (
+          <>
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 bg-espresso-900/60 backdrop-blur-sm z-[200]" onClick={() => setIsLogModalOpen(false)} />
+            <div className="fixed inset-0 z-[210] flex items-center justify-center p-4 pointer-events-none">
+              <motion.div initial={{ opacity: 0, scale: 0.95, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 20 }} className="bg-[#FAF8F5] rounded-[2rem] w-full max-w-sm shadow-2xl pointer-events-auto flex flex-col overflow-hidden">
+                 <div className="p-6 border-b border-camel-100 flex justify-between items-center bg-white">
+                    <h2 className="text-xl font-display font-black text-espresso-900">Add Daily Log</h2>
+                    <button onClick={() => setIsLogModalOpen(false)} className="w-8 h-8 rounded-full bg-white border border-camel-200 flex items-center justify-center text-espresso-400 hover:text-espresso-900 transition-colors shadow-sm"><X size={16}/></button>
+                 </div>
+                 <div className="p-8">
+                    <form onSubmit={handleLogSubmit} className="space-y-5">
+                       <div>
+                         <label className="block text-xs font-bold text-espresso-900 uppercase tracking-widest mb-2 px-1">Activity Type</label>
+                         <select required value={logForm.activityType} onChange={e => setLogForm({...logForm, activityType: e.target.value})} className="w-full bg-white border border-camel-200 rounded-xl px-4 py-3 text-sm focus:border-camel-500 transition-all appearance-none">
+                           <option>Feeding</option>
+                           <option>Grooming</option>
+                           <option>Medication</option>
+                           <option>Walk/Exercise</option>
+                           <option>Other</option>
+                         </select>
+                       </div>
+                       <div>
+                         <label className="block text-xs font-bold text-espresso-900 uppercase tracking-widest mb-2 px-1">Notes</label>
+                         <textarea required rows="4" value={logForm.notes} onChange={e => setLogForm({...logForm, notes: e.target.value})} className="w-full bg-white border border-camel-200 rounded-xl px-4 py-3 text-sm focus:border-camel-500 transition-all resize-none" placeholder="Add specific details here..." />
+                       </div>
+                       <button type="submit" className="w-full bg-espresso-900 hover:bg-espresso-800 text-white py-3 rounded-xl font-bold text-sm tracking-wide transition-all shadow-md mt-2 flex items-center justify-center gap-2">
+                         <Activity size={16} /> Save Log
+                       </button>
                     </form>
                  </div>
               </motion.div>

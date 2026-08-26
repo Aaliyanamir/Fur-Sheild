@@ -19,6 +19,7 @@ const Avatar = ({ src, alt, name, className }) => {
 
 export default function ShelterDashboard() {
   const [pipelineData, setPipelineData] = useState([]);
+  const [adoptionRequests, setAdoptionRequests] = useState([]);
   const [loading, setLoading] = useState(true);
   
   // Modals
@@ -33,12 +34,28 @@ export default function ShelterDashboard() {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [aiResult, setAiResult] = useState(null);
 
+  
+  const handleRequestStatus = async (id, status) => {
+    try {
+      const res = await shelterService.updateAdoptionRequestStatus(id, status);
+      if (res.success) {
+        // Refresh data
+        const [pipeRes, reqRes] = await Promise.all([shelterService.getPipeline(), shelterService.getAdoptionRequests()]);
+        if (pipeRes.success) setPipelineData(pipeRes.data);
+        if (reqRes.success) setAdoptionRequests(reqRes.data);
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const res = await shelterService.getPipeline();
+        const [res, requestsRes] = await Promise.all([shelterService.getPipeline(), shelterService.getAdoptionRequests()]);
         if (res.success) {
           setPipelineData(res.data);
+        if (requestsRes.success) setAdoptionRequests(requestsRes.data);
         }
       } catch (error) {
         console.error("Error fetching pipeline:", error);

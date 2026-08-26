@@ -4,6 +4,15 @@ const shelterAnimalSchema = new mongoose.Schema({
   name: { type: String, required: [true, 'Animal name is required'] },
   species: { type: String },
   breed: { type: String },
+
+  age: { type: String },
+  dailyLogs: [{
+    date: { type: Date, default: Date.now },
+    activityType: { type: String, enum: ['Feeding', 'Grooming', 'Medication', 'Walk/Exercise', 'Other'] },
+    notes: { type: String },
+    loggedBy: { type: String }
+  }],
+
   avatarUrl: { type: String },
   intakeDate: { type: Date, default: Date.now },
   status: { 

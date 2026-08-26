@@ -17,6 +17,7 @@ import ShelterDashboard from './pages/ShelterDashboard';
 import ShopCatalog from './pages/ShopCatalog';
 import UserProfile from './pages/UserProfile';
 import Settings from './pages/Settings';
+import AdoptionCatalog from './pages/AdoptionCatalog';
 import BookAppointment from './pages/BookAppointment';
 import MyOrders from './pages/MyOrders';
 import NotFound from './pages/NotFound';
@@ -30,6 +31,7 @@ export default function App() {
           <Route path="/" element={<LandingPage />} />
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
+        <Route path="/adopt" element={<AdoptionCatalog />} />
           
           {/* App Routes wrapped in the Global Layout */}
           <Route element={<GlobalLayout />}>

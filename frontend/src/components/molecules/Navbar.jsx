@@ -19,6 +19,7 @@ export default function Navbar() {
     if (!user) {
       return [
         { name: 'Home', path: '/', icon: Home },
+        { name: 'Adopt', path: '/adopt', icon: HeartHandshake },
         { name: 'Shop', path: '/shop', icon: ShoppingBag },
         { name: 'Find a Vet', path: '/vet', icon: Stethoscope },
       ];
@@ -29,6 +30,7 @@ export default function Navbar() {
         return [
           { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
           { name: 'My Pets', path: '/my-pets', icon: PawPrint },
+          { name: 'Adopt', path: '/adopt', icon: HeartHandshake },
           { name: 'Shop', path: '/shop', icon: ShoppingBag },
         ];
       case 'VET':

@@ -1,6 +1,7 @@
 ﻿import React from 'react';
 import { Link, NavLink } from 'react-router-dom';
-import { ArrowRight, PlayCircle, Play, PawPrint, LayoutDashboard, Stethoscope, HeartHandshake, ShoppingBag } from 'lucide-react';
+import { LayoutDashboard, Stethoscope, HeartHandshake, ShoppingBag, ArrowRight, Play, PawPrint, Activity, ShieldCheck } from 'lucide-react';
+import { motion } from 'framer-motion';
 import { cn } from '../lib/utils';
 
 export default function LandingPage() {
@@ -11,26 +12,34 @@ export default function LandingPage() {
     { name: 'Shop', path: '/shop', icon: ShoppingBag },
   ];
 
+  const marqueeItems = [
+    "NEXT-GEN VETERINARY DIAGNOSTICS", "•",
+    "UNIFIED SHELTER MANAGEMENT", "•",
+    "SEAMLESS ADOPTION PIPELINE", "•",
+    "REAL-TIME PET HEALTH TRACKING", "•",
+    "SECURE MEDICAL RECORDS", "•",
+  ];
+
   return (
-    <div className="relative min-h-screen flex flex-col font-sans overflow-hidden">
+    <div className="relative min-h-screen flex flex-col font-sans overflow-hidden bg-espresso-900">
       
-      {/* --- Video Background Section --- */}
+      {/* --- Immersive Cinematic Video Background --- */}
       <div className="absolute inset-0 z-0">
-        <video 
-          autoPlay 
-          loop 
-          muted 
-          playsInline 
-          className="w-full h-full object-cover"
-        >
+        <video autoPlay loop muted playsInline className="w-full h-full object-cover scale-[1.02]">
           <source src="https://cdn.pixabay.com/video/2021/08/04/83908-584742637_large.mp4" type="video/mp4" />
         </video>
+        {/* Complex Gradient Overlays for High-Contrast Text */}
         <div className="absolute inset-0 bg-espresso-900/60 mix-blend-multiply"></div>
-        <div className="absolute inset-0 bg-gradient-to-t from-espresso-900/90 via-transparent to-transparent"></div>
+        <div className="absolute inset-0 bg-gradient-to-b from-espresso-900/80 via-transparent to-espresso-900/95"></div>
       </div>
 
-      {/* --- Premium Public Navbar (Matching Finalized Dashboard Aesthetic) --- */}
-      <div className="fixed top-4 md:top-6 left-0 right-0 z-50 flex justify-center px-4 pointer-events-none">
+      {/* --- Premium Public Navbar (Kept from Final Approval) --- */}
+      <motion.div 
+        initial={{ y: -100, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+        className="fixed top-4 md:top-6 left-0 right-0 z-50 flex justify-center px-4 pointer-events-none"
+      >
         <header className="relative w-full max-w-5xl h-[64px] md:h-[72px] bg-white rounded-[32px] md:rounded-[40px] shadow-[0_15px_40px_rgba(0,0,0,0.15)] border border-camel-100/50 flex items-center justify-between overflow-hidden pointer-events-auto transition-all duration-300">
           
           {/* RIGHT ZONE SWOOP BACKGROUND - Perfect SVG curve */}
@@ -51,7 +60,7 @@ export default function LandingPage() {
 
           <div className="relative z-10 flex items-center justify-between w-full h-full px-2">
             
-            {/* Left: Logo (Exact match to Dashboard Watercolor/Script Logo) */}
+            {/* Left: Logo */}
             <Link to="/" className="flex items-center gap-2 md:gap-3 pl-3 md:pl-4 md:pr-4 lg:pr-8 shrink-0 hover:opacity-80 transition-opacity">
               <div className="relative w-9 h-9 md:w-11 md:h-11 flex items-center justify-center transition-all duration-300">
                 <div className="absolute inset-0 bg-camel-200 rounded-full mix-blend-multiply filter blur-[3px] opacity-80 scale-110 rotate-12"></div>
@@ -72,7 +81,7 @@ export default function LandingPage() {
               </div>
             </Link>
 
-            {/* Center: Replicated Dashboard Navigation (Using Exact Dashboard Code) */}
+            {/* Center: Dashboard Navigation Sync */}
             <nav className="hidden md:flex items-center gap-1 md:gap-2 lg:gap-6 h-full pt-1">
               {navItems.map((item) => {
                 const Icon = item.icon;
@@ -129,64 +138,100 @@ export default function LandingPage() {
 
           </div>
         </header>
-      </div>
+      </motion.div>
 
-      {/* --- Hero Content --- */}
-            {/* --- Editorial Hero Content --- */}
-      <main className="relative z-10 flex-1 flex items-center w-full max-w-7xl mx-auto px-6 lg:px-12 mt-20">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-end w-full pb-20">
+      {/* --- Spatial / Kinetic Hero Content --- */}
+      <main className="relative z-10 flex-1 flex flex-col items-center justify-center w-full max-w-7xl mx-auto px-6 lg:px-12 mt-32 mb-24">
+        
+        {/* Floating Glassmorphic Widgets (Scroll Activated) */}
+        <motion.div 
+          initial={{ x: -100, opacity: 0 }}
+          whileInView={{ x: 0, opacity: 1 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.8, delay: 0.2 }}
+          className="hidden lg:flex absolute left-8 top-1/4 animate-float flex-col gap-2 p-4 rounded-2xl bg-white/5 backdrop-blur-xl border border-white/10"
+        >
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-full bg-emerald-500/20 flex items-center justify-center"><Activity size={16} className="text-emerald-400" /></div>
+            <div>
+              <p className="text-[10px] text-white/50 uppercase tracking-widest font-bold">System Status</p>
+              <p className="text-sm text-white font-medium">All APIs Operational</p>
+            </div>
+          </div>
+        </motion.div>
+
+        <motion.div 
+          initial={{ x: 100, opacity: 0 }}
+          whileInView={{ x: 0, opacity: 1 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.8, delay: 0.4 }}
+          className="hidden lg:flex absolute right-8 bottom-1/3 animate-float flex-col gap-2 p-4 rounded-2xl bg-white/5 backdrop-blur-xl border border-white/10"
+          style={{ animationDelay: '2s' }}
+        >
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-full bg-camel-500/20 flex items-center justify-center"><ShieldCheck size={16} className="text-camel-400" /></div>
+            <div>
+              <p className="text-[10px] text-white/50 uppercase tracking-widest font-bold">Data Security</p>
+              <p className="text-sm text-white font-medium">End-to-End Encrypted</p>
+            </div>
+          </div>
+        </motion.div>
+
+        {/* Central Core Content (Slide Up) */}
+        <motion.div 
+          initial={{ y: 50, opacity: 0 }}
+          whileInView={{ y: 0, opacity: 1 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.8 }}
+          className="flex flex-col items-center text-center max-w-4xl z-10"
+        >
+          <h1 className="text-[3.5rem] sm:text-7xl lg:text-[7rem] font-display font-black text-white tracking-tighter leading-[0.95] drop-shadow-2xl">
+            Beyond <span className="text-transparent bg-clip-text bg-gradient-to-r from-camel-300 via-camel-400 to-camel-600">Standard</span><br/>Pet Care.
+          </h1>
           
-          {/* Left Column: Massive Typography */}
-          <div className="lg:col-span-8 flex flex-col items-start pt-20">
-            {/* Elegant Accent instead of generic badge */}
-            <div className="flex items-center gap-4 mb-8">
-              <div className="h-[2px] w-12 bg-camel-400"></div>
-              <span className="tracking-[0.25em] text-xs font-bold text-camel-100 uppercase">
-                The Future of Animal Welfare
-              </span>
-            </div>
+          <p className="mt-8 text-lg md:text-xl text-white/70 font-medium max-w-2xl leading-relaxed drop-shadow-md">
+            An enterprise-grade ecosystem uniting pet owners, clinical veterinarians, and rescue shelters into one synchronized reality.
+          </p>
 
-            <h1 className="text-6xl sm:text-7xl lg:text-[6.5rem] font-display font-extrabold text-white tracking-tighter leading-[0.9] drop-shadow-xl">
-              Tails that <br />
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-camel-300 to-camel-500 italic font-medium pr-4">
-                tell stories.
-              </span>
-            </h1>
-          </div>
-
-          {/* Right Column: Narrative & Bespoke Actions */}
-          <div className="lg:col-span-4 flex flex-col items-start lg:pl-6 pb-4">
-            <p className="text-lg text-white/80 font-medium leading-relaxed mb-10 drop-shadow-md">
-              Comprehensive health tracking, veterinary integration, and unified shelter management. An ecosystem designed for the modern pet care professional.
-            </p>
-
-            <div className="flex flex-col sm:flex-row items-center gap-5 w-full">
-              {/* Primary Brutalist Button */}
-              <Link 
-                to="/dashboard" 
-                className="group relative w-full sm:w-auto inline-flex items-center justify-between gap-6 bg-camel-600 pl-8 pr-2 py-2 rounded-full overflow-hidden transition-all hover:bg-camel-500 shadow-[0_10px_40px_rgba(186,127,72,0.3)]"
-              >
-                <span className="text-white font-bold text-sm tracking-wide">ENTER APP</span>
-                <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center text-camel-700 transition-transform group-hover:scale-110">
-                  <ArrowRight size={18} strokeWidth={2.5} />
-                </div>
-              </Link>
-              
-              {/* Secondary Minimalist Play Button */}
-              <button className="group flex items-center gap-4 w-full sm:w-auto hover:opacity-80 transition-opacity">
-                <div className="w-12 h-12 rounded-full border border-white/30 backdrop-blur-sm flex items-center justify-center text-white group-hover:bg-white/10 transition-colors">
-                  <Play size={18} className="ml-1" fill="currentColor" />
-                </div>
-                <span className="text-white font-semibold text-sm tracking-wide">Watch Demo</span>
-              </button>
-            </div>
-          </div>
-
-        </div>
+          {/* Bespoke Interactive Portal CTA */}
+          <motion.div 
+            initial={{ scale: 0.9, opacity: 0 }}
+            whileInView={{ scale: 1, opacity: 1 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5, delay: 0.3 }}
+            className="mt-12"
+          >
+            <Link 
+              to="/dashboard" 
+              className="group relative inline-flex items-center gap-6 bg-white/5 backdrop-blur-xl border border-white/20 pl-8 pr-2 py-2 rounded-full overflow-hidden transition-all hover:bg-white/10 hover:border-camel-400/50 hover:shadow-[0_0_40px_rgba(186,127,72,0.2)]"
+            >
+              <span className="text-white font-bold text-sm tracking-widest uppercase">Initialize Workspace</span>
+              <div className="w-12 h-12 bg-camel-500 rounded-full flex items-center justify-center text-white transition-all duration-300 group-hover:scale-105 group-hover:bg-camel-400">
+                <ArrowRight size={20} strokeWidth={2.5} className="group-hover:translate-x-1 transition-transform" />
+              </div>
+            </Link>
+          </motion.div>
+        </motion.div>
       </main>
+
+      {/* --- Infinite Animated Ticker (Marquee) --- */}
+      <div className="absolute bottom-0 w-full overflow-hidden bg-espresso-900/80 backdrop-blur-md border-t border-white/10 py-3 z-20">
+        <div className="flex whitespace-nowrap animate-marquee">
+          {/* Render twice for seamless looping */}
+          {[...marqueeItems, ...marqueeItems, ...marqueeItems, ...marqueeItems].map((text, i) => (
+            <span 
+              key={i} 
+              className={cn(
+                "mx-4 text-xs font-black tracking-[0.2em] uppercase",
+                text === "•" ? "text-camel-500" : "text-white/60"
+              )}
+            >
+              {text}
+            </span>
+          ))}
+        </div>
+      </div>
       
     </div>
   );
 }
-
-

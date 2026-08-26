@@ -39,6 +39,20 @@ export default {
       boxShadow: {
         'floating': '0 20px 40px -15px rgba(90, 56, 37, 0.1)',
         'soft': '0 4px 20px -2px rgba(90, 56, 37, 0.05)',
+      },
+      animation: {
+        'marquee': 'marquee 25s linear infinite',
+        'float': 'float 6s ease-in-out infinite',
+      },
+      keyframes: {
+        marquee: {
+          '0%': { transform: 'translateX(0%)' },
+          '100%': { transform: 'translateX(-100%)' },
+        },
+        float: {
+          '0%, 100%': { transform: 'translateY(0)' },
+          '50%': { transform: 'translateY(-10px)' },
+        }
       }
     },
   },

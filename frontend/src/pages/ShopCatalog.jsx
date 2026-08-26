@@ -2,10 +2,12 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { Search, ShoppingBag, ShieldCheck, Truck, ArrowRight, Plus, Minus, X } from 'lucide-react';
 import { cn } from '../lib/utils';
+import CustomSelect from '../components/molecules/CustomSelect';
 
 export default function ShopCatalog() {
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [cart, setCart] = useState(0);
+  const [selectedVerificationPet, setSelectedVerificationPet] = useState('');
 
   const addToCart = (product) => {
     setCart(prev => prev + 1);
@@ -402,12 +404,23 @@ export default function ShopCatalog() {
                         <p className="text-xs font-medium text-accent-700/80 mb-4">
                           This item requires an active prescription from your VetHub records.
                         </p>
-                        <select className="w-full bg-white border border-accent-200 rounded-xl px-4 py-2.5 text-sm font-bold text-espresso-900 focus:outline-none mb-3">
-                          <option>Select Pet...</option>
-                          <option>Buddy (Golden Retriever)</option>
-                          <option>Luna (Maine Coon)</option>
-                        </select>
-                        <button onClick={() => { addToCart(selectedProduct); setSelectedProduct(null); }} className="w-full bg-accent-600 hover:bg-accent-500 text-white py-3 rounded-xl font-bold text-xs tracking-wide transition-all shadow-sm">
+                        {/* Premium Dropdown using our existing CustomSelect */}
+                        <div className="mb-4 w-full">
+                          <CustomSelect 
+                            options={['Buddy (Golden Retriever)', 'Luna (Maine Coon)']}
+                            value={selectedVerificationPet}
+                            onChange={setSelectedVerificationPet}
+                            placeholder="Select Pet..."
+                            className="!bg-white" 
+                          />
+                        </div>
+
+                        {/* Fixed Persistent Button */}
+                        <button 
+                          onClick={() => { addToCart(selectedProduct); setSelectedProduct(null); }}
+                          disabled={!selectedVerificationPet}
+                          className="w-full bg-camel-600 hover:bg-camel-500 disabled:opacity-50 disabled:hover:bg-camel-600 text-white py-3 rounded-xl font-bold text-sm tracking-wide transition-all shadow-md shadow-camel-900/10"
+                        >
                           Verify & Add to Cart
                         </button>
                       </div>
@@ -440,3 +453,4 @@ export default function ShopCatalog() {
     </div>
   );
 }
+

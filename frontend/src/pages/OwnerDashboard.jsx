@@ -1,6 +1,6 @@
 ﻿import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Calendar, Plus, Flame, Moon, Droplets, CheckCircle2, Circle, ArrowRight, Footprints, Loader2, PawPrint, HeartHandshake, Syringe, Stethoscope } from 'lucide-react';
+import { Calendar, Plus, Flame, Moon, Droplets, CheckCircle2, Circle, ArrowRight, Footprints, PawPrint, HeartHandshake, Syringe, Stethoscope } from 'lucide-react';
 import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip } from 'recharts';
 import { fetchDashboardData } from '../services/api';
 import AddRecordModal from '../components/organisms/AddRecordModal';
@@ -71,7 +71,7 @@ export default function OwnerDashboard() {
   if (loading) {
     return (
       <div className="flex-1 flex items-center justify-center min-h-[60vh]">
-        <Loader2 className="animate-spin text-camel-600" size={48} />
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-camel-600"></div>
       </div>
     );
   }
@@ -268,4 +268,5 @@ export default function OwnerDashboard() {
     </>
   );
 }
+
 

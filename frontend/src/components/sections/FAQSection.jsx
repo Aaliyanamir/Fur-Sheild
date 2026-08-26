@@ -67,7 +67,7 @@ export default function FAQSection() {
               <div className="relative w-full aspect-[4/5] max-w-sm rounded-3xl overflow-hidden shadow-lg hidden md:block">
                 <div className="absolute inset-0 bg-espresso-900/20 mix-blend-multiply z-10"></div>
                 <img 
-                  src="/images/vet-clinic.jpg" 
+                  src="/images/faq-pets.jpg" 
                   alt="Veterinary Care" 
                   className="absolute inset-0 w-full h-full object-cover"
                 />
@@ -138,3 +138,4 @@ export default function FAQSection() {
     </section>
   );
 }
+

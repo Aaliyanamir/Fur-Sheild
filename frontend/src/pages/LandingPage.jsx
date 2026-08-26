@@ -12,6 +12,14 @@ export default function LandingPage() {
     { name: 'Shop', path: '/shop', icon: ShoppingBag },
   ];
 
+  const galleryImages = [
+    "https://images.unsplash.com/photo-1543466835-00a7907e9de1?auto=format&fit=crop&q=80&w=400",
+    "https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?auto=format&fit=crop&q=80&w=400",
+    "https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?auto=format&fit=crop&q=80&w=400",
+    "https://images.unsplash.com/photo-1495360010541-f48722b34f7d?auto=format&fit=crop&q=80&w=400",
+    "https://images.unsplash.com/photo-1553284965-83fd3e82fa5a?auto=format&fit=crop&q=80&w=400"
+  ];
+
   const fadeUp = {
     hidden: { opacity: 0, y: 30 },
     show: { opacity: 1, y: 0, transition: { duration: 0.8, ease: [0.16, 1, 0.3, 1] } }
@@ -20,14 +28,14 @@ export default function LandingPage() {
   return (
     <div className="relative min-h-screen flex flex-col font-sans bg-espresso-900 overflow-hidden">
       
-      {/* --- Cinematic Video Background (Warm Overlay) --- */}
+      {/* --- Local Cinematic Video Background --- */}
       <div className="absolute inset-0 z-0">
-        <video autoPlay loop muted playsInline className="w-full h-full object-cover scale-[1.02] opacity-90">
-          <source src="https://cdn.pixabay.com/video/2021/08/04/83908-584742637_large.mp4" type="video/mp4" />
+        <video autoPlay loop muted playsInline className="w-full h-full object-cover opacity-85">
+          <source src="/videos/hero.mp4" type="video/mp4" />
         </video>
         <div className="absolute inset-0 bg-espresso-900/50 mix-blend-multiply"></div>
-        {/* Soft gradient to ensure text readability without making it pitch black */}
-        <div className="absolute inset-0 bg-gradient-to-r from-espresso-900/90 via-espresso-900/60 to-transparent"></div>
+        {/* Soft gradient to ensure text readability */}
+        <div className="absolute inset-0 bg-gradient-to-r from-espresso-900/95 via-espresso-900/60 to-transparent"></div>
         <div className="absolute inset-0 bg-gradient-to-t from-espresso-900/80 via-transparent to-transparent"></div>
       </div>
 
@@ -139,7 +147,7 @@ export default function LandingPage() {
       </motion.div>
 
       {/* --- Warm, Elegant Hero Content --- */}
-      <main className="relative z-10 flex-1 flex flex-col justify-center w-full max-w-7xl mx-auto px-6 lg:px-12 pt-32 pb-20">
+      <main className="relative z-10 flex-1 flex flex-col justify-center w-full max-w-7xl mx-auto px-6 lg:px-12 pt-32 pb-32">
         
         <motion.div 
           initial="hidden"
@@ -160,25 +168,60 @@ export default function LandingPage() {
             A comprehensive ecosystem uniting pet owners, clinical veterinarians, and rescue shelters into one simple, seamless platform.
           </motion.p>
 
-          {/* Friendly, standard CTAs (No robotic text) */}
-          <motion.div variants={fadeUp} className="flex flex-col sm:flex-row items-center gap-5 w-full sm:w-auto">
-            <Link 
-              to="/dashboard" 
-              className="w-full sm:w-auto px-8 py-4 bg-camel-600 hover:bg-camel-500 text-white rounded-full font-bold text-base transition-all shadow-[0_10px_30px_rgba(186,127,72,0.3)] hover:shadow-[0_15px_40px_rgba(186,127,72,0.5)] hover:-translate-y-1 flex items-center justify-center gap-2"
-            >
-              Get Started
+          <motion.div variants={fadeUp} className="flex flex-col sm:flex-row items-start sm:items-center gap-8 mt-4">
+            
+            {/* Primary CTA */}
+            <Link to="/dashboard" className="group relative px-8 py-4 bg-camel-600 hover:bg-camel-500 text-white rounded-full font-bold text-base transition-all shadow-[0_10px_30px_rgba(186,127,72,0.3)] hover:shadow-[0_15px_40px_rgba(186,127,72,0.5)] hover:-translate-y-1 flex items-center justify-center gap-3 overflow-hidden">
+              <span className="relative z-10">Get Started</span>
+              <ArrowRight size={18} className="relative z-10 group-hover:translate-x-1 transition-transform" />
+              <div className="absolute inset-0 bg-gradient-to-r from-camel-500 to-camel-400 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
             </Link>
             
-            <button className="group w-full sm:w-auto px-8 py-4 bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/20 text-white rounded-full font-bold text-base transition-all flex items-center justify-center gap-3">
-              <span className="flex items-center justify-center w-8 h-8 rounded-full bg-white/20 group-hover:bg-camel-500 transition-colors">
-                <Play size={14} className="ml-0.5 fill-current" />
-              </span>
-              Watch Demo
+            {/* Ultra-Premium Bespoke "Watch Demo" Action */}
+            <button className="group flex items-center gap-5 hover:opacity-90 transition-opacity">
+              <div className="relative flex items-center justify-center w-14 h-14 rounded-full border border-camel-200/30 bg-white/5 backdrop-blur-md overflow-hidden">
+                <div className="absolute inset-0 bg-camel-400/10 group-hover:bg-camel-400/30 transition-colors duration-500"></div>
+                <svg className="absolute inset-0 w-full h-full text-camel-300/80 -rotate-90 group-hover:rotate-0 transition-transform duration-700 ease-in-out" viewBox="0 0 100 100">
+                  <circle cx="50" cy="50" r="48" fill="none" stroke="currentColor" strokeWidth="1.5" strokeDasharray="301" strokeDashoffset="240" className="group-hover:stroke-dashoffset-0 transition-all duration-700 ease-in-out" />
+                </svg>
+                <Play size={16} className="text-white ml-1 fill-current relative z-10 group-hover:scale-110 transition-transform duration-300" />
+              </div>
+              <div className="flex flex-col items-start text-left">
+                <span className="text-[10px] font-black tracking-[0.25em] text-camel-300 uppercase">See it in action</span>
+                <span className="text-sm font-semibold text-white mt-0.5">Watch 2-Min Film</span>
+              </div>
             </button>
+
           </motion.div>
 
         </motion.div>
       </main>
+
+      {/* --- Infinite Cinematic Emotional Anchor Gallery --- */}
+      <div className="absolute bottom-0 left-0 right-0 h-32 md:h-40 z-20 overflow-hidden bg-gradient-to-t from-espresso-900 via-espresso-900/60 to-transparent pointer-events-none flex items-end pb-4">
+        {/* We use w-max and the 50% translation keyframe for a perfectly seamless infinite scroll */}
+        <div className="w-max flex whitespace-nowrap animate-marquee opacity-60 mix-blend-screen hover:opacity-80 transition-opacity duration-500">
+          
+          <div className="flex gap-6 px-3">
+            {galleryImages.map((src, i) => (
+              <div key={"set1-" + i} className="w-48 md:w-64 h-20 md:h-28 rounded-2xl overflow-hidden border border-white/10 relative shadow-lg">
+                <div className="absolute inset-0 bg-camel-900/30 mix-blend-overlay z-10"></div>
+                <img src={src} alt="Pet Gallery" className="w-full h-full object-cover filter grayscale sepia-[0.3]" />
+              </div>
+            ))}
+          </div>
+
+          <div className="flex gap-6 px-3">
+            {galleryImages.map((src, i) => (
+              <div key={"set2-" + i} className="w-48 md:w-64 h-20 md:h-28 rounded-2xl overflow-hidden border border-white/10 relative shadow-lg">
+                <div className="absolute inset-0 bg-camel-900/30 mix-blend-overlay z-10"></div>
+                <img src={src} alt="Pet Gallery" className="w-full h-full object-cover filter grayscale sepia-[0.3]" />
+              </div>
+            ))}
+          </div>
+
+        </div>
+      </div>
       
     </div>
   );

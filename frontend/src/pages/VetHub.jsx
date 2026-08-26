@@ -1,132 +1,98 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, Filter, Clock, Activity, Thermometer, FileDigit, Syringe, Calendar, FileText, ActivitySquare, ShieldAlert, Heart, MoreHorizontal } from 'lucide-react';
+import { Search, Filter, Clock, Activity, Thermometer, FileDigit, Syringe, Calendar, FileText, ActivitySquare, ShieldAlert, Heart, MoreHorizontal, Plus, AlertCircle, X, CheckCircle2, Trash2 } from 'lucide-react';
+import vetService from '../services/vet.service';
+import { AuthContext } from '../context/AuthContext';
+import { useNavigate } from 'react-router-dom';
 
 export default function VetHub() {
+  const { user } = useContext(AuthContext);
   const [loading, setLoading] = useState(true);
   const [activePatient, setActivePatient] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("All");
   const [queue, setQueue] = useState([]);
 
-  // Deep, highly-detailed mock clinical data
-  const initialMockQueue = [
-    { 
-      id: 'PT-101', 
-      petName: 'Buddy', 
-      breed: 'Golden Retriever',
-      age: '3 Yrs 2 Mos',
-      petImage: '/images/pet-1.jpg',
-      owner: 'Sarah Jenkins', 
-      ownerImage: '/images/owner-1.jpg',
-      time: '10:30 AM', 
-      status: 'In Progress', 
-      type: 'Annual Checkup',
-      vitals: { weight: '28.6 kg', temp: '101.2 F', hr: '80 bpm' },
-      notes: "Buddy is here for his annual checkup and DHPP booster. Owner noted slight lethargy yesterday after a long run.",
-      history: [
-        { date: 'Oct 20, 2024', event: 'DHPP Vaccine Administered' },
-        { date: 'May 12, 2024', event: 'Flea & Tick Prevention Refill' }
-      ]
-    },
-    { 
-      id: 'PT-102', 
-      petName: 'Luna',
-      breed: 'Persian Cat',
-      age: '2 Yrs 5 Mos', 
-      petImage: '/images/pet-2.jpg',
-      owner: 'Mike Ross', 
-      ownerImage: '/images/owner-2.jpg',
-      time: '11:15 AM', 
-      status: 'Waiting', 
-      type: 'Vaccination',
-      vitals: { weight: '4.2 kg', temp: '100.5 F', hr: '120 bpm' },
-      notes: "Routine Rabies and FVRCP vaccination. No known allergies.",
-      history: [
-        { date: 'Jan 05, 2024', event: 'Annual Checkup - Healthy' }
-      ]
-    },
-    { 
-      id: 'PT-103', 
-      petName: 'Max',
-      breed: 'Beagle',
-      age: '5 Yrs 1 Mo', 
-      petImage: '/images/pet-3.jpg',
-      owner: 'Emma Stone', 
-      ownerImage: '/images/owner-3.jpg',
-      time: '12:00 PM', 
-      status: 'Scheduled', 
-      type: 'Skin Allergy',
-      vitals: { weight: '12.4 kg', temp: '102.1 F', hr: '95 bpm' },
-      notes: "Severe scratching on hind legs. Possible contact dermatitis. Prescribe topical cream.",
-      history: [
-        { date: 'Jul 18, 2024', event: 'Treated for ear infection' },
-        { date: 'Mar 22, 2024', event: 'Allergy panel drawn' }
-      ]
-    },
-    { 
-      id: 'PT-104', 
-      petName: 'Bella',
-      breed: 'French Bulldog',
-      age: '1 Yr 8 Mos', 
-      petImage: '/images/pet-1.jpg',
-      owner: 'John Doe', 
-      ownerImage: '/images/pet-owner.jpg',
-      time: '02:30 PM', 
-      status: 'Scheduled', 
-      type: 'Post-Op Review',
-      vitals: { weight: '9.8 kg', temp: '101.0 F', hr: '105 bpm' },
-      notes: "Two weeks post-spay checkup. Check incision site for proper healing.",
-      history: [
-        { date: 'Oct 01, 2024', event: 'Ovariohysterectomy (Spay)' }
-      ]
-    },
-  ];
-
-  useEffect(() => {
-    // Simulate network fetch
-    // TODO: Replace with backend API call (e.g., fetch('/api/vet/queue'))
-    setTimeout(() => {
-      setQueue(initialMockQueue);
-      setLoading(false);
-      setActivePatient(initialMockQueue[0]); // Auto-select first patient
-    }, 800);
-  }, []);
-
-  // Filter Logic
-  const filteredQueue = queue.filter(patient => {
-    const matchesSearch = 
-      patient.petName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      patient.owner.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      patient.id.toLowerCase().includes(searchQuery.toLowerCase());
-    
-    const matchesFilter = statusFilter === "All" || patient.status === statusFilter;
-    
-    return matchesSearch && matchesFilter;
+  // Modals state
+  const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
+  const [isWalkinModalOpen, setIsWalkinModalOpen] = useState(false);
+  const [isCancelModalOpen, setIsCancelModalOpen] = useState(false);
+  const [isStatusDropdownOpen, setIsStatusDropdownOpen] = useState(false);
+  
+  // Forms state
+  const [vitalsForm, setVitalsForm] = useState({ temp: '', hr: '', weight: '', notes: '' });
+  const [walkinForm, setWalkinForm] = useState({ 
+    petName: '', breed: '', species: 'Dog', age: '', ownerName: '', reason: '', severity: 'ROUTINE' 
   });
 
-  // Action Handlers
+  const fetchQueue = async () => {
+    try {
+      setLoading(true);
+      const res = await vetService.getQueue();
+      if (res.success) {
+        const mappedQueue = res.data.map(appt => {
+          const isWalkin = !appt.petId && appt.walkInDetails;
+          return {
+            id: appt._id,
+            displayId: appt._id.slice(-6).toUpperCase(), // Short ID
+            petId: appt.petId?._id || null,
+            petName: isWalkin ? appt.walkInDetails.petName : (appt.petId?.name || 'Unknown Pet'),
+            breed: isWalkin ? appt.walkInDetails.breed : (appt.petId?.breed || 'Unknown'),
+            species: isWalkin ? appt.walkInDetails.species : (appt.petId?.species || 'Unknown'),
+            age: isWalkin ? appt.walkInDetails.age : 'Adult', 
+            petImage: appt.petId?.avatarUrl ? (appt.petId.avatarUrl.startsWith('http') ? appt.petId.avatarUrl : `http://localhost:5000${appt.petId.avatarUrl}`) : '/images/product-placeholder.jpg',
+            owner: isWalkin ? appt.walkInDetails.ownerName : (appt.ownerId?.name || 'Unknown Owner'),
+            ownerImage: '/images/product-placeholder.jpg',
+            time: new Date(appt.scheduledAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+            status: appt.status === 'EXAM' ? 'In Progress' : (appt.status === 'WAITING' ? 'Waiting' : 'Discharged'),
+            rawStatus: appt.status,
+            type: appt.reason,
+            vitals: {
+              hr: appt.vitals?.heartRate ? `${appt.vitals.heartRate} bpm` : '-- bpm',
+              temp: appt.vitals?.temperature ? `${appt.vitals.temperature} °C` : '-- °C',
+              weight: appt.vitals?.weight ? `${appt.vitals.weight} kg` : '-- kg',
+            },
+            notes: appt.medicalNotes || 'No notes provided.',
+            history: [
+              { date: new Date(appt.scheduledAt).toLocaleDateString(), event: 'Registered to queue' }
+            ]
+          };
+        });
+        setQueue(mappedQueue);
+        // Refresh active patient if it was selected
+        if (activePatient) {
+          const updatedActive = mappedQueue.find(p => p.id === activePatient.id);
+          setActivePatient(updatedActive || null);
+        } else if (mappedQueue.length > 0) {
+          setActivePatient(mappedQueue[0]);
+        }
+      }
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchQueue();
+  }, []);
+
+  const filteredQueue = queue.filter(patient => {
+    const matchesSearch = 
+      patient.petName.toLowerCase().includes(searchQuery.toLowerCase()) || 
+      patient.owner.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      patient.displayId.toLowerCase().includes(searchQuery.toLowerCase());
+    
+    if (statusFilter === "All") return matchesSearch;
+    return matchesSearch && patient.status === statusFilter;
+  });
+
   const handleFilterToggle = () => {
-    const filters = ["All", "Waiting", "In Progress", "Scheduled"];
+    const filters = ["All", "Waiting", "In Progress"];
     const currentIndex = filters.indexOf(statusFilter);
     setStatusFilter(filters[(currentIndex + 1) % filters.length]);
   };
-
-  const handleBeginExamination = () => {
-    // TODO: Replace with backend API call (e.g., POST /api/vet/examine/{patient.id})
-    if (!activePatient) return;
-    
-    const updatedQueue = queue.map(p => 
-      p.id === activePatient.id ? { ...p, status: 'In Progress' } : p
-    );
-    setQueue(updatedQueue);
-    setActivePatient({ ...activePatient, status: 'In Progress' });
-    
-    alert(`Examination started for ${activePatient.petName}. Status updated to IN PROGRESS.`);
-  };
-
-  const handleOrderMeds = () => alert(`Opening pharmacy modal for ${activePatient?.petName}...`);
-  const handleViewLabs = () => alert(`Loading lab results for ${activePatient?.petName}...`);
 
   const getStatusDot = (status) => {
     switch (status) {
@@ -135,6 +101,73 @@ export default function VetHub() {
       default: return 'bg-espresso-300';
     }
   };
+
+  // ACTIONS
+  const handleBeginExamination = async () => {
+    if (!activePatient) return;
+    await vetService.updateStatus(activePatient.id, 'EXAM');
+    await fetchQueue();
+  };
+
+  const handleUpdateVitals = async (e) => {
+    e.preventDefault();
+    const payload = {
+      vitals: {
+        heartRate: vitalsForm.hr,
+        temperature: vitalsForm.temp,
+        weight: vitalsForm.weight
+      },
+      medicalNotes: vitalsForm.notes
+    };
+    await vetService.updateVitalsAndNotes(activePatient.id, payload);
+    await fetchQueue();
+    setIsUpdateModalOpen(false);
+  };
+
+  const handleChangeStatus = async (newStatus) => {
+    await vetService.updateStatus(activePatient.id, newStatus);
+    await fetchQueue();
+    setIsStatusDropdownOpen(false);
+  };
+
+  const handleCancelAppointment = async () => {
+    await vetService.deleteAppointment(activePatient.id);
+    setActivePatient(null);
+    setIsCancelModalOpen(false);
+    await fetchQueue();
+  };
+
+  const handleAddWalkin = async (e) => {
+    e.preventDefault();
+    await vetService.createAppointment({
+      reason: walkinForm.reason,
+      severity: walkinForm.severity,
+      walkInDetails: {
+        petName: walkinForm.petName,
+        breed: walkinForm.breed,
+        species: walkinForm.species,
+        age: walkinForm.age,
+        ownerName: walkinForm.ownerName
+      }
+    });
+    setWalkinForm({ petName: '', breed: '', species: 'Dog', age: '', ownerName: '', reason: '', severity: 'ROUTINE' });
+    setIsWalkinModalOpen(false);
+    await fetchQueue();
+  };
+
+  const openUpdateModal = () => {
+    setVitalsForm({
+      temp: activePatient.vitals.temp.replace(' °C', '').replace('--', ''),
+      hr: activePatient.vitals.hr.replace(' bpm', '').replace('--', ''),
+      weight: activePatient.vitals.weight.replace(' kg', '').replace('--', ''),
+      notes: activePatient.notes === 'No notes provided.' ? '' : activePatient.notes
+    });
+    setIsUpdateModalOpen(true);
+    setIsStatusDropdownOpen(false);
+  };
+
+  const handleOrderMeds = () => alert(`Opening pharmacy modal for ${activePatient?.petName}...`);
+  const handleViewLabs = () => alert(`Loading lab results for ${activePatient?.petName}...`);
 
   if (loading) {
     return (
@@ -154,8 +187,11 @@ export default function VetHub() {
             Veterinary Hub
           </h1>
         </div>
-        <div className="flex gap-3">
-          <div className="relative">
+        <div className="flex gap-3 items-center">
+          <button onClick={() => setIsWalkinModalOpen(true)} className="flex items-center gap-2 bg-espresso-900 hover:bg-espresso-800 text-white px-5 py-3 rounded-full font-bold text-sm tracking-wide shadow-sm transition-transform hover:-translate-y-0.5 whitespace-nowrap">
+            <Plus size={16} /> Add Walk-in
+          </button>
+          <div className="relative hidden md:block">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-espresso-300" size={18} />
             <input type="text" placeholder="Search patients..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="pl-12 pr-4 py-3 rounded-full border border-camel-100 bg-white text-sm font-medium focus:outline-none focus:border-camel-400 focus:ring-1 focus:ring-camel-400 w-full md:w-64 shadow-sm transition-all"
             />
@@ -174,22 +210,17 @@ export default function VetHub() {
           
           {/* Vet ID Card */}
           <div className="bg-white rounded-[2rem] p-6 border border-camel-100 shadow-sm flex flex-col items-center text-center">
-            <div className="w-24 h-24 rounded-full overflow-hidden mb-4 border-4 border-camel-50 shadow-sm relative">
-               <img src="/images/vet-portrait.jpg" alt="Dr. Mark Thorne" className="w-full h-full object-cover" />
+            <div className="w-24 h-24 rounded-full overflow-hidden mb-4 border-4 border-camel-50 shadow-sm relative flex items-center justify-center bg-camel-100 text-2xl font-black text-espresso-500">
+               {user?.name?.charAt(0) || 'V'}
                <div className="absolute bottom-1 right-1 w-4 h-4 bg-emerald-500 border-2 border-white rounded-full"></div>
             </div>
-            <h2 className="text-xl font-display font-black text-espresso-900 tracking-tight">Dr. M. Thorne</h2>
+            <h2 className="text-xl font-display font-black text-espresso-900 tracking-tight">Dr. {user?.name?.split(' ')[user?.name?.split(' ').length - 1] || 'Vet'}</h2>
             <p className="text-sm font-bold text-camel-600 mt-1">Lead Veterinarian</p>
             <div className="w-full h-[1px] bg-camel-100/50 my-5"></div>
             <div className="flex justify-around w-full">
               <div>
-                <p className="text-2xl font-black text-espresso-900">12</p>
-                <p className="text-[10px] font-bold uppercase tracking-widest text-espresso-400 mt-1">Patients</p>
-              </div>
-              <div className="w-[1px] h-full bg-camel-100/50"></div>
-              <div>
-                <p className="text-2xl font-black text-espresso-900">2</p>
-                <p className="text-[10px] font-bold uppercase tracking-widest text-espresso-400 mt-1">Surgeries</p>
+                <p className="text-2xl font-black text-espresso-900">{queue.length}</p>
+                <p className="text-[10px] font-bold uppercase tracking-widest text-espresso-400 mt-1">Total Queue</p>
               </div>
             </div>
           </div>
@@ -227,10 +258,12 @@ export default function VetHub() {
             <p className="text-xs font-bold text-camel-600">{filteredQueue.length} {statusFilter === "All" ? "Patients" : statusFilter}</p>
           </div>
           
-          {filteredQueue.map((patient) => (
+          {filteredQueue.length === 0 ? (
+            <div className="text-center p-8 bg-white border border-camel-100 rounded-[1.5rem] shadow-sm text-espresso-500 text-sm font-medium">No patients in queue.</div>
+          ) : filteredQueue.map((patient) => (
             <motion.div 
               key={patient.id} variants={{ hidden: { opacity: 0, x: -20 }, show: { opacity: 1, x: 0 } }}
-              onClick={() => setActivePatient(patient)}
+              onClick={() => { setActivePatient(patient); setIsStatusDropdownOpen(false); }}
               whileHover={{ scale: 1.01 }}
               whileTap={{ scale: 0.99 }}
               className={`p-5 rounded-[1.5rem] cursor-pointer transition-all border relative overflow-hidden group ${activePatient?.id === patient.id ? 'bg-camel-50 border-camel-300 shadow-md' : 'bg-white border-camel-100 shadow-sm hover:border-camel-300 hover:shadow-md'}`}
@@ -248,22 +281,22 @@ export default function VetHub() {
                  <div className="text-right">
                    <span className="text-xs font-bold text-espresso-500 flex items-center justify-end gap-1"><Clock size={12}/> {patient.time}</span>
                    <div className="flex items-center justify-end gap-1.5 mt-1">
-                     <div className={`w-1.5 h-1.5 rounded-full ${getStatusDot(patient.status)}`}></div>
-                     <span className="text-[9px] font-black uppercase tracking-wider text-espresso-600">{patient.status}</span>
+                     <span className={`w-2 h-2 rounded-full ${getStatusDot(patient.status)}`}></span>
+                     <span className="text-[10px] font-bold uppercase tracking-widest text-espresso-900">{patient.status}</span>
                    </div>
                  </div>
               </div>
+
               <div>
-                <h3 className="text-lg font-black text-espresso-900 tracking-tight">{patient.petName} <span className="text-xs font-medium text-espresso-400 font-sans ml-1">({patient.id})</span></h3>
-                <p className="text-sm font-bold text-camel-700 mt-0.5">{patient.type}</p>
+                <h3 className="text-lg font-display font-black text-espresso-900 tracking-tight">{patient.petName} <span className="text-xs font-bold text-camel-600 align-middle ml-1">({patient.displayId})</span></h3>
+                <p className="text-sm font-bold text-camel-600 mt-0.5">{patient.type}</p>
               </div>
             </motion.div>
           ))}
         </motion.div>
 
-        {/* PANE 3: DEEP CLINICAL CHART (Col 5) */}
-        <div className="lg:col-span-5 lg:sticky lg:top-32 h-[calc(100vh-10rem)] bg-white rounded-[2rem] border border-camel-100 shadow-sm overflow-hidden flex flex-col">
-          
+        {/* PANE 3: CLINICAL CHART (Col 5) */}
+        <div className="lg:col-span-5 bg-white border border-camel-100 shadow-md rounded-[2.5rem] h-[80vh] flex flex-col overflow-hidden relative">
           <AnimatePresence mode="wait">
             {activePatient ? (
               <motion.div 
@@ -272,7 +305,7 @@ export default function VetHub() {
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: -20 }}
                 transition={{ duration: 0.3 }}
-                className="flex-1 flex flex-col h-full overflow-y-auto scrollbar-hide"
+                className="flex-1 flex flex-col h-full overflow-y-auto scrollbar-hide relative"
               >
                 {/* Cover Image & Primary Info */}
                 <div className="h-56 relative shrink-0">
@@ -280,9 +313,24 @@ export default function VetHub() {
                    <div className="absolute inset-0 bg-gradient-to-t from-espresso-900/90 via-espresso-900/40 to-transparent"></div>
                    
                    <div className="absolute top-4 right-4 flex gap-2">
-                     <button className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center text-white hover:bg-white/30 transition-colors">
+                     <button onClick={(e) => { e.stopPropagation(); setIsStatusDropdownOpen(!isStatusDropdownOpen); }} className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center text-white hover:bg-white/30 transition-colors z-10 relative">
                        <MoreHorizontal size={18} />
                      </button>
+                     {/* DROPDOWN MENU */}
+                     <AnimatePresence>
+                       {isStatusDropdownOpen && (
+                         <motion.div initial={{ opacity: 0, scale: 0.95, y: -10 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: -10 }} className="absolute right-0 top-12 w-48 bg-white rounded-2xl shadow-xl border border-camel-100 overflow-hidden z-50">
+                           <div className="px-4 py-2 border-b border-camel-50 bg-camel-50/50">
+                             <p className="text-[10px] font-bold uppercase tracking-widest text-espresso-400">Actions</p>
+                           </div>
+                           <button onClick={openUpdateModal} className="w-full text-left px-4 py-3 text-sm font-bold text-espresso-700 hover:bg-camel-50 transition-colors flex items-center gap-2"><Activity size={14} className="text-camel-500" /> Update Vitals</button>
+                           <button onClick={() => handleChangeStatus('EXAM')} className="w-full text-left px-4 py-3 text-sm font-bold text-espresso-700 hover:bg-camel-50 transition-colors flex items-center gap-2"><ShieldAlert size={14} className="text-blue-500" /> Begin Exam</button>
+                           <button onClick={() => handleChangeStatus('DISCHARGED')} className="w-full text-left px-4 py-3 text-sm font-bold text-espresso-700 hover:bg-camel-50 transition-colors flex items-center gap-2"><CheckCircle2 size={14} className="text-emerald-500" /> Discharge</button>
+                           <div className="border-t border-camel-100 my-1"></div>
+                           <button onClick={() => { setIsStatusDropdownOpen(false); setIsCancelModalOpen(true); }} className="w-full text-left px-4 py-3 text-sm font-bold text-rose-600 hover:bg-rose-50 transition-colors flex items-center gap-2"><Trash2 size={14} /> Cancel Appointment</button>
+                         </motion.div>
+                       )}
+                     </AnimatePresence>
                    </div>
                    
                    <div className="absolute bottom-0 left-0 w-full p-6 text-white flex justify-between items-end">
@@ -383,11 +431,142 @@ export default function VetHub() {
         </div>
 
       </motion.div>
+
+      {/* MODALS */}
+      {/* Update Vitals Modal */}
+      <AnimatePresence>
+        {isUpdateModalOpen && (
+          <>
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 bg-espresso-900/60 backdrop-blur-sm z-[200]" onClick={() => setIsUpdateModalOpen(false)} />
+            <div className="fixed inset-0 z-[210] flex items-center justify-center p-4 pointer-events-none">
+              <motion.div initial={{ opacity: 0, scale: 0.95, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 20 }} className="bg-white rounded-[2rem] w-full max-w-md shadow-2xl pointer-events-auto flex flex-col overflow-hidden">
+                 <div className="p-6 border-b border-camel-100 flex justify-between items-center bg-[#FAF8F5]">
+                    <h2 className="text-xl font-display font-black text-espresso-900">Update Vitals & Notes</h2>
+                    <button onClick={() => setIsUpdateModalOpen(false)} className="w-8 h-8 rounded-full bg-white border border-camel-200 flex items-center justify-center text-espresso-400 hover:text-espresso-900 transition-colors shadow-sm"><X size={16}/></button>
+                 </div>
+                 <div className="p-6 flex-1 overflow-y-auto">
+                    <form onSubmit={handleUpdateVitals} className="space-y-4">
+                       <div className="grid grid-cols-2 gap-4">
+                         <div>
+                           <label className="block text-xs font-bold text-espresso-900 uppercase tracking-widest mb-2 px-1">Heart Rate (bpm)</label>
+                           <input type="number" value={vitalsForm.hr} onChange={(e) => setVitalsForm({...vitalsForm, hr: e.target.value})} className="w-full bg-white border border-camel-200 rounded-xl px-4 py-3 text-sm focus:border-camel-500 focus:ring-4 focus:ring-camel-50 transition-all" />
+                         </div>
+                         <div>
+                           <label className="block text-xs font-bold text-espresso-900 uppercase tracking-widest mb-2 px-1">Temp (°C)</label>
+                           <input type="number" step="0.1" value={vitalsForm.temp} onChange={(e) => setVitalsForm({...vitalsForm, temp: e.target.value})} className="w-full bg-white border border-camel-200 rounded-xl px-4 py-3 text-sm focus:border-camel-500 focus:ring-4 focus:ring-camel-50 transition-all" />
+                         </div>
+                       </div>
+                       <div>
+                         <label className="block text-xs font-bold text-espresso-900 uppercase tracking-widest mb-2 px-1">Weight (kg)</label>
+                         <input type="number" step="0.1" value={vitalsForm.weight} onChange={(e) => setVitalsForm({...vitalsForm, weight: e.target.value})} className="w-full bg-white border border-camel-200 rounded-xl px-4 py-3 text-sm focus:border-camel-500 focus:ring-4 focus:ring-camel-50 transition-all" />
+                       </div>
+                       <div>
+                         <label className="block text-xs font-bold text-espresso-900 uppercase tracking-widest mb-2 px-1">Intake Notes</label>
+                         <textarea rows={4} value={vitalsForm.notes} onChange={(e) => setVitalsForm({...vitalsForm, notes: e.target.value})} className="w-full bg-white border border-camel-200 rounded-xl px-4 py-3 text-sm focus:border-camel-500 focus:ring-4 focus:ring-camel-50 transition-all"></textarea>
+                       </div>
+                       <button type="submit" className="w-full bg-espresso-900 hover:bg-espresso-800 text-white py-4 rounded-xl font-bold text-sm tracking-wide transition-all shadow-md">Save Updates</button>
+                    </form>
+                 </div>
+              </motion.div>
+            </div>
+          </>
+        )}
+      </AnimatePresence>
+
+      {/* Cancel Modal */}
+      <AnimatePresence>
+        {isCancelModalOpen && (
+          <>
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 bg-espresso-900/60 backdrop-blur-sm z-[200]" onClick={() => setIsCancelModalOpen(false)} />
+            <div className="fixed inset-0 z-[210] flex items-center justify-center p-4 pointer-events-none">
+              <motion.div initial={{ opacity: 0, scale: 0.95, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 20 }} className="bg-white rounded-[2rem] w-full max-w-sm shadow-2xl pointer-events-auto flex flex-col overflow-hidden">
+                 <div className="p-8 flex flex-col items-center text-center">
+                    <div className="w-16 h-16 bg-rose-100 text-rose-500 rounded-full flex items-center justify-center mb-6">
+                      <AlertCircle size={32} />
+                    </div>
+                    <h2 className="text-xl font-display font-black text-espresso-900 mb-2">Cancel Appointment?</h2>
+                    <p className="text-sm font-medium text-espresso-600 mb-8 leading-relaxed">
+                      Are you sure you want to cancel the appointment for <strong>{activePatient?.petName}</strong>?
+                    </p>
+                    <div className="flex w-full gap-3">
+                      <button onClick={() => setIsCancelModalOpen(false)} className="flex-1 bg-camel-50 hover:bg-camel-100 text-espresso-800 py-3.5 rounded-2xl font-bold text-sm tracking-wide transition-colors">No</button>
+                      <button onClick={handleCancelAppointment} className="flex-1 bg-rose-500 hover:bg-rose-600 text-white py-3.5 rounded-2xl font-bold text-sm tracking-wide transition-colors shadow-md">Yes, Cancel</button>
+                    </div>
+                 </div>
+              </motion.div>
+            </div>
+          </>
+        )}
+      </AnimatePresence>
+
+      {/* Walk-in Modal */}
+      <AnimatePresence>
+        {isWalkinModalOpen && (
+          <>
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 bg-espresso-900/60 backdrop-blur-sm z-[200]" onClick={() => setIsWalkinModalOpen(false)} />
+            <div className="fixed inset-0 z-[210] flex items-center justify-center p-4 pointer-events-none">
+              <motion.div initial={{ opacity: 0, scale: 0.95, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 20 }} className="bg-white rounded-[2rem] w-full max-w-xl shadow-2xl pointer-events-auto flex flex-col overflow-hidden">
+                 <div className="p-6 border-b border-camel-100 flex justify-between items-center bg-[#FAF8F5]">
+                    <h2 className="text-xl font-display font-black text-espresso-900">Register New Patient</h2>
+                    <button onClick={() => setIsWalkinModalOpen(false)} className="w-8 h-8 rounded-full bg-white border border-camel-200 flex items-center justify-center text-espresso-400 hover:text-espresso-900 transition-colors shadow-sm"><X size={16}/></button>
+                 </div>
+                 <div className="p-6 flex-1 overflow-y-auto max-h-[80vh]">
+                    <form onSubmit={handleAddWalkin} className="space-y-4">
+                       <div className="grid grid-cols-2 gap-4">
+                         <div>
+                           <label className="block text-xs font-bold text-espresso-900 uppercase tracking-widest mb-2 px-1">Pet Name</label>
+                           <input type="text" required value={walkinForm.petName} onChange={(e) => setWalkinForm({...walkinForm, petName: e.target.value})} className="w-full bg-white border border-camel-200 rounded-xl px-4 py-3 text-sm focus:border-camel-500 focus:ring-4 focus:ring-camel-50 transition-all" placeholder="e.g. Max" />
+                         </div>
+                         <div>
+                           <label className="block text-xs font-bold text-espresso-900 uppercase tracking-widest mb-2 px-1">Owner Name</label>
+                           <input type="text" required value={walkinForm.ownerName} onChange={(e) => setWalkinForm({...walkinForm, ownerName: e.target.value})} className="w-full bg-white border border-camel-200 rounded-xl px-4 py-3 text-sm focus:border-camel-500 focus:ring-4 focus:ring-camel-50 transition-all" placeholder="e.g. Sarah Jenkins" />
+                         </div>
+                       </div>
+                       
+                       <div className="grid grid-cols-3 gap-4">
+                         <div>
+                           <label className="block text-xs font-bold text-espresso-900 uppercase tracking-widest mb-2 px-1">Species</label>
+                           <select value={walkinForm.species} onChange={(e) => setWalkinForm({...walkinForm, species: e.target.value})} className="w-full bg-white border border-camel-200 rounded-xl px-4 py-3 text-sm focus:border-camel-500 focus:ring-4 focus:ring-camel-50 transition-all appearance-none">
+                             <option value="Dog">Dog</option>
+                             <option value="Cat">Cat</option>
+                             <option value="Other">Other</option>
+                           </select>
+                         </div>
+                         <div>
+                           <label className="block text-xs font-bold text-espresso-900 uppercase tracking-widest mb-2 px-1">Breed</label>
+                           <input type="text" required value={walkinForm.breed} onChange={(e) => setWalkinForm({...walkinForm, breed: e.target.value})} className="w-full bg-white border border-camel-200 rounded-xl px-4 py-3 text-sm focus:border-camel-500 focus:ring-4 focus:ring-camel-50 transition-all" placeholder="e.g. Beagle" />
+                         </div>
+                         <div>
+                           <label className="block text-xs font-bold text-espresso-900 uppercase tracking-widest mb-2 px-1">Age</label>
+                           <input type="text" value={walkinForm.age} onChange={(e) => setWalkinForm({...walkinForm, age: e.target.value})} className="w-full bg-white border border-camel-200 rounded-xl px-4 py-3 text-sm focus:border-camel-500 focus:ring-4 focus:ring-camel-50 transition-all" placeholder="e.g. 2 Yrs" />
+                         </div>
+                       </div>
+
+                       <div className="grid grid-cols-2 gap-4">
+                         <div>
+                           <label className="block text-xs font-bold text-espresso-900 uppercase tracking-widest mb-2 px-1">Reason for Visit</label>
+                           <input type="text" required value={walkinForm.reason} onChange={(e) => setWalkinForm({...walkinForm, reason: e.target.value})} className="w-full bg-white border border-camel-200 rounded-xl px-4 py-3 text-sm focus:border-camel-500 focus:ring-4 focus:ring-camel-50 transition-all" placeholder="e.g. Vaccination, Limping" />
+                         </div>
+                         <div>
+                           <label className="block text-xs font-bold text-espresso-900 uppercase tracking-widest mb-2 px-1">Severity</label>
+                           <select value={walkinForm.severity} onChange={(e) => setWalkinForm({...walkinForm, severity: e.target.value})} className="w-full bg-white border border-camel-200 rounded-xl px-4 py-3 text-sm focus:border-camel-500 focus:ring-4 focus:ring-camel-50 transition-all appearance-none">
+                             <option value="ROUTINE">Routine</option>
+                             <option value="URGENT">Urgent</option>
+                             <option value="EMERGENCY">Emergency</option>
+                           </select>
+                         </div>
+                       </div>
+                       
+                       <div className="pt-4">
+                         <button type="submit" className="w-full bg-espresso-900 hover:bg-espresso-800 text-white py-4 rounded-xl font-bold text-sm tracking-wide transition-all shadow-md">Register to Queue</button>
+                       </div>
+                    </form>
+                 </div>
+              </motion.div>
+            </div>
+          </>
+        )}
+      </AnimatePresence>
     </>
   );
 }
-
-
-
-
-

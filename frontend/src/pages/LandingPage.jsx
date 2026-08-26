@@ -1,6 +1,6 @@
 ﻿import React from 'react';
 import { Link, NavLink } from 'react-router-dom';
-import { LayoutDashboard, Stethoscope, HeartHandshake, ShoppingBag, ArrowRight, PawPrint } from 'lucide-react';
+import { LayoutDashboard, Stethoscope, HeartHandshake, ShoppingBag, ArrowRight, Play, PawPrint } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { cn } from '../lib/utils';
 
@@ -12,42 +12,30 @@ export default function LandingPage() {
     { name: 'Shop', path: '/shop', icon: ShoppingBag },
   ];
 
-  // Animation variants for staggered text reveal
-  const container = {
-    hidden: { opacity: 0 },
-    show: { opacity: 1, transition: { staggerChildren: 0.15, delayChildren: 0.3 } }
-  };
-  const item = {
-    hidden: { opacity: 0, y: 40 },
+  const fadeUp = {
+    hidden: { opacity: 0, y: 30 },
     show: { opacity: 1, y: 0, transition: { duration: 0.8, ease: [0.16, 1, 0.3, 1] } }
   };
 
   return (
-    <div className="relative min-h-screen flex flex-col font-sans bg-espresso-900 selection:bg-camel-500 selection:text-white overflow-hidden">
+    <div className="relative min-h-screen flex flex-col font-sans bg-espresso-900 overflow-hidden">
       
-      {/* --- Immersive Cinematic Video Background --- */}
+      {/* --- Cinematic Video Background (Warm Overlay) --- */}
       <div className="absolute inset-0 z-0">
-        <video autoPlay loop muted playsInline className="w-full h-full object-cover scale-[1.02] opacity-80">
+        <video autoPlay loop muted playsInline className="w-full h-full object-cover scale-[1.02] opacity-90">
           <source src="https://cdn.pixabay.com/video/2021/08/04/83908-584742637_large.mp4" type="video/mp4" />
         </video>
-        <div className="absolute inset-0 bg-espresso-900/60 mix-blend-multiply"></div>
-        <div className="absolute inset-0 bg-gradient-to-r from-espresso-900/95 via-espresso-900/70 to-transparent"></div>
-        <div className="absolute inset-0 bg-gradient-to-t from-espresso-900/90 via-transparent to-transparent"></div>
-      </div>
-
-      {/* --- Architectural Grid Overlay --- */}
-      <div className="absolute inset-0 z-0 pointer-events-none flex justify-between px-6 lg:px-12">
-        <div className="w-[1px] h-full bg-white/5"></div>
-        <div className="w-[1px] h-full bg-white/5 hidden md:block"></div>
-        <div className="w-[1px] h-full bg-white/5 hidden lg:block"></div>
-        <div className="w-[1px] h-full bg-white/5"></div>
+        <div className="absolute inset-0 bg-espresso-900/50 mix-blend-multiply"></div>
+        {/* Soft gradient to ensure text readability without making it pitch black */}
+        <div className="absolute inset-0 bg-gradient-to-r from-espresso-900/90 via-espresso-900/60 to-transparent"></div>
+        <div className="absolute inset-0 bg-gradient-to-t from-espresso-900/80 via-transparent to-transparent"></div>
       </div>
 
       {/* --- Premium Public Navbar (Pristine Approved Version) --- */}
       <motion.div 
-        initial={{ y: -100, opacity: 0 }}
+        initial={{ y: -50, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
-        transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+        transition={{ duration: 0.8, ease: "easeOut" }}
         className="fixed top-4 md:top-6 left-0 right-0 z-50 flex justify-center px-4 pointer-events-none"
       >
         <header className="relative w-full max-w-5xl h-[64px] md:h-[72px] bg-white rounded-[32px] md:rounded-[40px] shadow-[0_15px_40px_rgba(0,0,0,0.15)] border border-camel-100/50 flex items-center justify-between overflow-hidden pointer-events-auto transition-all duration-300">
@@ -150,63 +138,43 @@ export default function LandingPage() {
         </header>
       </motion.div>
 
-      {/* --- Vertical Typographic Accent (Editorial Detail) --- */}
-      <motion.div 
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 1, duration: 1 }}
-        className="hidden xl:block absolute left-8 top-1/2 -translate-y-1/2 -rotate-90 origin-left z-20"
-      >
-        <p className="text-[10px] tracking-[0.4em] uppercase text-white/40 font-bold whitespace-nowrap">
-          FurShield Architecture v1.0
-        </p>
-      </motion.div>
-
-      {/* --- Architectural Hero Content --- */}
+      {/* --- Warm, Elegant Hero Content --- */}
       <main className="relative z-10 flex-1 flex flex-col justify-center w-full max-w-7xl mx-auto px-6 lg:px-12 pt-32 pb-20">
         
         <motion.div 
-          variants={container}
           initial="hidden"
           animate="show"
-          className="max-w-4xl"
+          variants={{
+            hidden: { opacity: 0 },
+            show: { opacity: 1, transition: { staggerChildren: 0.15, delayChildren: 0.2 } }
+          }}
+          className="max-w-3xl"
         >
-          {/* Subtle Overline */}
-          <motion.div variants={item} className="flex items-center gap-4 mb-8">
-            <span className="w-12 h-[1px] bg-camel-400"></span>
-            <span className="text-[11px] font-bold tracking-[0.3em] text-camel-300 uppercase">
-              Next-Generation Platform
-            </span>
-          </motion.div>
-
-          {/* Massive Minimalist Typography */}
-          <motion.h1 variants={item} className="text-[4rem] sm:text-[5.5rem] lg:text-[7rem] font-display font-bold text-white tracking-tighter leading-[0.9] mb-8">
-            Beyond <br/>
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-camel-300 to-camel-600 italic font-medium pr-4">Standard</span><br/>
-            Pet Care.
+          {/* Gentle, friendly heading */}
+          <motion.h1 variants={fadeUp} className="text-5xl sm:text-6xl lg:text-7xl font-display font-extrabold text-white tracking-tight leading-[1.1] mb-6 drop-shadow-lg">
+            Exceptional care for the <br/>
+            <span className="text-camel-400">pets you love.</span>
           </motion.h1>
           
-          <motion.p variants={item} className="text-base sm:text-lg text-white/70 font-medium max-w-xl leading-relaxed mb-12 pl-1 border-l border-white/20 ml-2">
-            An enterprise-grade ecosystem uniting pet owners, clinical veterinarians, and rescue shelters into one meticulously engineered reality.
+          <motion.p variants={fadeUp} className="text-lg sm:text-xl text-white/80 font-medium max-w-2xl leading-relaxed mb-10 drop-shadow-md">
+            A comprehensive ecosystem uniting pet owners, clinical veterinarians, and rescue shelters into one simple, seamless platform.
           </motion.p>
 
-          {/* Bespoke Expanding-Line CTA */}
-          <motion.div variants={item} className="flex flex-col sm:flex-row items-start sm:items-center gap-8 pl-3">
+          {/* Friendly, standard CTAs (No robotic text) */}
+          <motion.div variants={fadeUp} className="flex flex-col sm:flex-row items-center gap-5 w-full sm:w-auto">
             <Link 
               to="/dashboard" 
-              className="group flex items-center gap-5 cursor-pointer"
+              className="w-full sm:w-auto px-8 py-4 bg-camel-600 hover:bg-camel-500 text-white rounded-full font-bold text-base transition-all shadow-[0_10px_30px_rgba(186,127,72,0.3)] hover:shadow-[0_15px_40px_rgba(186,127,72,0.5)] hover:-translate-y-1 flex items-center justify-center gap-2"
             >
-              <div className="flex items-center justify-center w-12 h-12 rounded-full border border-camel-500 text-camel-400 group-hover:bg-camel-500 group-hover:text-white transition-all duration-300">
-                <ArrowRight size={18} strokeWidth={2} className="group-hover:-rotate-45 transition-transform duration-300" />
-              </div>
-              <div className="flex flex-col">
-                <span className="text-[11px] font-black tracking-[0.2em] uppercase text-white group-hover:text-camel-300 transition-colors">
-                  Initialize Workspace
-                </span>
-                {/* Animated underline */}
-                <div className="h-[2px] w-8 bg-camel-500 mt-1 group-hover:w-full transition-all duration-500 ease-out"></div>
-              </div>
+              Get Started
             </Link>
+            
+            <button className="group w-full sm:w-auto px-8 py-4 bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/20 text-white rounded-full font-bold text-base transition-all flex items-center justify-center gap-3">
+              <span className="flex items-center justify-center w-8 h-8 rounded-full bg-white/20 group-hover:bg-camel-500 transition-colors">
+                <Play size={14} className="ml-0.5 fill-current" />
+              </span>
+              Watch Demo
+            </button>
           </motion.div>
 
         </motion.div>

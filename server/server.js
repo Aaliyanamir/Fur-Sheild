@@ -26,8 +26,16 @@ app.get('/api/v1/health', (req, res) => {
   res.status(200).json({ success: true, message: 'FurShield Enterprise API is running.' });
 });
 
+// Route Files
+const authRoutes = require('./routes/auth.routes');
+
+// Mount Routers
+app.use('/api/v1/auth', authRoutes);
+});
+
 // Start Server
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(Server running in  mode on port );
 });
+

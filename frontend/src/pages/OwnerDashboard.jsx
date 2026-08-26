@@ -1,6 +1,6 @@
 ﻿import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Calendar, Plus, Flame, Moon, Droplets, CheckCircle2, Circle, ArrowRight, Footprints, Loader2, Sparkles } from 'lucide-react';
+import { Calendar, Plus, Flame, Moon, Droplets, CheckCircle2, Circle, ArrowRight, Footprints, Loader2, PawPrint, HeartHandshake, Syringe } from 'lucide-react';
 import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip } from 'recharts';
 import { fetchDashboardData } from '../services/api';
 import AddRecordModal from '../components/organisms/AddRecordModal';
@@ -50,7 +50,7 @@ export default function OwnerDashboard() {
           </div>
         </div>
         <span className="text-espresso-900 font-bold text-sm">{label}</span>
-        <span className="text-emerald-500 text-[10px] font-bold mt-1 tracking-wide">{trend}</span>
+        <span className="text-camel-500 text-[10px] font-bold mt-1 tracking-wide">{trend}</span>
       </div>
     );
   };
@@ -58,7 +58,7 @@ export default function OwnerDashboard() {
   const CustomTooltip = ({ active, payload, label }) => {
     if (active && payload && payload.length) {
       return (
-        <div className="bg-white px-4 py-3 shadow-[0_10px_30px_rgba(90,56,37,0.1)] rounded-2xl border-none">
+        <div className="bg-white px-4 py-3 shadow-lg rounded-xl border border-camel-100">
           <p className="font-bold text-espresso-900 mb-2">{label}</p>
           <p className="text-sm font-medium text-camel-600">Weight: {payload[0].value} kg</p>
           <p className="text-sm font-medium text-espresso-500">Calories: {payload[1].value} kcal</p>
@@ -66,15 +66,6 @@ export default function OwnerDashboard() {
       );
     }
     return null;
-  };
-
-  const container = {
-    hidden: { opacity: 0 },
-    show: { opacity: 1, transition: { staggerChildren: 0.1 } }
-  };
-  const itemVariant = {
-    hidden: { opacity: 0, y: 20 },
-    show: { opacity: 1, y: 0, transition: { duration: 0.6, ease: [0.16, 1, 0.3, 1] } }
   };
 
   if (loading) {
@@ -91,157 +82,110 @@ export default function OwnerDashboard() {
       <div className="flex flex-col md:flex-row md:items-end justify-between mb-8 gap-4 pt-4">
         <div>
           <p className="text-camel-600 font-bold text-sm tracking-widest uppercase mb-1">My Companion</p>
-          <h1 className="text-4xl font-display font-black text-espresso-900 tracking-tight">{data.pet.name}</h1>
+          <h1 className="text-4xl font-display font-black text-espresso-900 tracking-tight">{data.pet.name}'s Health</h1>
         </div>
-        <button onClick={handleAddRecord} className="flex items-center gap-2 bg-espresso-900 hover:bg-espresso-800 text-white px-6 py-2.5 rounded-full font-bold text-sm transition-all shadow-md">
+        <button onClick={handleAddRecord} className="flex items-center gap-2 bg-espresso-900 hover:bg-espresso-800 text-white px-6 py-2.5 rounded-full font-bold text-sm transition-all shadow-md hover:-translate-y-0.5">
           <Plus size={18} /> Add Record
         </button>
       </div>
 
-      {/* Master Bento Grid */}
-      <motion.div initial="hidden" animate="show" variants={container} className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+      {/* Master Grid - Clean & Warm */}
+      <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }} className="grid grid-cols-1 lg:grid-cols-12 gap-8">
         
-        {/* LEFT COLUMN: Portrait Card (Col 4) */}
-        <motion.div variants={itemVariant} className="lg:col-span-4 lg:sticky lg:top-32 relative h-[600px] rounded-[2rem] overflow-hidden group shadow-[0_15px_40px_rgba(90,56,37,0.08)]">
-          <img src={data.pet.image} alt={data.pet.name} className="absolute inset-0 w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105" />
-          <div className="absolute inset-0 bg-gradient-to-t from-espresso-900 via-espresso-900/60 to-transparent h-full"></div>
-          
-          <div className="absolute inset-0 p-8 flex flex-col justify-end">
-            <div className="bg-white/20 backdrop-blur-md border border-white/30 px-3 py-1 rounded-full w-fit mb-auto mt-2">
-              <span className="text-white text-xs font-bold tracking-wide">{data.pet.breed}</span>
+        {/* LEFT COLUMN: Clean ID Card (Col 4) */}
+        <div className="lg:col-span-4 lg:sticky lg:top-32 flex flex-col gap-6">
+          <div className="bg-white rounded-[2rem] p-6 border border-camel-100 shadow-sm flex flex-col">
+            <div className="w-full aspect-[4/5] rounded-[1.5rem] overflow-hidden mb-6 relative group">
+              <img src={data.pet.image} alt={data.pet.name} className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
             </div>
             
-            <div className="grid grid-cols-3 gap-4 mb-6 pt-4 border-t border-white/10">
+            <div className="flex justify-between items-start mb-6">
               <div>
-                <p className="text-white/50 text-[10px] font-bold uppercase tracking-widest mb-1">Age</p>
-                <p className="text-white font-bold text-sm">{data.pet.age}</p>
+                <h2 className="text-3xl font-display font-black text-espresso-900 tracking-tight">{data.pet.name}</h2>
+                <p className="text-camel-600 font-bold mt-1">{data.pet.breed}</p>
               </div>
-              <div>
-                <p className="text-white/50 text-[10px] font-bold uppercase tracking-widest mb-1">Weight</p>
-                <p className="text-white font-bold text-sm">{data.pet.weight}</p>
+              <div className="w-12 h-12 rounded-full bg-camel-50 flex items-center justify-center text-camel-600">
+                <PawPrint size={24} />
               </div>
-              <div>
-                <p className="text-white/50 text-[10px] font-bold uppercase tracking-widest mb-1">Blood</p>
-                <p className="text-white font-bold text-sm">{data.pet.blood}</p>
+            </div>
+            
+            <div className="grid grid-cols-2 gap-4 mb-6 pt-4 border-t border-camel-100/50">
+              <div className="bg-bg-secondary rounded-2xl p-4">
+                <p className="text-espresso-400 text-[10px] font-bold uppercase tracking-widest mb-1">Age</p>
+                <p className="text-espresso-900 font-black text-lg">{data.pet.age}</p>
+              </div>
+              <div className="bg-bg-secondary rounded-2xl p-4">
+                <p className="text-espresso-400 text-[10px] font-bold uppercase tracking-widest mb-1">Weight</p>
+                <p className="text-espresso-900 font-black text-lg">{data.pet.weight}</p>
               </div>
             </div>
 
-            <button onClick={handleViewProfile} className="w-full bg-white text-espresso-900 py-4 rounded-full font-bold text-sm hover:bg-camel-50 transition-colors flex items-center justify-center gap-2">
-              View Full Profile <ArrowRight size={16} />
+            <button onClick={handleViewProfile} className="w-full bg-bg-secondary text-espresso-900 py-4 rounded-full font-bold text-sm hover:bg-camel-100 transition-colors flex items-center justify-center gap-2 mt-auto">
+              Full Health Profile <ArrowRight size={16} />
             </button>
           </div>
-        </motion.div>
+        </div>
 
-                {/* RIGHT COLUMN: Data Widgets (Col 8) */}
+        {/* RIGHT COLUMN: Warm Data Widgets (Col 8) */}
         <div className="lg:col-span-8 flex flex-col gap-8">
           
-          {/* Spatial Generative AI Insight (No Generic Icons) */}
-          <motion.div 
-            variants={itemVariant} 
-            className="relative overflow-hidden rounded-[2.5rem] bg-gradient-to-br from-white/80 to-white/40 backdrop-blur-2xl border border-white shadow-[0_20px_40px_rgba(90,56,37,0.05)] p-8 md:p-10"
-          >
-            {/* Subtle animated background gradient */}
-            <div className="absolute top-0 right-0 -mr-20 -mt-20 w-64 h-64 bg-camel-200/30 rounded-full blur-3xl animate-pulse"></div>
+          {/* Pet-Centric Health Summary */}
+          <div className="bg-camel-600 rounded-[2rem] p-8 md:p-10 text-white relative overflow-hidden flex flex-col md:flex-row gap-8 items-center shadow-md">
+            <div className="absolute top-0 right-0 w-64 h-64 bg-camel-500 rounded-full blur-3xl opacity-50 pointer-events-none"></div>
             
-            <div className="relative z-10 flex flex-col md:flex-row gap-8 items-start">
-              {/* Custom CSS AI Orb (Replacing cheap icons) */}
-              <div className="flex-shrink-0 relative w-12 h-12 flex items-center justify-center">
-                <div className="absolute inset-0 bg-camel-400 rounded-full animate-ping opacity-20"></div>
-                <div className="absolute inset-2 bg-gradient-to-tr from-camel-600 to-camel-300 rounded-full shadow-[0_0_15px_rgba(186,127,72,0.5)]"></div>
-                <div className="absolute inset-3 bg-white rounded-full opacity-30 blur-[1px]"></div>
-              </div>
-              
-              <div>
-                <div className="flex items-center gap-3 mb-3">
-                  <span className="text-[10px] font-black tracking-[0.25em] text-camel-600 uppercase">
-                    Generative Health Synthesis
-                  </span>
-                  <div className="h-[1px] w-12 bg-camel-200"></div>
-                </div>
-                <p className="text-xl md:text-2xl font-display font-medium text-espresso-900 leading-relaxed tracking-tight">
-                  Buddy's weight has stabilized at <span className="font-bold border-b-2 border-camel-300">28.6 kg</span>, aligning perfectly with his reduced 850 kcal intake. This steady trajectory significantly reduces joint stress. <span className="text-camel-700 italic">Maintain current diet plan.</span>
-                </p>
-              </div>
+            <div className="w-20 h-20 shrink-0 bg-white/20 backdrop-blur-sm rounded-[1.5rem] flex items-center justify-center relative z-10 border border-white/20 shadow-inner">
+              <HeartHandshake size={36} className="text-white" />
             </div>
-          </motion.div>
+            
+            <div className="relative z-10">
+              <h3 className="text-camel-200 text-xs font-bold uppercase tracking-widest mb-2 flex items-center gap-2">
+                Veterinary Summary
+              </h3>
+              <p className="text-lg md:text-xl font-medium leading-relaxed">
+                Buddy's weight has stabilized perfectly at 28.6 kg. The reduced calorie intake is working, relieving joint stress. Keep up the great work!
+              </p>
+            </div>
+          </div>
 
-          {/* Precision Trend Chart (Borderless & Seamless) */}
-          <motion.div 
-            variants={itemVariant} 
-            className="bg-white/60 backdrop-blur-xl rounded-[2.5rem] p-8 md:p-10 border border-white shadow-[0_10px_30px_rgba(90,56,37,0.03)]"
-          >
-            <div className="mb-8">
-              <h3 className="text-2xl font-display font-bold text-espresso-900 tracking-tight">Nutrition & Weight Trajectory</h3>
-              <p className="text-sm font-medium text-espresso-500 mt-1">6-month macro correlation analysis.</p>
+          {/* Clean Area Chart */}
+          <div className="bg-white rounded-[2rem] p-8 md:p-10 border border-camel-100 shadow-sm flex flex-col h-[400px]">
+            <div className="flex justify-between items-center mb-8">
+              <div>
+                <h3 className="text-2xl font-display font-bold text-espresso-900 tracking-tight">Nutrition & Weight</h3>
+                <p className="text-sm font-medium text-espresso-500 mt-1">6-month trend analysis.</p>
+              </div>
             </div>
             
-            {/* Chart Container */}
-            <div className="w-full h-[250px] relative">
+            <div className="flex-1 w-full relative">
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart data={data.chartData} margin={{ top: 10, right: 0, left: -20, bottom: 0 }}>
                   <defs>
                     <linearGradient id="colorWeight" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#BA7F48" stopOpacity={0.3}/>
+                      <stop offset="5%" stopColor="#BA7F48" stopOpacity={0.2}/>
                       <stop offset="95%" stopColor="#BA7F48" stopOpacity={0}/>
                     </linearGradient>
                     <linearGradient id="colorCals" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#3E2A20" stopOpacity={0.1}/>
+                      <stop offset="5%" stopColor="#3E2A20" stopOpacity={0.05}/>
                       <stop offset="95%" stopColor="#3E2A20" stopOpacity={0}/>
                     </linearGradient>
                   </defs>
-                  <XAxis 
-                    dataKey="month" 
-                    axisLine={false} 
-                    tickLine={false} 
-                    tick={{ fill: '#9CA3AF', fontSize: 12, fontWeight: 500 }} 
-                    dy={10}
-                  />
-                  <YAxis 
-                    yAxisId="left" 
-                    axisLine={false} 
-                    tickLine={false} 
-                    tick={false} 
-                    domain={['dataMin - 1', 'dataMax + 1']}
-                  />
-                  <YAxis 
-                    yAxisId="right" 
-                    orientation="right" 
-                    axisLine={false} 
-                    tickLine={false} 
-                    tick={false} 
-                    domain={['dataMin - 100', 'dataMax + 100']}
-                  />
-                  <Tooltip content={<CustomTooltip />} cursor={{ stroke: '#BA7F48', strokeWidth: 1, strokeDasharray: '5 5' }} />
-                  <Area 
-                    yAxisId="left"
-                    type="monotone" 
-                    dataKey="weight" 
-                    stroke="#BA7F48" 
-                    strokeWidth={3}
-                    fillOpacity={1} 
-                    fill="url(#colorWeight)" 
-                  />
-                  <Area 
-                    yAxisId="right"
-                    type="monotone" 
-                    dataKey="calories" 
-                    stroke="#3E2A20" 
-                    strokeWidth={2}
-                    strokeDasharray="4 4"
-                    fillOpacity={1} 
-                    fill="url(#colorCals)" 
-                  />
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f5f5f5" />
+                  <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fill: '#a8a29e', fontSize: 12, fontWeight: 500 }} dy={10} />
+                  <YAxis yAxisId="left" axisLine={false} tickLine={false} tick={{ fill: '#a8a29e', fontSize: 12, fontWeight: 500 }} domain={['dataMin - 1', 'dataMax + 1']} />
+                  <YAxis yAxisId="right" orientation="right" axisLine={false} tickLine={false} tick={false} domain={['dataMin - 100', 'dataMax + 100']} />
+                  <Tooltip content={<CustomTooltip />} cursor={{ stroke: '#BA7F48', strokeWidth: 1, strokeDasharray: '4 4' }} />
+                  <Area yAxisId="left" type="monotone" dataKey="weight" stroke="#BA7F48" strokeWidth={3} fillOpacity={1} fill="url(#colorWeight)" />
+                  <Area yAxisId="right" type="monotone" dataKey="calories" stroke="#3E2A20" strokeWidth={2} strokeDasharray="4 4" fillOpacity={1} fill="url(#colorCals)" />
                 </AreaChart>
               </ResponsiveContainer>
             </div>
-          </motion.div>
+          </div>
           
-          {/* Health Overview Rings */}
-          <motion.div variants={itemVariant} className="bg-white rounded-[2rem] p-8 border border-camel-100 shadow-[0_8px_30px_rgb(90,56,37,0.03)] flex flex-col justify-between">
+          {/* Health Vitals Rings */}
+          <div className="bg-white rounded-[2rem] p-8 md:p-10 border border-camel-100 shadow-sm flex flex-col justify-between">
             <div className="flex justify-between items-center mb-8">
               <div>
-                <h3 className="text-xl font-display font-bold text-espresso-900">Health Overview</h3>
-                <p className="text-espresso-500 text-sm font-medium">Live health insights & key stats.</p>
+                <h3 className="text-xl font-display font-bold text-espresso-900 tracking-tight">Daily Vitals</h3>
               </div>
               <div className="w-36">
                 <CustomSelect 
@@ -254,56 +198,62 @@ export default function OwnerDashboard() {
             </div>
 
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 justify-items-center">
-              <CircularProgress percentage={data.health.activity} colorClass="text-emerald-500" icon={Footprints} label="Activity" trend="+12% this week" />
+              <CircularProgress percentage={data.health.activity} colorClass="text-camel-600" icon={Footprints} label="Activity" trend="+12% this week" />
               <CircularProgress percentage={data.health.sleep} colorClass="text-indigo-500" icon={Moon} label="Sleep" trend="+5% this week" />
-              <CircularProgress percentage={data.health.calories} colorClass="text-accent-500" icon={Flame} label="Calories" trend="On Track" />
+              <CircularProgress percentage={data.health.calories} colorClass="text-orange-500" icon={Flame} label="Calories" trend="On Track" />
               <CircularProgress percentage={data.health.hydration} colorClass="text-blue-500" icon={Droplets} label="Hydration" trend="+8% this week" />
             </div>
-          </motion.div>
+          </div>
 
           {/* Bottom Split: Timeline & Appointment */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <motion.div variants={itemVariant} className="bg-white rounded-[2rem] p-8 border border-camel-100 shadow-[0_8px_30px_rgb(90,56,37,0.03)]">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            
+            <div className="bg-white rounded-[2rem] p-8 border border-camel-100 shadow-sm">
               <div className="flex justify-between items-center mb-8">
-                <h3 className="text-lg font-display font-bold text-espresso-900">Health Timeline</h3>
+                <h3 className="text-xl font-display font-bold text-espresso-900 tracking-tight">Timeline</h3>
                 <button className="text-xs font-bold text-camel-600 hover:text-camel-800">View All</button>
               </div>
               
-              <div className="relative pl-4 border-l-2 border-camel-100 space-y-8">
+              <div className="relative pl-6 border-l-2 border-camel-100 space-y-8">
                 <div className="relative">
-                  <div className="absolute -left-[25px] bg-white p-1 rounded-full"><CheckCircle2 className="text-emerald-500" size={18} /></div>
-                  <p className="font-bold text-espresso-900 text-sm">Vaccination - DHPP</p>
+                  <div className="absolute -left-[33px] bg-white p-1.5 rounded-full"><CheckCircle2 className="text-camel-600" size={20} /></div>
+                  <p className="font-bold text-espresso-900">Vaccination - DHPP</p>
                   <p className="text-xs font-medium text-espresso-500 mt-1">Oct 20, 2024 • Dr. Emily Carter</p>
                 </div>
                 <div className="relative">
-                  <div className="absolute -left-[25px] bg-white p-1 rounded-full"><Circle className="text-camel-500 fill-camel-100" size={18} /></div>
-                  <p className="font-bold text-espresso-900 text-sm">Annual Checkup</p>
+                  <div className="absolute -left-[33px] bg-white p-1.5 rounded-full"><Circle className="text-camel-300 fill-camel-100" size={20} /></div>
+                  <p className="font-bold text-espresso-900">Annual Checkup</p>
                   <p className="text-xs font-medium text-camel-600 mt-1">Nov 10, 2024 • 10:30 AM</p>
                 </div>
               </div>
-            </motion.div>
+            </div>
 
-            <motion.div variants={itemVariant} className="flex flex-col gap-6">
-              <div className="bg-camel-50 rounded-[2rem] p-8 border border-camel-100/50 flex flex-col justify-between h-full">
-                <div className="flex justify-between items-center mb-6">
-                  <h3 className="text-lg font-display font-bold text-espresso-900">Next Appointment</h3>
+            <div className="flex flex-col gap-6">
+              <div className="bg-white rounded-[2rem] p-8 border border-camel-100 shadow-sm flex flex-col justify-between h-full relative overflow-hidden">
+                <div className="absolute top-0 right-0 p-8 text-camel-50 pointer-events-none">
+                   <Syringe size={120} strokeWidth={1} className="-rotate-12 translate-x-8 -translate-y-8" />
                 </div>
-                <div className="flex gap-4 items-center bg-white p-4 rounded-2xl shadow-sm">
-                  <div className="bg-camel-100 text-camel-800 rounded-xl px-4 py-2 text-center">
-                    <span className="block text-[10px] font-bold uppercase">Nov</span>
-                    <span className="block text-2xl font-black">10</span>
-                  </div>
-                  <div>
-                    <p className="font-bold text-espresso-900 text-sm mb-1">General Checkup</p>
-                    <p className="text-xs font-medium text-espresso-600 flex items-center gap-1"><Calendar size={12}/> Dr. Mark Thorne</p>
+                
+                <div className="relative z-10">
+                  <h3 className="text-xl font-display font-bold text-espresso-900 tracking-tight mb-8">Next Visit</h3>
+                  
+                  <div className="flex gap-4 items-center bg-bg-secondary p-4 rounded-2xl border border-camel-100/50">
+                    <div className="bg-white text-camel-800 rounded-xl px-4 py-2 text-center shadow-sm">
+                      <span className="block text-[10px] font-bold uppercase">Nov</span>
+                      <span className="block text-2xl font-black">10</span>
+                    </div>
+                    <div>
+                      <p className="font-bold text-espresso-900 mb-1">General Checkup</p>
+                      <p className="text-xs font-medium text-espresso-500 flex items-center gap-1"><Calendar size={12}/> Dr. Mark Thorne</p>
+                    </div>
                   </div>
                 </div>
                 
-                <button onClick={handleManageAppointment} className="w-full mt-6 bg-camel-600 text-white py-3 rounded-full font-bold text-sm hover:bg-camel-500 transition-colors">
+                <button onClick={handleManageAppointment} className="w-full mt-8 bg-camel-600 text-white py-3.5 rounded-full font-bold text-sm hover:bg-camel-700 transition-colors relative z-10 shadow-md hover:shadow-lg hover:-translate-y-0.5">
                   Manage Appointment
                 </button>
               </div>
-            </motion.div>
+            </div>
           </div>
         </div>
       </motion.div>
@@ -314,4 +264,3 @@ export default function OwnerDashboard() {
     </>
   );
 }
-

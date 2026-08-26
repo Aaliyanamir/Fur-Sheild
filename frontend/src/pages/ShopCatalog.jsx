@@ -395,8 +395,11 @@ export default function ShopCatalog() {
 
                 {/* PHASE 5: Rx Verification Block (Conditional) */}
                 {selectedProduct.rxRequired ? (
-                  <div className="bg-accent-50 border border-accent-200 rounded-2xl p-5 mb-8 relative overflow-hidden">
-                    <div className="absolute right-0 top-0 w-32 h-32 bg-accent-200/30 rounded-full blur-2xl -mr-10 -mt-10"></div>
+                  <div className="bg-accent-50 border border-accent-200 rounded-2xl p-5 mb-8 relative">
+                    {/* Glow Wrapper to prevent bleed without clipping dropdown */}
+                    <div className="absolute inset-0 overflow-hidden rounded-2xl pointer-events-none">
+                      <div className="absolute right-0 top-0 w-32 h-32 bg-accent-200/30 rounded-full blur-2xl -mr-10 -mt-10"></div>
+                    </div>
                     <div className="flex items-start gap-4 relative z-10">
                       <div className="w-10 h-10 rounded-full bg-accent-100 flex items-center justify-center flex-shrink-0 border border-accent-200">
                         <ShieldCheck className="text-accent-600" size={20} />
@@ -459,5 +462,6 @@ export default function ShopCatalog() {
     </div>
   );
 }
+
 
 

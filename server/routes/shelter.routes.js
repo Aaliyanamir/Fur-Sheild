@@ -1,7 +1,19 @@
-﻿const express = require('express');
+const express = require('express');
 const router = express.Router();
-const { getPipeline, updateAnimalStatus, addIntake } = require('../controllers/shelter.controller');
+const { getPipeline, updateAnimalStatus, addIntake, updateAnimal, deleteAnimal } = require('../controllers/shelter.controller');
 const { protect, authorize } = require('../middlewares/auth.middleware');
+const multer = require('multer');
+const path = require('path');
+
+const storage = multer.diskStorage({
+  destination(req, file, cb) {
+    cb(null, 'uploads/');
+  },
+  filename(req, file, cb) {
+    cb(null, `shelter-${Date.now()}${path.extname(file.originalname)}`);
+  }
+});
+const upload = multer({ storage });
 
 // Apply protection and RBAC to ALL routes in this file
 router.use(protect);
@@ -9,6 +21,8 @@ router.use(authorize('SHELTER_ADMIN'));
 
 router.get('/pipeline', getPipeline);
 router.patch('/pipeline/:id/status', updateAnimalStatus);
-router.post('/intake', addIntake);
+router.patch('/pipeline/:id', upload.single('avatar'), updateAnimal);
+router.delete('/pipeline/:id', deleteAnimal);
+router.post('/intake', upload.single('avatar'), addIntake);
 
 module.exports = router;

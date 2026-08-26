@@ -3,6 +3,8 @@
 const shelterAnimalSchema = new mongoose.Schema({
   name: { type: String, required: [true, 'Animal name is required'] },
   species: { type: String },
+  breed: { type: String },
+  avatarUrl: { type: String },
   intakeDate: { type: Date, default: Date.now },
   status: { 
     type: String, 

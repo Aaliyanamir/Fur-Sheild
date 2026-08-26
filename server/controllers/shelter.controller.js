@@ -44,13 +44,15 @@ const updateAnimalStatus = async (req, res) => {
 // @access  Private/ShelterAdmin
 const addIntake = async (req, res) => {
   try {
-    const { name, species, behaviorNotes, aiTriageLog } = req.body;
+    const { name, species, breed, behaviorNotes, aiTriageLog } = req.body;
 
     const animal = await ShelterAnimal.create({
       name,
       species,
+      breed,
       behaviorNotes,
-      aiTriageLog: aiTriageLog ? [aiTriageLog] : [] // If AI triage data is provided, push it as the first log
+      aiTriageLog: aiTriageLog ? [aiTriageLog] : [],
+      avatarUrl: req.file ? '/uploads/' + req.file.filename : undefined
     });
 
     res.status(201).json({ success: true, data: animal });
@@ -59,4 +61,48 @@ const addIntake = async (req, res) => {
   }
 };
 
-module.exports = { getPipeline, updateAnimalStatus, addIntake };
+
+// @desc    Update animal details (Name, Breed, Photo, etc)
+// @route   PATCH /api/v1/shelter/pipeline/:id
+// @access  Private/ShelterAdmin
+const updateAnimal = async (req, res) => {
+  try {
+    const { name, species, breed, behaviorNotes } = req.body;
+    
+    let animal = await ShelterAnimal.findById(req.params.id);
+    if (!animal) {
+      return res.status(404).json({ success: false, message: 'Animal not found' });
+    }
+
+    if (name) animal.name = name;
+    if (species) animal.species = species;
+    if (breed) animal.breed = breed;
+    if (behaviorNotes) animal.behaviorNotes = behaviorNotes;
+    if (req.file) animal.avatarUrl = '/uploads/' + req.file.filename;
+
+    await animal.save();
+    res.status(200).json({ success: true, data: animal });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// @desc    Delete animal
+// @route   DELETE /api/v1/shelter/pipeline/:id
+// @access  Private/ShelterAdmin
+const deleteAnimal = async (req, res) => {
+  try {
+    const animal = await ShelterAnimal.findById(req.params.id);
+    if (!animal) {
+      return res.status(404).json({ success: false, message: 'Animal not found' });
+    }
+    
+    await animal.deleteOne();
+    res.status(200).json({ success: true, data: {} });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+module.exports = { getPipeline, updateAnimalStatus, addIntake, updateAnimal, deleteAnimal };
+

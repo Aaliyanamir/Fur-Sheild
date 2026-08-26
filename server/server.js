@@ -31,12 +31,14 @@ const authRoutes = require('./routes/auth.routes');
 const vetRoutes = require('./routes/vet.routes');
 const shopRoutes = require('./routes/shop.routes');
 const shelterRoutes = require('./routes/shelter.routes');
+const dashboardRoutes = require('./routes/dashboard.routes');
 
 // Mount Routers
 app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/vethub', vetRoutes);
 app.use('/api/v1/shop', shopRoutes);
 app.use('/api/v1/shelter', shelterRoutes);
+app.use('/api/v1/dashboard', dashboardRoutes);
 });
 
 // Start Server
@@ -44,6 +46,7 @@ const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(Server running in  mode on port );
 });
+
 
 
 

@@ -1,4 +1,5 @@
 ﻿const express = require('express');
+const path = require('path');
 const dotenv = require('dotenv');
 const cors = require('cors');
 const helmet = require('helmet');
@@ -14,9 +15,10 @@ connectDB();
 const app = express();
 
 // Enterprise Middlewares
-app.use(helmet()); // Security headers
+app.use(helmet({ crossOriginResourcePolicy: false })); // Security headers
 app.use(cors()); // Enable CORS
-app.use(express.json()); // Body parser
+app.use(express.json());
+app.use('/uploads', express.static(path.join(__dirname, 'uploads'))); // Body parser
 if (process.env.NODE_ENV === 'development') {
   app.use(morgan('dev')); // HTTP request logging
 }
@@ -45,3 +47,5 @@ const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`Server running in ${process.env.NODE_ENV} mode on port ${PORT}`);
 });
+
+

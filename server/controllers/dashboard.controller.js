@@ -25,13 +25,16 @@ const addPet = async (req, res) => {
     }
     
     const pet = await Pet.create({
-      ownerId: req.user.id, // Securely link pet to the active user
-      name,
-      species,
-      breed,
-      dob,
-      avatarUrl
-    });
+        ownerId: req.user.id,
+        name,
+        species,
+        breed,
+        dob,
+        gender,
+        age,
+        microchipId,
+        avatarUrl
+      });
     
     res.status(201).json({ success: true, data: pet });
   } catch (error) {
@@ -111,6 +114,7 @@ const deletePet = async (req, res) => {
 };
 
 module.exports = { getMyPets, addPet, updateVitals, updatePet, deletePet };
+
 
 
 

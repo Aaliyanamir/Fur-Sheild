@@ -1,129 +1,195 @@
 ﻿import React, { useState, useContext } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { motion } from 'framer-motion';
-import { ShieldCheck, ArrowRight, AlertCircle, UserPlus } from 'lucide-react';
 import { AuthContext } from '../context/AuthContext';
+import { motion, AnimatePresence } from 'framer-motion';
+import { ArrowRight, Mail, Lock, User, AlertCircle, CheckCircle2 } from 'lucide-react';
+import Navbar from '../components/molecules/Navbar';
+import Footer from '../components/molecules/Footer';
+import { cn } from '../lib/utils';
 
 export default function Signup() {
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [role, setRole] = useState('OWNER');
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    password: '',
+    role: 'OWNER'
+  });
   const [error, setError] = useState('');
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const { user, register } = useContext(AuthContext);
+  const [success, setSuccess] = useState(false);
+  const { register } = useContext(AuthContext);
   const navigate = useNavigate();
 
-  const handleSignup = async (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
-    setIsSubmitting(true);
-    try {
-      const data = await register(name, email, password, role);
-      if (data.success) {
-        if (data.role === 'VET') navigate('/vet');
-        else if (data.role === 'SHELTER_ADMIN') navigate('/shelter');
+    
+    if (formData.password.length < 6) {
+      setError('Password must be at least 6 characters');
+      return;
+    }
+
+    const result = await register(formData.name, formData.email, formData.password, formData.role);
+    if (result.success) {
+      setSuccess(true);
+      setTimeout(() => {
+        if (result.role === 'VET') navigate('/vet');
+        else if (result.role === 'SHELTER_ADMIN') navigate('/shelter');
         else navigate('/dashboard');
-      }
-    } catch (err) {
-      setError(err.response?.data?.message || 'Registration failed. Please try again.');
-    } finally {
-      setIsSubmitting(false);
+      }, 1500);
+    } else {
+      setError(result.message);
     }
   };
 
   return (
-    <div className="min-h-screen bg-[#FDFBF7] flex items-center justify-center p-4">
-      {/* Background Ambience */}
-      <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
-        <div className="absolute -top-[20%] -left-[10%] w-[50%] h-[50%] bg-camel-200/40 rounded-full blur-[120px]"></div>
-        <div className="absolute bottom-[10%] -right-[10%] w-[40%] h-[40%] bg-accent-200/30 rounded-full blur-[100px]"></div>
-      </div>
-
-      <motion.div 
-        initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}
-        className="relative z-10 w-full max-w-md bg-white/80 backdrop-blur-xl border border-camel-100 rounded-[2.5rem] p-8 sm:p-10 shadow-[0_20px_60px_rgba(90,56,37,0.08)]"
-      >
-        <div className="flex justify-center mb-8">
-          <div className="w-14 h-14 rounded-full bg-espresso-900 flex items-center justify-center shadow-lg">
-            <UserPlus className="text-camel-400" size={28} />
-          </div>
-        </div>
+    <div className="min-h-screen bg-bg-primary flex flex-col font-sans">
+      <Navbar />
+      
+      {/* Split Screen Container */}
+      <main className="flex-1 flex flex-col lg:flex-row mt-[88px] md:mt-[104px]">
         
-        <div className="text-center mb-10">
-          <h2 className="text-3xl font-display font-black text-espresso-900 mb-2">Join FurShield</h2>
-          <p className="text-sm font-medium text-espresso-500">Create an account to access the ecosystem.</p>
-        </div>
-
-        {error && (
-          <div className="mb-6 bg-red-50 text-red-600 px-4 py-3 rounded-2xl text-sm font-bold border border-red-100 flex items-center gap-2">
-            <AlertCircle size={16} /> {error}
-          </div>
-        )}
-
-        <form onSubmit={handleSignup} className="space-y-5">
-          <div>
-            <label className="block text-xs font-bold text-espresso-900 uppercase tracking-widest mb-2 px-1">Full Name</label>
-            <input 
-              type="text" 
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              className="w-full bg-white border border-camel-200 rounded-2xl px-5 py-3.5 text-sm font-medium focus:outline-none focus:border-camel-500 focus:ring-4 focus:ring-camel-50 transition-all shadow-sm"
-              placeholder="John Doe"
-              required
-            />
-          </div>
-          <div>
-            <label className="block text-xs font-bold text-espresso-900 uppercase tracking-widest mb-2 px-1">Email Address</label>
-            <input 
-              type="email" 
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full bg-white border border-camel-200 rounded-2xl px-5 py-3.5 text-sm font-medium focus:outline-none focus:border-camel-500 focus:ring-4 focus:ring-camel-50 transition-all shadow-sm"
-              placeholder="you@example.com"
-              required
-            />
-          </div>
-          <div>
-            <label className="block text-xs font-bold text-espresso-900 uppercase tracking-widest mb-2 px-1">Password</label>
-            <input 
-              type="password" 
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full bg-white border border-camel-200 rounded-2xl px-5 py-3.5 text-sm font-medium focus:outline-none focus:border-camel-500 focus:ring-4 focus:ring-camel-50 transition-all shadow-sm"
-              placeholder="••••••••"
-              required
-            />
-          </div>
-          <div>
-            <label className="block text-xs font-bold text-espresso-900 uppercase tracking-widest mb-2 px-1">Account Type</label>
-            <select
-              value={role}
-              onChange={(e) => setRole(e.target.value)}
-              className="w-full bg-white border border-camel-200 rounded-2xl px-5 py-3.5 text-sm font-medium focus:outline-none focus:border-camel-500 focus:ring-4 focus:ring-camel-50 transition-all shadow-sm appearance-none"
-            >
-              <option value="OWNER">Pet Owner</option>
-              <option value="VET">Veterinarian</option>
-              <option value="SHELTER_ADMIN">Shelter Admin</option>
-            </select>
-          </div>
-          
-          <button 
-            type="submit" 
-            disabled={isSubmitting}
-            className="w-full bg-espresso-900 hover:bg-espresso-800 disabled:opacity-70 text-white py-4 rounded-2xl font-bold text-sm tracking-wide transition-all shadow-md flex items-center justify-center gap-2 mt-4"
+        {/* Left Side: Image */}
+        <div className="hidden lg:block lg:w-1/2 relative p-6 pr-0 pb-6">
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.8, ease: "easeOut", delay: 0.2 }}
+            className="w-full h-full rounded-[40px] overflow-hidden relative shadow-2xl"
           >
-            {isSubmitting ? 'Creating Account...' : 'Sign Up'} <ArrowRight size={16} />
-          </button>
-        </form>
-
-        <div className="mt-8 text-center">
-          <p className="text-xs font-medium text-espresso-500">
-            Already have an account? <Link to="/login" className="font-bold text-camel-600 hover:text-camel-700">Sign in</Link>
-          </p>
+            <div className="absolute inset-0 bg-espresso-900/10 z-10 mix-blend-overlay"></div>
+            <img 
+              src="/images/signup-bg.jpg" 
+              alt="Cute Cat" 
+              className="absolute inset-0 w-full h-full object-cover"
+            />
+            {/* Minimalist Overlay Graphic */}
+            <div className="absolute bottom-12 left-12 right-12 z-20 bg-white/10 backdrop-blur-md border border-white/20 p-8 rounded-3xl">
+               <h3 className="text-white font-display font-black text-3xl mb-2">Every tail tells a story.</h3>
+               <p className="text-white/90 font-medium">Join thousands of pet lovers and professionals.</p>
+            </div>
+          </motion.div>
         </div>
-      </motion.div>
+
+        {/* Right Side: Form */}
+        <div className="w-full lg:w-1/2 flex items-center justify-center p-8 lg:p-16 relative z-10">
+          <motion.div 
+            initial={{ opacity: 0, x: 30 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.6, ease: "easeOut" }}
+            className="w-full max-w-md"
+          >
+            <div className="mb-10">
+              <h1 className="text-4xl lg:text-5xl font-display font-black text-espresso-900 tracking-tight mb-3">
+                Create Account
+              </h1>
+              <p className="text-espresso-500 font-medium text-lg">
+                Choose your role and join FurShield.
+              </p>
+            </div>
+
+            <AnimatePresence>
+              {error && (
+                <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="mb-6 bg-red-50 text-red-600 px-5 py-4 rounded-2xl text-sm font-bold border border-red-100 flex items-center gap-3">
+                  <AlertCircle size={18} /> {error}
+                </motion.div>
+              )}
+              {success && (
+                <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="mb-6 bg-emerald-50 text-emerald-600 px-5 py-4 rounded-2xl text-sm font-bold border border-emerald-100 flex items-center gap-3">
+                  <CheckCircle2 size={18} /> Account created successfully! Redirecting...
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            <form onSubmit={handleSubmit} className="space-y-5">
+              
+              {/* Role Selection */}
+              <div className="flex bg-camel-50 p-1.5 rounded-2xl mb-8">
+                {['OWNER', 'VET', 'SHELTER_ADMIN'].map((r) => (
+                  <button
+                    key={r}
+                    type="button"
+                    onClick={() => setFormData({ ...formData, role: r })}
+                    className={cn(
+                      "flex-1 py-3 text-[10px] md:text-xs font-black tracking-widest uppercase rounded-xl transition-all",
+                      formData.role === r 
+                        ? "bg-white text-camel-900 shadow-sm border border-camel-100" 
+                        : "text-espresso-400 hover:text-espresso-900"
+                    )}
+                  >
+                    {r.replace('_', ' ')}
+                  </button>
+                ))}
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-espresso-900 uppercase tracking-widest mb-2 px-1">Full Name</label>
+                <div className="relative">
+                  <User className="absolute left-4 top-1/2 -translate-y-1/2 text-espresso-300" size={18} />
+                  <input
+                    type="text"
+                    value={formData.name}
+                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                    className="w-full bg-white border border-camel-200 rounded-2xl pl-12 pr-5 py-4 text-sm font-medium focus:outline-none focus:border-camel-500 focus:ring-4 focus:ring-camel-50 transition-all text-espresso-900 shadow-sm"
+                    placeholder="John Doe"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-espresso-900 uppercase tracking-widest mb-2 px-1">Email Address</label>
+                <div className="relative">
+                  <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-espresso-300" size={18} />
+                  <input
+                    type="email"
+                    value={formData.email}
+                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                    className="w-full bg-white border border-camel-200 rounded-2xl pl-12 pr-5 py-4 text-sm font-medium focus:outline-none focus:border-camel-500 focus:ring-4 focus:ring-camel-50 transition-all text-espresso-900 shadow-sm"
+                    placeholder="name@example.com"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-espresso-900 uppercase tracking-widest mb-2 px-1">Password</label>
+                <div className="relative">
+                  <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-espresso-300" size={18} />
+                  <input
+                    type="password"
+                    value={formData.password}
+                    onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                    className="w-full bg-white border border-camel-200 rounded-2xl pl-12 pr-5 py-4 text-sm font-medium focus:outline-none focus:border-camel-500 focus:ring-4 focus:ring-camel-50 transition-all text-espresso-900 shadow-sm"
+                    placeholder="••••••••"
+                    required
+                  />
+                </div>
+              </div>
+
+              <button
+                type="submit"
+                disabled={success}
+                className="w-full bg-espresso-900 hover:bg-espresso-800 disabled:opacity-70 text-white px-8 py-4 rounded-2xl font-bold text-base tracking-wide transition-all shadow-[0_8px_20px_rgba(90,56,37,0.2)] hover:shadow-[0_12px_25px_rgba(90,56,37,0.3)] flex items-center justify-center gap-3 mt-4 group"
+              >
+                {success ? 'Success!' : 'Create Account'}
+                {!success && <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />}
+              </button>
+            </form>
+
+            <div className="mt-10 pt-8 border-t border-camel-100 text-center">
+              <p className="text-sm font-medium text-espresso-500">
+                Already have an account?{' '}
+                <Link to="/login" className="font-black text-camel-700 hover:text-camel-900 transition-colors">
+                  Sign In
+                </Link>
+              </p>
+            </div>
+          </motion.div>
+        </div>
+
+      </main>
+      
+      <Footer />
     </div>
   );
 }
-

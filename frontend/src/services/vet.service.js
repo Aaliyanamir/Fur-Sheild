@@ -61,7 +61,18 @@ const deleteAppointment = async (id) => {
   }
 };
 
+
+const updateWalkin = async (id, payload) => {
+  try {
+    const response = await api.patch('/vethub/queue/' + id + '/walkin', payload);
+    return response.data;
+  } catch (error) {
+    return { success: false, message: error.response?.data?.message || 'Failed to update patient' };
+  }
+};
+
 const vetService = {
+  updateWalkin,
   getQueue,
   updateStatus,
   updateVitalsAndNotes,

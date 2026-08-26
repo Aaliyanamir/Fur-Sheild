@@ -1,4 +1,4 @@
-﻿const mongoose = require('mongoose');
+const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 
 const userSchema = new mongoose.Schema({
@@ -22,6 +22,7 @@ const userSchema = new mongoose.Schema({
     state: String,
     zip: String
   },
+  avatarUrl: { type: String },
   active: { type: Boolean, default: true }
 }, { timestamps: true });
 

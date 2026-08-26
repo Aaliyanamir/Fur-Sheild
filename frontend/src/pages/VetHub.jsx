@@ -2,11 +2,12 @@ import React, { useState, useEffect, useContext } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Search, Filter, Clock, Activity, Thermometer, FileDigit, Syringe, Calendar, FileText, ActivitySquare, ShieldAlert, Heart, MoreHorizontal, Plus, AlertCircle, X, CheckCircle2, Trash2 } from 'lucide-react';
 import vetService from '../services/vet.service';
+import authService from '../services/auth.service';
 import { AuthContext } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 
 export default function VetHub() {
-  const { user } = useContext(AuthContext);
+  const { user, dispatch } = useContext(AuthContext) || { user: {} };
   const [loading, setLoading] = useState(true);
   const [activePatient, setActivePatient] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
@@ -18,12 +19,24 @@ export default function VetHub() {
   const [isWalkinModalOpen, setIsWalkinModalOpen] = useState(false);
   const [isCancelModalOpen, setIsCancelModalOpen] = useState(false);
   const [isStatusDropdownOpen, setIsStatusDropdownOpen] = useState(false);
+  const [isVetProfileModalOpen, setIsVetProfileModalOpen] = useState(false);
+  const [isEditPatientModalOpen, setIsEditPatientModalOpen] = useState(false);
   
   // Forms state
   const [vitalsForm, setVitalsForm] = useState({ temp: '', hr: '', weight: '', notes: '' });
   const [walkinForm, setWalkinForm] = useState({ 
     petName: '', breed: '', species: 'Dog', age: '', ownerName: '', reason: '', severity: 'ROUTINE' 
   });
+  const [walkinImageFile, setWalkinImageFile] = useState(null);
+  const [walkinImagePreview, setWalkinImagePreview] = useState(null);
+
+  const [vetProfileForm, setVetProfileForm] = useState({ name: user?.name || '' });
+  const [vetImageFile, setVetImageFile] = useState(null);
+  const [vetImagePreview, setVetImagePreview] = useState(user?.avatarUrl ? (user.avatarUrl.startsWith('http') ? user.avatarUrl : `http://localhost:5000${user.avatarUrl}`) : null);
+
+  const [editPatientForm, setEditPatientForm] = useState({ petName: '', breed: '', species: 'Dog', age: '', ownerName: '' });
+  const [editPatientImageFile, setEditPatientImageFile] = useState(null);
+  const [editPatientImagePreview, setEditPatientImagePreview] = useState(null);
 
   const fetchQueue = async () => {
     try {
@@ -32,6 +45,8 @@ export default function VetHub() {
       if (res.success) {
         const mappedQueue = res.data.map(appt => {
           const isWalkin = !appt.petId && appt.walkInDetails;
+          const petAvatarUrl = isWalkin ? appt.walkInDetails.petAvatarUrl : appt.petId?.avatarUrl;
+          
           return {
             id: appt._id,
             displayId: appt._id.slice(-6).toUpperCase(), // Short ID
@@ -40,7 +55,7 @@ export default function VetHub() {
             breed: isWalkin ? appt.walkInDetails.breed : (appt.petId?.breed || 'Unknown'),
             species: isWalkin ? appt.walkInDetails.species : (appt.petId?.species || 'Unknown'),
             age: isWalkin ? appt.walkInDetails.age : 'Adult', 
-            petImage: appt.petId?.avatarUrl ? (appt.petId.avatarUrl.startsWith('http') ? appt.petId.avatarUrl : `http://localhost:5000${appt.petId.avatarUrl}`) : '/images/product-placeholder.jpg',
+            petImage: petAvatarUrl ? (petAvatarUrl.startsWith('http') ? petAvatarUrl : `http://localhost:5000${petAvatarUrl}`) : '/images/product-placeholder.jpg',
             owner: isWalkin ? appt.walkInDetails.ownerName : (appt.ownerId?.name || 'Unknown Owner'),
             ownerImage: '/images/product-placeholder.jpg',
             time: new Date(appt.scheduledAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
@@ -139,20 +154,37 @@ export default function VetHub() {
 
   const handleAddWalkin = async (e) => {
     e.preventDefault();
-    await vetService.createAppointment({
-      reason: walkinForm.reason,
-      severity: walkinForm.severity,
-      walkInDetails: {
-        petName: walkinForm.petName,
-        breed: walkinForm.breed,
-        species: walkinForm.species,
-        age: walkinForm.age,
-        ownerName: walkinForm.ownerName
-      }
-    });
+    const formData = new FormData();
+    formData.append('reason', walkinForm.reason);
+    formData.append('severity', walkinForm.severity);
+    formData.append('petName', walkinForm.petName);
+    formData.append('breed', walkinForm.breed);
+    formData.append('species', walkinForm.species);
+    formData.append('age', walkinForm.age);
+    formData.append('ownerName', walkinForm.ownerName);
+    if (walkinImageFile) formData.append('petAvatar', walkinImageFile);
+
+    await vetService.createAppointment(formData);
+    
     setWalkinForm({ petName: '', breed: '', species: 'Dog', age: '', ownerName: '', reason: '', severity: 'ROUTINE' });
+    setWalkinImageFile(null);
+    setWalkinImagePreview(null);
     setIsWalkinModalOpen(false);
     await fetchQueue();
+  };
+
+  const handleVetProfileUpdate = async (e) => {
+    e.preventDefault();
+    const formData = new FormData();
+    formData.append('name', vetProfileForm.name);
+    if (vetImageFile) {
+      formData.append('avatar', vetImageFile);
+    }
+    const res = await authService.updateProfile(formData);
+    if (res.success) {
+      window.location.reload();
+      setIsVetProfileModalOpen(false);
+    }
   };
 
   const openUpdateModal = () => {
@@ -164,6 +196,35 @@ export default function VetHub() {
     });
     setIsUpdateModalOpen(true);
     setIsStatusDropdownOpen(false);
+  };
+
+  const openEditPatientModal = () => {
+    setEditPatientForm({
+      petName: activePatient.petName,
+      breed: activePatient.breed,
+      species: activePatient.species || 'Dog',
+      age: activePatient.age,
+      ownerName: activePatient.owner
+    });
+    setEditPatientImagePreview(activePatient.petImage);
+    setEditPatientImageFile(null);
+    setIsEditPatientModalOpen(true);
+    setIsStatusDropdownOpen(false);
+  };
+
+  const handleEditPatient = async (e) => {
+    e.preventDefault();
+    const formData = new FormData();
+    formData.append('petName', editPatientForm.petName);
+    formData.append('breed', editPatientForm.breed);
+    formData.append('species', editPatientForm.species);
+    formData.append('age', editPatientForm.age);
+    formData.append('ownerName', editPatientForm.ownerName);
+    if (editPatientImageFile) formData.append('petAvatar', editPatientImageFile);
+
+    await vetService.updateWalkin(activePatient.id, formData);
+    await fetchQueue();
+    setIsEditPatientModalOpen(false);
   };
 
   const handleOrderMeds = () => alert(`Opening pharmacy modal for ${activePatient?.petName}...`);
@@ -210,9 +271,10 @@ export default function VetHub() {
           
           {/* Vet ID Card */}
           <div className="bg-white rounded-[2rem] p-6 border border-camel-100 shadow-sm flex flex-col items-center text-center">
-            <div className="w-24 h-24 rounded-full overflow-hidden mb-4 border-4 border-camel-50 shadow-sm relative flex items-center justify-center bg-camel-100 text-2xl font-black text-espresso-500">
-               {user?.name?.charAt(0) || 'V'}
-               <div className="absolute bottom-1 right-1 w-4 h-4 bg-emerald-500 border-2 border-white rounded-full"></div>
+            <div onClick={() => setIsVetProfileModalOpen(true)} className="w-24 h-24 rounded-full overflow-hidden mb-4 border-4 border-camel-50 shadow-sm relative flex items-center justify-center bg-camel-100 text-2xl font-black text-espresso-500 cursor-pointer group">
+               {user?.avatarUrl ? <img src={user.avatarUrl.startsWith('http') ? user.avatarUrl : `http://localhost:5000${user.avatarUrl}`} className="w-full h-full object-cover" alt="Vet" /> : (user?.name?.charAt(0) || 'V')}
+               <div className="absolute inset-0 bg-black/40 hidden group-hover:flex items-center justify-center text-white text-xs font-bold transition-all">Edit</div>
+               <div className="absolute bottom-1 right-1 w-4 h-4 bg-emerald-500 border-2 border-white rounded-full z-10"></div>
             </div>
             <h2 className="text-xl font-display font-black text-espresso-900 tracking-tight">Dr. {user?.name?.split(' ')[user?.name?.split(' ').length - 1] || 'Vet'}</h2>
             <p className="text-sm font-bold text-camel-600 mt-1">Lead Veterinarian</p>
@@ -275,8 +337,8 @@ export default function VetHub() {
               
               <div className="flex justify-between items-start mb-4">
                  <div className="flex -space-x-3 items-center">
-                    <img src={patient.petImage} alt="Pet" className="w-12 h-12 rounded-full border-2 border-white object-cover shadow-sm relative z-10" />
-                    <img src={patient.ownerImage} alt="Owner" className="w-10 h-10 rounded-full border-2 border-white object-cover shadow-sm relative z-0 translate-y-1" />
+                    <img src={patient.petImage} alt="Pet" className="w-12 h-12 rounded-full border-2 border-white object-cover shadow-sm relative z-10 bg-camel-50" />
+                    <img src={patient.ownerImage} alt="Owner" className="w-10 h-10 rounded-full border-2 border-white object-cover shadow-sm relative z-0 translate-y-1 bg-camel-50" />
                  </div>
                  <div className="text-right">
                    <span className="text-xs font-bold text-espresso-500 flex items-center justify-end gap-1"><Clock size={12}/> {patient.time}</span>
@@ -324,6 +386,7 @@ export default function VetHub() {
                              <p className="text-[10px] font-bold uppercase tracking-widest text-espresso-400">Actions</p>
                            </div>
                            <button onClick={openUpdateModal} className="w-full text-left px-4 py-3 text-sm font-bold text-espresso-700 hover:bg-camel-50 transition-colors flex items-center gap-2"><Activity size={14} className="text-camel-500" /> Update Vitals</button>
+                           <button onClick={openEditPatientModal} className="w-full text-left px-4 py-3 text-sm font-bold text-espresso-700 hover:bg-camel-50 transition-colors flex items-center gap-2"><FileDigit size={14} className="text-camel-500" /> Edit Patient</button>
                            <button onClick={() => handleChangeStatus('EXAM')} className="w-full text-left px-4 py-3 text-sm font-bold text-espresso-700 hover:bg-camel-50 transition-colors flex items-center gap-2"><ShieldAlert size={14} className="text-blue-500" /> Begin Exam</button>
                            <button onClick={() => handleChangeStatus('DISCHARGED')} className="w-full text-left px-4 py-3 text-sm font-bold text-espresso-700 hover:bg-camel-50 transition-colors flex items-center gap-2"><CheckCircle2 size={14} className="text-emerald-500" /> Discharge</button>
                            <div className="border-t border-camel-100 my-1"></div>
@@ -343,7 +406,7 @@ export default function VetHub() {
                         </div>
                       </div>
                       <div className="text-right">
-                        <img src={activePatient.ownerImage} className="w-10 h-10 rounded-full border-2 border-white/20 ml-auto mb-1 object-cover" alt="Owner" />
+                        <img src={activePatient.ownerImage} className="w-10 h-10 rounded-full border-2 border-white/20 ml-auto mb-1 object-cover bg-camel-50" alt="Owner" />
                         <span className="text-[10px] font-bold uppercase tracking-widest text-white/70 block">{activePatient.owner}</span>
                       </div>
                    </div>
@@ -433,6 +496,114 @@ export default function VetHub() {
       </motion.div>
 
       {/* MODALS */}
+
+      {/* Vet Profile Modal */}
+      <AnimatePresence>
+        {isVetProfileModalOpen && (
+          <>
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 bg-espresso-900/60 backdrop-blur-sm z-[200]" onClick={() => setIsVetProfileModalOpen(false)} />
+            <div className="fixed inset-0 z-[210] flex items-center justify-center p-4 pointer-events-none">
+              <motion.div initial={{ opacity: 0, scale: 0.95, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 20 }} className="bg-white rounded-[2rem] w-full max-w-sm shadow-2xl pointer-events-auto flex flex-col overflow-hidden">
+                 <div className="p-6 border-b border-camel-100 flex justify-between items-center bg-[#FAF8F5]">
+                    <h2 className="text-xl font-display font-black text-espresso-900">Edit Profile</h2>
+                    <button onClick={() => setIsVetProfileModalOpen(false)} className="w-8 h-8 rounded-full bg-white border border-camel-200 flex items-center justify-center text-espresso-400 hover:text-espresso-900 transition-colors shadow-sm"><X size={16}/></button>
+                 </div>
+                 <div className="p-6">
+                    <form onSubmit={handleVetProfileUpdate} className="space-y-4">
+                       <div className="flex flex-col items-center mb-4">
+                         <div className="relative w-24 h-24 rounded-full border border-camel-200 overflow-hidden mb-2 bg-camel-50">
+                           {vetImagePreview ? <img src={vetImagePreview} className="w-full h-full object-cover" alt="Preview"/> : <div className="w-full h-full flex items-center justify-center text-camel-300 font-medium">Upload</div>}
+                           <input type="file" accept="image/*" onChange={(e) => {
+                             const file = e.target.files[0];
+                             if(file) {
+                               setVetImageFile(file);
+                               setVetImagePreview(URL.createObjectURL(file));
+                             }
+                           }} className="absolute inset-0 opacity-0 cursor-pointer" />
+                         </div>
+                         <p className="text-[10px] text-camel-600 font-bold uppercase tracking-widest">Change Avatar</p>
+                       </div>
+                       <div>
+                         <label className="block text-xs font-bold text-espresso-900 uppercase tracking-widest mb-2 px-1">Full Name</label>
+                         <input type="text" value={vetProfileForm.name} onChange={(e) => setVetProfileForm({...vetProfileForm, name: e.target.value})} className="w-full bg-white border border-camel-200 rounded-xl px-4 py-3 text-sm focus:border-camel-500 focus:ring-4 focus:ring-camel-50 transition-all" />
+                       </div>
+                       <button type="submit" className="w-full bg-espresso-900 hover:bg-espresso-800 text-white py-4 rounded-xl font-bold text-sm tracking-wide transition-all shadow-md">Save Profile</button>
+                    </form>
+                 </div>
+              </motion.div>
+            </div>
+          </>
+        )}
+      </AnimatePresence>
+
+      {/* Edit Patient Modal */}
+      <AnimatePresence>
+        {isEditPatientModalOpen && (
+          <>
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 bg-espresso-900/60 backdrop-blur-sm z-[200]" onClick={() => setIsEditPatientModalOpen(false)} />
+            <div className="fixed inset-0 z-[210] flex items-center justify-center p-4 pointer-events-none">
+              <motion.div initial={{ opacity: 0, scale: 0.95, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 20 }} className="bg-white rounded-[2rem] w-full max-w-xl shadow-2xl pointer-events-auto flex flex-col overflow-hidden">
+                 <div className="p-6 border-b border-camel-100 flex justify-between items-center bg-[#FAF8F5]">
+                    <h2 className="text-xl font-display font-black text-espresso-900">Edit Patient Details</h2>
+                    <button onClick={() => setIsEditPatientModalOpen(false)} className="w-8 h-8 rounded-full bg-white border border-camel-200 flex items-center justify-center text-espresso-400 hover:text-espresso-900 transition-colors shadow-sm"><X size={16}/></button>
+                 </div>
+                 <div className="p-6 flex-1 overflow-y-auto max-h-[80vh]">
+                    <form onSubmit={handleEditPatient} className="space-y-4">
+                       <div className="flex flex-col items-center mb-4">
+                         <div className="relative w-24 h-24 rounded-full border border-camel-200 overflow-hidden mb-2 bg-camel-50">
+                           {editPatientImagePreview ? <img src={editPatientImagePreview} className="w-full h-full object-cover" alt="Pet"/> : <div className="w-full h-full flex items-center justify-center text-camel-300 font-medium">Upload</div>}
+                           <input type="file" accept="image/*" onChange={(e) => {
+                             const file = e.target.files[0];
+                             if(file) {
+                               setEditPatientImageFile(file);
+                               setEditPatientImagePreview(URL.createObjectURL(file));
+                             }
+                           }} className="absolute inset-0 opacity-0 cursor-pointer" />
+                         </div>
+                         <p className="text-[10px] text-camel-600 font-bold uppercase tracking-widest">Change Pet Photo</p>
+                       </div>
+
+                       <div className="grid grid-cols-2 gap-4">
+                         <div>
+                           <label className="block text-xs font-bold text-espresso-900 uppercase tracking-widest mb-2 px-1">Pet Name</label>
+                           <input type="text" required value={editPatientForm.petName} onChange={(e) => setEditPatientForm({...editPatientForm, petName: e.target.value})} className="w-full bg-white border border-camel-200 rounded-xl px-4 py-3 text-sm focus:border-camel-500 focus:ring-4 focus:ring-camel-50 transition-all" />
+                         </div>
+                         <div>
+                           <label className="block text-xs font-bold text-espresso-900 uppercase tracking-widest mb-2 px-1">Owner Name</label>
+                           <input type="text" required value={editPatientForm.ownerName} onChange={(e) => setEditPatientForm({...editPatientForm, ownerName: e.target.value})} className="w-full bg-white border border-camel-200 rounded-xl px-4 py-3 text-sm focus:border-camel-500 focus:ring-4 focus:ring-camel-50 transition-all" />
+                         </div>
+                       </div>
+                       
+                       <div className="grid grid-cols-3 gap-4">
+                         <div>
+                           <label className="block text-xs font-bold text-espresso-900 uppercase tracking-widest mb-2 px-1">Species</label>
+                           <select value={editPatientForm.species} onChange={(e) => setEditPatientForm({...editPatientForm, species: e.target.value})} className="w-full bg-white border border-camel-200 rounded-xl px-4 py-3 text-sm focus:border-camel-500 focus:ring-4 focus:ring-camel-50 transition-all appearance-none">
+                             <option value="Dog">Dog</option>
+                             <option value="Cat">Cat</option>
+                             <option value="Other">Other</option>
+                           </select>
+                         </div>
+                         <div>
+                           <label className="block text-xs font-bold text-espresso-900 uppercase tracking-widest mb-2 px-1">Breed</label>
+                           <input type="text" required value={editPatientForm.breed} onChange={(e) => setEditPatientForm({...editPatientForm, breed: e.target.value})} className="w-full bg-white border border-camel-200 rounded-xl px-4 py-3 text-sm focus:border-camel-500 focus:ring-4 focus:ring-camel-50 transition-all" />
+                         </div>
+                         <div>
+                           <label className="block text-xs font-bold text-espresso-900 uppercase tracking-widest mb-2 px-1">Age</label>
+                           <input type="text" value={editPatientForm.age} onChange={(e) => setEditPatientForm({...editPatientForm, age: e.target.value})} className="w-full bg-white border border-camel-200 rounded-xl px-4 py-3 text-sm focus:border-camel-500 focus:ring-4 focus:ring-camel-50 transition-all" />
+                         </div>
+                       </div>
+                       
+                       <div className="pt-4">
+                         <button type="submit" className="w-full bg-espresso-900 hover:bg-espresso-800 text-white py-4 rounded-xl font-bold text-sm tracking-wide transition-all shadow-md">Save Changes</button>
+                       </div>
+                    </form>
+                 </div>
+              </motion.div>
+            </div>
+          </>
+        )}
+      </AnimatePresence>
+
       {/* Update Vitals Modal */}
       <AnimatePresence>
         {isUpdateModalOpen && (
@@ -512,6 +683,19 @@ export default function VetHub() {
                  </div>
                  <div className="p-6 flex-1 overflow-y-auto max-h-[80vh]">
                     <form onSubmit={handleAddWalkin} className="space-y-4">
+                       <div className="flex flex-col items-center mb-4">
+                         <div className="relative w-24 h-24 rounded-full border border-camel-200 overflow-hidden mb-2 bg-camel-50">
+                           {walkinImagePreview ? <img src={walkinImagePreview} className="w-full h-full object-cover" alt="Pet"/> : <div className="w-full h-full flex items-center justify-center text-camel-300 font-medium">Upload</div>}
+                           <input type="file" accept="image/*" onChange={(e) => {
+                             const file = e.target.files[0];
+                             if(file) {
+                               setWalkinImageFile(file);
+                               setWalkinImagePreview(URL.createObjectURL(file));
+                             }
+                           }} className="absolute inset-0 opacity-0 cursor-pointer" />
+                         </div>
+                         <p className="text-[10px] text-camel-600 font-bold uppercase tracking-widest">Pet Photo</p>
+                       </div>
                        <div className="grid grid-cols-2 gap-4">
                          <div>
                            <label className="block text-xs font-bold text-espresso-900 uppercase tracking-widest mb-2 px-1">Pet Name</label>

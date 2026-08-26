@@ -1,4 +1,4 @@
-﻿const User = require('../models/User');
+const User = require('../models/User');
 const generateToken = require('../utils/generateToken');
 
 // @desc    Register a new user
@@ -98,6 +98,9 @@ const updateMe = async (req, res) => {
     if (req.body.password) {
        user.password = req.body.password;
     }
+    if (req.file) {
+      user.avatarUrl = `/uploads/${req.file.filename}`;
+    }
 
     const updatedUser = await user.save();
 
@@ -107,6 +110,7 @@ const updateMe = async (req, res) => {
       name: updatedUser.name,
       email: updatedUser.email,
       role: updatedUser.role,
+      avatarUrl: updatedUser.avatarUrl,
       token: generateToken(updatedUser._id) // issue new token just in case
     });
   } catch (error) {

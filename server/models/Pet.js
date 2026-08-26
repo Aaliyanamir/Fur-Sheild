@@ -10,6 +10,9 @@ const petSchema = new mongoose.Schema({
   name: { type: String, required: [true, 'Pet name is required'] },
   species: { type: String, required: [true, 'Species is required'] },
   breed: { type: String },
+  gender: { type: String, enum: ['Male', 'Female'] },
+  age: { type: Number },
+  microchipId: { type: String },
   dob: { type: Date },
   weightHistory: [{
     weight: { type: Number },
@@ -25,3 +28,4 @@ const petSchema = new mongoose.Schema({
 }, { timestamps: true });
 
 module.exports = mongoose.model('Pet', petSchema);
+

@@ -1,4 +1,4 @@
-﻿import React, { useState, useContext } from 'react';
+import React, { useState, useContext } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -57,7 +57,7 @@ export default function Signup() {
             className="w-full h-full rounded-[40px] overflow-hidden relative shadow-2xl"
           >
             <img 
-              src="/images/signup-bg.jpg" 
+              src="/images/signup-bird.jpg" 
               alt="Join FurShield" 
               className="absolute inset-0 w-full h-full object-cover"
             />

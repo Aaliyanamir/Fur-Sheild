@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Search, ShoppingBag, ShieldCheck, Truck, ArrowRight, Plus, Minus, X, Package, RotateCcw } from 'lucide-react';
 import { cn } from '../lib/utils';
@@ -11,21 +11,25 @@ export default function ShopCatalog() {
   const [isCartOpen, setIsCartOpen] = useState(false);
   
   // Phase 8: Auto-Ship & Promo State
+  const [modalQuantity, setModalQuantity] = useState(1);
   const [isAutoShip, setIsAutoShip] = useState(false);
   const [promoCode, setPromoCode] = useState('');
   const [isPromoApplied, setIsPromoApplied] = useState(false);
 
   // Advanced Cart Logic
-  const addToCart = (product, quantity = 1, autoShip = false) => {
+  const addToCart = (product, qty, auto) => {
+    const finalQty = product.quantity !== undefined ? product.quantity : (qty || 1);
+    const finalAutoShip = product.isAutoShip !== undefined ? product.isAutoShip : (auto || false);
+    
     setCart(prev => {
-      const existing = prev.find(item => item.id === product.id && item.isAutoShip === autoShip);
+      const existing = prev.find(item => item.id === product.id && item.isAutoShip === finalAutoShip);
       if (existing) {
-        return prev.map(item => item.id === product.id && item.isAutoShip === autoShip
-          ? { ...item, quantity: item.quantity + quantity } 
+        return prev.map(item => item.id === product.id && item.isAutoShip === finalAutoShip
+          ? { ...item, quantity: item.quantity + finalQty } 
           : item
         );
       }
-      return [...prev, { ...product, quantity, isAutoShip: autoShip }];
+      return [...prev, { ...product, quantity: finalQty, isAutoShip: finalAutoShip }];
     });
     setIsCartOpen(true);
   };
@@ -214,7 +218,7 @@ export default function ShopCatalog() {
                    <div>
                       <div className="flex items-center gap-2 mb-1.5">
                         <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
-                        <p className="text-camel-400 text-[10px] font-black uppercase tracking-widest">Active Delivery • Order #FS-8921</p>
+                        <p className="text-camel-400 text-[10px] font-black uppercase tracking-widest">Active Delivery â€¢ Order #FS-8921</p>
                       </div>
                       <h4 className="font-display font-bold text-2xl md:text-3xl leading-tight">Arriving Today by 8:00 PM</h4>
                       <p className="text-white/60 text-xs font-medium mt-1">Flea & Tick Prevention (3-Month) + 1 more item</p>
@@ -291,7 +295,7 @@ export default function ShopCatalog() {
                      <p className="text-[9px] font-bold text-espresso-400 uppercase tracking-widest mb-1">FurShield Lab</p>
                      <h4 className="font-display font-bold text-espresso-900 leading-tight mb-2">Advanced Joint Support</h4>
                      <div className="flex items-center gap-1 mb-4">
-                        <span className="flex text-accent-500 text-xs">★★★★★</span>
+                        <span className="flex text-accent-500 text-xs">â˜…â˜…â˜…â˜…â˜…</span>
                         <span className="text-[10px] font-bold text-espresso-400">(124)</span>
                      </div>
                      <div className="mt-auto flex justify-between items-end">
@@ -316,7 +320,7 @@ export default function ShopCatalog() {
                      <p className="text-[9px] font-bold text-espresso-400 uppercase tracking-widest mb-1">HeartSafe</p>
                      <h4 className="font-display font-bold text-espresso-900 leading-tight mb-2">Heartworm Medication (3-Month)</h4>
                      <div className="flex items-center gap-1 mb-4">
-                        <span className="flex text-accent-500 text-xs">★★★★☆</span>
+                        <span className="flex text-accent-500 text-xs">â˜…â˜…â˜…â˜…â˜†</span>
                         <span className="text-[10px] font-bold text-espresso-400">(56)</span>
                      </div>
                      <div className="mt-auto flex justify-between items-end">
@@ -341,7 +345,7 @@ export default function ShopCatalog() {
                      <p className="text-[9px] font-bold text-espresso-400 uppercase tracking-widest mb-1">NatureVet</p>
                      <h4 className="font-display font-bold text-espresso-900 leading-tight mb-2">Hypoallergenic Salmon Diet</h4>
                      <div className="flex items-center gap-1 mb-4">
-                        <span className="flex text-accent-500 text-xs">★★★★★</span>
+                        <span className="flex text-accent-500 text-xs">â˜…â˜…â˜…â˜…â˜…</span>
                         <span className="text-[10px] font-bold text-espresso-400">(89)</span>
                      </div>
                      <div className="mt-auto flex justify-between items-end">
@@ -424,7 +428,7 @@ export default function ShopCatalog() {
                 <div className="flex items-center gap-4 mb-6 pb-6 border-b border-camel-100/50">
                   <span className="font-black text-camel-600 text-3xl">${selectedProduct.price.toFixed(2)}</span>
                   <div className="flex items-center gap-1 bg-camel-50 px-3 py-1.5 rounded-full border border-camel-100">
-                     <span className="flex text-accent-500 text-sm">★★★★★</span>
+                     <span className="flex text-accent-500 text-sm">â˜…â˜…â˜…â˜…â˜…</span>
                      <span className="text-xs font-bold text-espresso-600 ml-1">4.9</span>
                   </div>
                 </div>
@@ -436,16 +440,14 @@ export default function ShopCatalog() {
                 {/* Auto-Ship Toggle */}
                 <div 
                   onClick={() => setIsAutoShip(!isAutoShip)}
-                  className={cn("p-4 rounded-2xl border-2 transition-all cursor-pointer mb-8 relative overflow-hidden", isAutoShip ? "border-accent-500 bg-accent-50/30" : "border-camel-100 bg-white hover:border-camel-300")}
+                  className={`border rounded-2xl p-4 mb-6 cursor-pointer transition-all flex items-center gap-4 ${isAutoShip ? 'border-accent-500 bg-accent-50/50' : 'border-camel-200 hover:border-camel-300'}`}
                 >
-                  <div className="flex items-center gap-3">
-                    <div className={cn("w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 transition-colors", isAutoShip ? "border-accent-500" : "border-camel-300")}>
-                      {isAutoShip && <motion.div layoutId="autoship-dot" className="w-2.5 h-2.5 rounded-full bg-accent-500" />}
-                    </div>
-                    <div>
-                      <p className="font-bold text-espresso-900 text-sm">Subscribe & Save 10%</p>
-                      <p className="text-xs font-medium text-espresso-500">Auto-deliver every 4 weeks. Cancel anytime.</p>
-                    </div>
+                  <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-colors ${isAutoShip ? 'border-accent-500' : 'border-camel-300'}`}>
+                    {isAutoShip && <div className="w-2.5 h-2.5 rounded-full bg-accent-500"></div>}
+                  </div>
+                  <div>
+                    <h4 className="font-bold text-espresso-900 text-sm">Subscribe & Save 10%</h4>
+                    <p className="text-xs font-medium text-espresso-500">Auto-deliver every 4 weeks. Cancel anytime.</p>
                   </div>
                 </div>
 
@@ -475,30 +477,50 @@ export default function ShopCatalog() {
                         </div>
                         <button 
                           onClick={() => { 
-                            addToCart(selectedProduct, 1, isAutoShip); 
+                            addToCart({ ...selectedProduct, quantity: modalQuantity, isAutoShip }); 
                             setSelectedProduct(null); 
                             setSelectedVerificationPet(''); 
+                            setModalQuantity(1);
+                            setIsAutoShip(false);
                           }}
                           disabled={!selectedVerificationPet}
                           className="w-full bg-camel-600 hover:bg-camel-500 disabled:opacity-50 disabled:hover:bg-camel-600 text-white py-3 rounded-xl font-bold text-sm tracking-wide transition-all shadow-md shadow-camel-900/10"
                         >
-                          Verify & Add to Cart
+                          Verify & Add to Cart — ${(selectedProduct.price * modalQuantity * (isAutoShip ? 0.9 : 1)).toFixed(2)}
                         </button>
                       </div>
                     </div>
                   </div>
                 ) : (
                   <div className="flex gap-4 mb-8">
+                    {/* Dynamic Quantity Selector */}
                     <div className="flex items-center bg-bg-secondary border border-camel-200 rounded-2xl p-1">
-                      <button className="w-10 h-10 rounded-xl bg-white flex items-center justify-center text-espresso-500 hover:text-espresso-900 shadow-sm"><Minus size={16}/></button>
-                      <span className="w-12 text-center font-bold text-espresso-900">1</span>
-                      <button className="w-10 h-10 rounded-xl bg-white flex items-center justify-center text-espresso-500 hover:text-espresso-900 shadow-sm"><Plus size={16}/></button>
+                      <button 
+                        onClick={() => setModalQuantity(prev => Math.max(1, prev - 1))}
+                        className="w-10 h-10 rounded-xl bg-white flex items-center justify-center text-espresso-500 hover:text-espresso-900 shadow-sm transition-colors"
+                      >
+                        <Minus size={16}/>
+                      </button>
+                      <span className="w-12 text-center font-bold text-espresso-900">{modalQuantity}</span>
+                      <button 
+                        onClick={() => setModalQuantity(prev => prev + 1)}
+                        className="w-10 h-10 rounded-xl bg-white flex items-center justify-center text-espresso-500 hover:text-espresso-900 shadow-sm transition-colors"
+                      >
+                        <Plus size={16}/>
+                      </button>
                     </div>
+                    
+                    {/* Wired Add to Cart Button */}
                     <button 
-                      onClick={() => { addToCart(selectedProduct, 1, isAutoShip); setSelectedProduct(null); }}
+                      onClick={() => { 
+                        addToCart({ ...selectedProduct, quantity: modalQuantity, isAutoShip }); 
+                        setSelectedProduct(null); 
+                        setModalQuantity(1); // Reset for next time
+                        setIsAutoShip(false); // Reset for next time
+                      }}
                       className="flex-1 bg-espresso-900 hover:bg-espresso-800 text-white py-4 rounded-2xl font-bold text-sm tracking-wide transition-all shadow-md shadow-espresso-900/20"
                     >
-                      Add to Cart
+                      Add to Cart — ${(selectedProduct.price * modalQuantity * (isAutoShip ? 0.9 : 1)).toFixed(2)}
                     </button>
                   </div>
                 )}
@@ -643,3 +665,4 @@ export default function ShopCatalog() {
     </div>
   );
 }
+

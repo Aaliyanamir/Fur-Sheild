@@ -44,12 +44,12 @@ const authUser = async (req, res) => {
     // We need to explicitly select the password because it was set to select: false in the schema
     const user = await User.findOne({ email }).select('+password');
 
-    if (!user) {
-      return res.status(401).json({ success: false, message: 'No account found with this email. Please sign up.' });
+        if (!user) {
+      return res.status(401).json({ success: false, message: 'Invalid credentials. Please check your email and password.' });
     }
 
     if (!(await user.matchPassword(password))) {
-      return res.status(401).json({ success: false, message: 'Incorrect password.' });
+      return res.status(401).json({ success: false, message: 'Invalid credentials. Please check your email and password.' });
     }
 
     if (user) {
@@ -115,6 +115,7 @@ const updateMe = async (req, res) => {
 };
 
 module.exports = { registerUser, authUser, getMe, updateMe };
+
 
 
 

@@ -27,22 +27,24 @@ export default function Navbar() {
       <div className="fixed top-4 md:top-6 left-0 right-0 z-50 flex justify-center px-4 pointer-events-none">
         
         {/* Main Pristine Container - Responsive Pill */}
-        <header className="relative w-full max-w-5xl h-[64px] md:h-[72px] bg-white rounded-[32px] md:rounded-[40px] shadow-[0_8px_30px_rgb(90,56,37,0.06)] border border-camel-100 flex items-center justify-between overflow-hidden pointer-events-auto transition-all duration-300">
+        <header className="relative w-full max-w-5xl h-[64px] md:h-[72px] bg-white rounded-[32px] md:rounded-[40px] shadow-[0_8px_30px_rgb(90,56,37,0.06)] border border-camel-100 flex items-center justify-between pointer-events-auto transition-all duration-300">
           
           {/* RIGHT ZONE SWOOP BACKGROUND */}
-          <div className="absolute top-0 right-0 h-full w-[220px] md:w-[360px] z-0 pointer-events-none transition-all duration-300">
-            <svg viewBox="0 0 360 72" className="w-full h-full" preserveAspectRatio="none">
-              <defs>
-                <linearGradient id="camelSwoop" x1="0" y1="0" x2="1" y2="1">
-                  <stop offset="0%" stopColor="#F9F6F0" stopOpacity="1" />
-                  <stop offset="100%" stopColor="#E4D1B9" stopOpacity="0.4" />
-                </linearGradient>
-              </defs>
-              <path 
-                d="M0,72 C120,72 160,0 260,0 L360,0 L360,72 Z" 
-                fill="url(#camelSwoop)" 
-              />
-            </svg>
+          <div className="absolute inset-0 rounded-[32px] md:rounded-[40px] overflow-hidden pointer-events-none z-0">
+            <div className="absolute top-0 right-0 h-full w-[220px] md:w-[360px] transition-all duration-300">
+              <svg viewBox="0 0 360 72" className="w-full h-full" preserveAspectRatio="none">
+                <defs>
+                  <linearGradient id="camelSwoop" x1="0" y1="0" x2="1" y2="1">
+                    <stop offset="0%" stopColor="#F9F6F0" stopOpacity="1" />
+                    <stop offset="100%" stopColor="#E4D1B9" stopOpacity="0.4" />
+                  </linearGradient>
+                </defs>
+                <path 
+                  d="M0,72 C120,72 160,0 260,0 L360,0 L360,72 Z" 
+                  fill="url(#camelSwoop)" 
+                />
+              </svg>
+            </div>
           </div>
 
           {/* Foreground Content */}
@@ -305,6 +307,8 @@ export default function Navbar() {
     </>
   );
 }
+
+
 
 
 

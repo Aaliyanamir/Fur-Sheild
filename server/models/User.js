@@ -12,7 +12,7 @@ const userSchema = new mongoose.Schema({
   password: { type: String, required: [true, 'Password is required'], select: false },
   role: { 
     type: String, 
-    enum: ['OWNER', 'VET', 'SHELTER_ADMIN', 'SYSTEM_ADMIN'], 
+    enum: ['OWNER', 'VET', 'SHELTER_ADMIN', 'SYSTEM_ADMIN', 'SUPER_ADMIN'], 
     default: 'OWNER' 
   },
   phone: { type: String },
@@ -23,7 +23,9 @@ const userSchema = new mongoose.Schema({
     zip: String
   },
   avatarUrl: { type: String },
-  active: { type: Boolean, default: true }
+  active: { type: Boolean, default: true },
+  status: { type: String, enum: ['ACTIVE', 'BANNED', 'PENDING'], default: 'ACTIVE' },
+  isVerified: { type: Boolean, default: false }
 }, { timestamps: true });
 
 // Encrypt password using bcrypt before saving

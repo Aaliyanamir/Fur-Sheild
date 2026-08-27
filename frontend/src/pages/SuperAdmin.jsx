@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Users, Stethoscope, HeartHandshake, PawPrint, ShieldCheck, Ban, Loader2, CheckCircle2, AlertCircle, LayoutDashboard, Search } from 'lucide-react';
+import { Users, Stethoscope, HeartHandshake, PawPrint, ShieldCheck, Ban, Loader2, CheckCircle2, AlertCircle, LayoutDashboard, Search, X } from 'lucide-react';
 import adminService from '../services/admin.service';
 
 export default function SuperAdmin() {
@@ -9,10 +9,21 @@ export default function SuperAdmin() {
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
+  
+  // Custom Toast State
+  const [toast, setToast] = useState(null);
 
   useEffect(() => {
     fetchData();
   }, []);
+
+  // Debounce search effect
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      fetchUsers(searchQuery);
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
 
   const fetchData = async () => {
     try {
@@ -25,36 +36,56 @@ export default function SuperAdmin() {
       if (usersRes.success) setUsers(usersRes.data);
     } catch (error) {
       console.error('Error fetching admin data:', error);
+      showToast('Error loading dashboard data', 'error');
     } finally {
       setLoading(false);
     }
+  };
+
+  const fetchUsers = async (query) => {
+    try {
+      const res = await adminService.getUsers(query);
+      if (res.success) setUsers(res.data);
+    } catch (error) {
+      console.error('Error searching users:', error);
+    }
+  };
+
+  const showToast = (message, type = 'success') => {
+    setToast({ message, type });
+    setTimeout(() => setToast(null), 3000);
   };
 
   const handleStatusUpdate = async (userId, action) => {
     try {
       setActionLoading(userId);
       const res = await adminService.updateUserStatus(userId, action);
+      
       if (res.success) {
-        // Refresh users list
-        const usersRes = await adminService.getUsers();
-        if (usersRes.success) setUsers(usersRes.data);
+        // INSTANT STATE UPDATE (No hard reload)
+        setUsers(prevUsers => 
+          prevUsers.map(u => u._id === res.data._id ? res.data : u)
+        );
+        
+        let msg = 'User updated successfully';
+        if (action === 'VERIFY') msg = `${res.data.name} has been verified.`;
+        if (action === 'BAN') msg = `${res.data.name} has been banned.`;
+        if (action === 'ACTIVATE') msg = `${res.data.name} account activated.`;
+        
+        showToast(msg, 'success');
       }
     } catch (error) {
       console.error(error);
-      alert('Error updating user status.');
+      showToast(error.response?.data?.message || 'Failed to update user', 'error');
     } finally {
       setActionLoading(null);
     }
   };
 
-  const filteredUsers = users.filter(u => 
-    u.name?.toLowerCase().includes(searchQuery.toLowerCase()) || 
-    u.email?.toLowerCase().includes(searchQuery.toLowerCase())
-  );
-
   const getRoleBadge = (role) => {
     switch (role) {
       case 'SUPER_ADMIN': return <span className="px-3 py-1 bg-espresso-900 text-camel-100 rounded-full text-[10px] font-black uppercase tracking-widest">Admin</span>;
+      case 'SYSTEM_ADMIN': return <span className="px-3 py-1 bg-espresso-900 text-camel-100 rounded-full text-[10px] font-black uppercase tracking-widest">SysAdmin</span>;
       case 'VET': return <span className="px-3 py-1 bg-blue-50 text-blue-600 rounded-full text-[10px] font-black uppercase tracking-widest">Vet</span>;
       case 'SHELTER_ADMIN': return <span className="px-3 py-1 bg-rose-50 text-rose-600 rounded-full text-[10px] font-black uppercase tracking-widest">Shelter</span>;
       default: return <span className="px-3 py-1 bg-camel-100 text-camel-700 rounded-full text-[10px] font-black uppercase tracking-widest">Owner</span>;
@@ -63,14 +94,17 @@ export default function SuperAdmin() {
 
   if (loading) {
     return (
-      <div className="flex-1 flex items-center justify-center min-h-[60vh]">
-        <Loader2 className="w-10 h-10 animate-spin text-camel-600" />
+      <div className="flex-1 flex items-center justify-center min-h-[60vh] bg-[#FAF8F5]">
+        <div className="flex flex-col items-center gap-4">
+           <Loader2 className="w-12 h-12 animate-spin text-camel-600" />
+           <p className="text-sm font-bold text-espresso-500 uppercase tracking-widest animate-pulse">Syncing Secure Core...</p>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="flex-1 w-full bg-[#FAF8F5] min-h-screen">
+    <div className="flex-1 w-full bg-[#FAF8F5] min-h-screen relative">
       <div className="max-w-7xl mx-auto px-4 py-8 md:py-12">
         
         <div className="flex items-center gap-3 mb-8">
@@ -132,7 +166,7 @@ export default function SuperAdmin() {
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-camel-400" size={16} />
               <input 
                 type="text" 
-                placeholder="Search users..." 
+                placeholder="Search globally..." 
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="pl-10 pr-4 py-3 bg-[#FAF8F5] border border-camel-200 rounded-full text-sm focus:border-camel-500 focus:ring-2 focus:ring-camel-100 transition-all w-full sm:w-64"
@@ -152,12 +186,12 @@ export default function SuperAdmin() {
               </thead>
               <tbody>
                 <AnimatePresence>
-                  {filteredUsers.length === 0 ? (
+                  {users.length === 0 ? (
                     <tr>
                       <td colSpan="4" className="py-12 text-center text-sm font-medium text-espresso-500">No users found.</td>
                     </tr>
                   ) : (
-                    filteredUsers.map((user, index) => (
+                    users.map((user, index) => (
                       <motion.tr 
                         key={user._id}
                         initial={{ opacity: 0, y: 10 }}
@@ -169,7 +203,7 @@ export default function SuperAdmin() {
                         <td className="py-5 px-8">
                           <div className="flex items-center gap-4">
                             <div className="w-10 h-10 rounded-full bg-camel-100 border border-camel-200 flex items-center justify-center text-espresso-900 font-bold shrink-0 overflow-hidden">
-                              {user.avatar ? <img src={user.avatar} className="w-full h-full object-cover" alt=""/> : user.name.charAt(0).toUpperCase()}
+                              {user.avatarUrl ? <img src={user.avatarUrl.startsWith('http') ? user.avatarUrl : `http://localhost:5000${user.avatarUrl}`} className="w-full h-full object-cover" alt=""/> : user.name.charAt(0).toUpperCase()}
                             </div>
                             <div>
                               <p className="font-black text-espresso-900">{user.name}</p>
@@ -197,8 +231,8 @@ export default function SuperAdmin() {
                         </td>
                         <td className="py-5 px-8">
                           <div className="flex justify-end gap-2">
-                            {user.role === 'SUPER_ADMIN' ? (
-                              <span className="text-xs text-camel-400 italic">No actions</span>
+                            {user.role === 'SUPER_ADMIN' || user.role === 'SYSTEM_ADMIN' ? (
+                              <span className="text-xs text-camel-400 italic">Protected</span>
                             ) : (
                               <>
                                 {!user.isVerified && user.status !== 'BANNED' && (
@@ -242,8 +276,28 @@ export default function SuperAdmin() {
             </table>
           </div>
         </div>
-
       </div>
+
+      {/* Custom Toast Notification */}
+      <AnimatePresence>
+        {toast && (
+          <motion.div
+            initial={{ opacity: 0, y: 50, scale: 0.9 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.2 } }}
+            className={`fixed bottom-8 right-8 z-[300] flex items-center gap-3 px-6 py-4 rounded-2xl shadow-2xl border ${
+              toast.type === 'error' ? 'bg-rose-50 border-rose-200 text-rose-700' : 'bg-emerald-50 border-emerald-200 text-emerald-700'
+            }`}
+          >
+            {toast.type === 'error' ? <AlertCircle size={20} /> : <CheckCircle2 size={20} />}
+            <span className="text-sm font-bold">{toast.message}</span>
+            <button onClick={() => setToast(null)} className="ml-2 hover:opacity-70 transition-opacity">
+              <X size={16} />
+            </button>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
     </div>
   );
 }

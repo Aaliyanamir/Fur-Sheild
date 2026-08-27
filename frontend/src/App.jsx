@@ -42,11 +42,14 @@ export default function App() {
 
                         {/* Protected Routes - Only logged-in users */}
             <Route element={<ProtectedRoute />}>
-              <Route path="/admin" element={
-          <ProtectedRoute>
-            <SuperAdmin />
-          </ProtectedRoute>
-        } />
+              </Route>
+
+            {/* Protected Routes - Strictly for Super Admins */}
+            <Route element={<ProtectedRoute allowedRoles={['SUPER_ADMIN', 'SYSTEM_ADMIN']} />}>
+              <Route path="/admin" element={<SuperAdmin />} />
+            </Route>
+
+            <Route element={<ProtectedRoute />}>
         <Route path="/dashboard" element={<OwnerDashboard />} />
               <Route path="/my-pets" element={<MyPets />} />
               <Route path="/profile" element={<UserProfile />} />

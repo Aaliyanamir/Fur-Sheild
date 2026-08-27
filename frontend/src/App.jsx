@@ -25,6 +25,11 @@ import MyOrders from './pages/MyOrders';
 import NotFound from './pages/NotFound';
 import CareArticles from './pages/CareArticles';
 
+import About from './pages/About';
+import Contact from './pages/Contact';
+import FAQ from './pages/FAQ';
+
+
 export default function App() {
   return (
     <AuthProvider>

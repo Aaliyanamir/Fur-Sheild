@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Search, Heart, MapPin, CheckCircle2, ChevronRight, X, Loader2 } from 'lucide-react';
-import shelterService from '../services/shelter.service';
+import adoptService from '../services/adopt.service';
 
 export default function AdoptionCatalog() {
   const [animals, setAnimals] = useState([]);
@@ -17,10 +17,10 @@ export default function AdoptionCatalog() {
   useEffect(() => {
     const fetchAnimals = async () => {
       try {
-        const res = await shelterService.getPipeline();
+        const res = await adoptService.getAdoptableAnimals();
         if (res.success) {
           // Show only adoptable
-          setAnimals(res.data.filter(a => a.status === 'ADOPTABLE'));
+          setAnimals(res.data);
         }
       } catch (error) {
         console.error(error);
@@ -42,7 +42,7 @@ export default function AdoptionCatalog() {
     e.preventDefault();
     setIsSubmitting(true);
     try {
-      const res = await shelterService.submitAdoptionRequest({ ...formData, animalId: selectedAnimal._id });
+      const res = await adoptService.submitAdoptionRequest({ ...formData, animalId: selectedAnimal._id });
       if (res.success) {
         setSuccess(true);
       }

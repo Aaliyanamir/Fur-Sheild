@@ -33,10 +33,9 @@ export default function App() {
           <Route path="/" element={<LandingPage />} />
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
-        <Route path="/adopt" element={<AdoptionCatalog />} />
-          
-          {/* App Routes wrapped in the Global Layout */}
+                  {/* App Routes wrapped in the Global Layout */}
           <Route element={<GlobalLayout />}>
+            <Route path="/adopt" element={<AdoptionCatalog />} />
             <Route path="/shop" element={<ShopCatalog />} />
         <Route path="/checkout" element={<Checkout />} />
 

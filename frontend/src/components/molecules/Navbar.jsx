@@ -39,6 +39,11 @@ export default function Navbar() {
           { name: 'Appointments', path: '/appointments', icon: Calendar },
           { name: 'Shop', path: '/shop', icon: ShoppingBag },
         ];
+      case 'SUPER_ADMIN':
+        return [
+          { name: 'Admin Hub', path: '/admin', icon: LayoutDashboard },
+          { name: 'Shop', path: '/shop', icon: ShoppingBag },
+        ];
       case 'SHELTER_ADMIN':
         return [
           { name: 'Shelter Portal', path: '/shelter', icon: HeartHandshake },

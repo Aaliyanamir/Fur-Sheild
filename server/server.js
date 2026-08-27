@@ -35,6 +35,7 @@ const shopRoutes = require('./routes/shop.routes');
 const orderRoutes = require('./routes/order.routes');
 const shelterRoutes = require('./routes/shelter.routes');
 const dashboardRoutes = require('./routes/dashboard.routes');
+const adminRoutes = require('./routes/admin.routes');
 
 // Mount Routers
 app.use('/api/v1/auth', authRoutes);
@@ -43,6 +44,7 @@ app.use('/api/v1/shop', shopRoutes);
 app.use('/api/v1/orders', orderRoutes);
 app.use('/api/v1/shelter', shelterRoutes);
 app.use('/api/v1/dashboard', dashboardRoutes);
+app.use('/api/v1/admin', adminRoutes);
 
 // Start Server
 const PORT = process.env.PORT || 5000;

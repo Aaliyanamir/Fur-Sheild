@@ -1,0 +1,249 @@
+import React, { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Users, Stethoscope, HeartHandshake, PawPrint, ShieldCheck, Ban, Loader2, CheckCircle2, AlertCircle, LayoutDashboard, Search } from 'lucide-react';
+import adminService from '../services/admin.service';
+
+export default function SuperAdmin() {
+  const [stats, setStats] = useState({ users: 0, vets: 0, shelters: 0, pets: 0, appointments: 0 });
+  const [users, setUsers] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [actionLoading, setActionLoading] = useState(null);
+  const [searchQuery, setSearchQuery] = useState('');
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  const fetchData = async () => {
+    try {
+      setLoading(true);
+      const [statsRes, usersRes] = await Promise.all([
+        adminService.getStats(),
+        adminService.getUsers()
+      ]);
+      if (statsRes.success) setStats(statsRes.data);
+      if (usersRes.success) setUsers(usersRes.data);
+    } catch (error) {
+      console.error('Error fetching admin data:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleStatusUpdate = async (userId, action) => {
+    try {
+      setActionLoading(userId);
+      const res = await adminService.updateUserStatus(userId, action);
+      if (res.success) {
+        // Refresh users list
+        const usersRes = await adminService.getUsers();
+        if (usersRes.success) setUsers(usersRes.data);
+      }
+    } catch (error) {
+      console.error(error);
+      alert('Error updating user status.');
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
+  const filteredUsers = users.filter(u => 
+    u.name?.toLowerCase().includes(searchQuery.toLowerCase()) || 
+    u.email?.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  const getRoleBadge = (role) => {
+    switch (role) {
+      case 'SUPER_ADMIN': return <span className="px-3 py-1 bg-espresso-900 text-camel-100 rounded-full text-[10px] font-black uppercase tracking-widest">Admin</span>;
+      case 'VET': return <span className="px-3 py-1 bg-blue-50 text-blue-600 rounded-full text-[10px] font-black uppercase tracking-widest">Vet</span>;
+      case 'SHELTER_ADMIN': return <span className="px-3 py-1 bg-rose-50 text-rose-600 rounded-full text-[10px] font-black uppercase tracking-widest">Shelter</span>;
+      default: return <span className="px-3 py-1 bg-camel-100 text-camel-700 rounded-full text-[10px] font-black uppercase tracking-widest">Owner</span>;
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="flex-1 flex items-center justify-center min-h-[60vh]">
+        <Loader2 className="w-10 h-10 animate-spin text-camel-600" />
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex-1 w-full bg-[#FAF8F5] min-h-screen">
+      <div className="max-w-7xl mx-auto px-4 py-8 md:py-12">
+        
+        <div className="flex items-center gap-3 mb-8">
+          <div className="w-12 h-12 bg-espresso-900 rounded-2xl flex items-center justify-center text-camel-100 shadow-md">
+            <LayoutDashboard size={24} />
+          </div>
+          <div>
+            <h1 className="text-3xl font-display font-black text-espresso-900 leading-tight">Super Admin Hub</h1>
+            <p className="text-xs font-bold uppercase tracking-widest text-camel-600">Platform Control Center</p>
+          </div>
+        </div>
+
+        {/* Top Stats Cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+          <div className="bg-white rounded-[2rem] p-6 border border-camel-100 shadow-sm flex flex-col hover:shadow-md hover:border-camel-300 transition-all">
+            <div className="flex justify-between items-start mb-4">
+              <div className="w-10 h-10 bg-camel-50 rounded-full flex items-center justify-center text-camel-600">
+                <Users size={20} />
+              </div>
+            </div>
+            <p className="text-xs font-bold text-espresso-500 uppercase tracking-widest mb-1">Total Users</p>
+            <h3 className="text-4xl font-black text-espresso-900">{stats.users}</h3>
+          </div>
+          <div className="bg-white rounded-[2rem] p-6 border border-camel-100 shadow-sm flex flex-col hover:shadow-md hover:border-camel-300 transition-all">
+            <div className="flex justify-between items-start mb-4">
+              <div className="w-10 h-10 bg-blue-50 rounded-full flex items-center justify-center text-blue-500">
+                <Stethoscope size={20} />
+              </div>
+            </div>
+            <p className="text-xs font-bold text-espresso-500 uppercase tracking-widest mb-1">Total Vets</p>
+            <h3 className="text-4xl font-black text-espresso-900">{stats.vets}</h3>
+          </div>
+          <div className="bg-white rounded-[2rem] p-6 border border-camel-100 shadow-sm flex flex-col hover:shadow-md hover:border-camel-300 transition-all">
+            <div className="flex justify-between items-start mb-4">
+              <div className="w-10 h-10 bg-rose-50 rounded-full flex items-center justify-center text-rose-500">
+                <HeartHandshake size={20} />
+              </div>
+            </div>
+            <p className="text-xs font-bold text-espresso-500 uppercase tracking-widest mb-1">Total Shelters</p>
+            <h3 className="text-4xl font-black text-espresso-900">{stats.shelters}</h3>
+          </div>
+          <div className="bg-white rounded-[2rem] p-6 border border-camel-100 shadow-sm flex flex-col hover:shadow-md hover:border-camel-300 transition-all">
+            <div className="flex justify-between items-start mb-4">
+              <div className="w-10 h-10 bg-emerald-50 rounded-full flex items-center justify-center text-emerald-500">
+                <PawPrint size={20} />
+              </div>
+            </div>
+            <p className="text-xs font-bold text-espresso-500 uppercase tracking-widest mb-1">Ecosystem Pets</p>
+            <h3 className="text-4xl font-black text-espresso-900">{stats.pets}</h3>
+          </div>
+        </div>
+
+        {/* User Management Section */}
+        <div className="bg-white rounded-[2.5rem] border border-camel-100 shadow-[0_8px_30px_rgb(90,56,37,0.06)] overflow-hidden">
+          
+          <div className="p-8 border-b border-camel-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <h2 className="text-xl font-black text-espresso-900">User Management</h2>
+            <div className="relative">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-camel-400" size={16} />
+              <input 
+                type="text" 
+                placeholder="Search users..." 
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-10 pr-4 py-3 bg-[#FAF8F5] border border-camel-200 rounded-full text-sm focus:border-camel-500 focus:ring-2 focus:ring-camel-100 transition-all w-full sm:w-64"
+              />
+            </div>
+          </div>
+
+          <div className="overflow-x-auto scrollbar-hide">
+            <table className="w-full text-left border-collapse">
+              <thead>
+                <tr className="bg-[#FAF8F5] border-b border-camel-100">
+                  <th className="py-4 px-8 text-[10px] font-bold uppercase tracking-widest text-espresso-500">User</th>
+                  <th className="py-4 px-8 text-[10px] font-bold uppercase tracking-widest text-espresso-500">Role</th>
+                  <th className="py-4 px-8 text-[10px] font-bold uppercase tracking-widest text-espresso-500">Status</th>
+                  <th className="py-4 px-8 text-[10px] font-bold uppercase tracking-widest text-espresso-500 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <AnimatePresence>
+                  {filteredUsers.length === 0 ? (
+                    <tr>
+                      <td colSpan="4" className="py-12 text-center text-sm font-medium text-espresso-500">No users found.</td>
+                    </tr>
+                  ) : (
+                    filteredUsers.map((user, index) => (
+                      <motion.tr 
+                        key={user._id}
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0 }}
+                        transition={{ delay: index * 0.05 }}
+                        className="border-b border-camel-50 hover:bg-camel-50/30 transition-colors group"
+                      >
+                        <td className="py-5 px-8">
+                          <div className="flex items-center gap-4">
+                            <div className="w-10 h-10 rounded-full bg-camel-100 border border-camel-200 flex items-center justify-center text-espresso-900 font-bold shrink-0 overflow-hidden">
+                              {user.avatar ? <img src={user.avatar} className="w-full h-full object-cover" alt=""/> : user.name.charAt(0).toUpperCase()}
+                            </div>
+                            <div>
+                              <p className="font-black text-espresso-900">{user.name}</p>
+                              <p className="text-xs text-camel-600 font-medium">{user.email}</p>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="py-5 px-8">
+                          {getRoleBadge(user.role)}
+                        </td>
+                        <td className="py-5 px-8">
+                          {user.status === 'BANNED' ? (
+                            <div className="flex items-center gap-1.5 text-rose-600 text-xs font-bold">
+                              <AlertCircle size={14} /> Banned
+                            </div>
+                          ) : user.isVerified ? (
+                            <div className="flex items-center gap-1.5 text-emerald-600 text-xs font-bold">
+                              <CheckCircle2 size={14} /> Verified
+                            </div>
+                          ) : (
+                            <div className="text-espresso-400 text-xs font-bold flex items-center gap-1.5">
+                              Unverified
+                            </div>
+                          )}
+                        </td>
+                        <td className="py-5 px-8">
+                          <div className="flex justify-end gap-2">
+                            {user.role === 'SUPER_ADMIN' ? (
+                              <span className="text-xs text-camel-400 italic">No actions</span>
+                            ) : (
+                              <>
+                                {!user.isVerified && user.status !== 'BANNED' && (
+                                  <button 
+                                    onClick={() => handleStatusUpdate(user._id, 'VERIFY')}
+                                    disabled={actionLoading === user._id}
+                                    className="p-2 rounded-xl bg-emerald-50 text-emerald-600 hover:bg-emerald-100 transition-colors shadow-sm disabled:opacity-50"
+                                    title="Verify User"
+                                  >
+                                    {actionLoading === user._id ? <Loader2 size={16} className="animate-spin" /> : <ShieldCheck size={16} />}
+                                  </button>
+                                )}
+                                {user.status !== 'BANNED' ? (
+                                  <button 
+                                    onClick={() => handleStatusUpdate(user._id, 'BAN')}
+                                    disabled={actionLoading === user._id}
+                                    className="p-2 rounded-xl bg-rose-50 text-rose-600 hover:bg-rose-100 transition-colors shadow-sm disabled:opacity-50"
+                                    title="Ban User"
+                                  >
+                                    {actionLoading === user._id ? <Loader2 size={16} className="animate-spin" /> : <Ban size={16} />}
+                                  </button>
+                                ) : (
+                                  <button 
+                                    onClick={() => handleStatusUpdate(user._id, 'ACTIVATE')}
+                                    disabled={actionLoading === user._id}
+                                    className="p-2 rounded-xl bg-camel-100 text-espresso-900 hover:bg-camel-200 transition-colors shadow-sm disabled:opacity-50"
+                                    title="Unban/Activate User"
+                                  >
+                                    {actionLoading === user._id ? <Loader2 size={16} className="animate-spin" /> : <CheckCircle2 size={16} />}
+                                  </button>
+                                )}
+                              </>
+                            )}
+                          </div>
+                        </td>
+                      </motion.tr>
+                    ))
+                  )}
+                </AnimatePresence>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  );
+}

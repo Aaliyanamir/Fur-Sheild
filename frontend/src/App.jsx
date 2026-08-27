@@ -16,6 +16,7 @@ import ShelterHub from './pages/ShelterHub';
 import ShelterDashboard from './pages/ShelterDashboard';
 import ShopCatalog from './pages/ShopCatalog';
 import Checkout from './pages/Checkout';
+import SuperAdmin from './pages/SuperAdmin';
 import UserProfile from './pages/UserProfile';
 import Settings from './pages/Settings';
 import AdoptionCatalog from './pages/AdoptionCatalog';
@@ -41,7 +42,12 @@ export default function App() {
 
                         {/* Protected Routes - Only logged-in users */}
             <Route element={<ProtectedRoute />}>
-              <Route path="/dashboard" element={<OwnerDashboard />} />
+              <Route path="/admin" element={
+          <ProtectedRoute>
+            <SuperAdmin />
+          </ProtectedRoute>
+        } />
+        <Route path="/dashboard" element={<OwnerDashboard />} />
               <Route path="/my-pets" element={<MyPets />} />
               <Route path="/profile" element={<UserProfile />} />
               <Route path="/settings" element={<Settings />} />

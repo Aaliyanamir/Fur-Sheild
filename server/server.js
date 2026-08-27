@@ -5,12 +5,16 @@ const cors = require('cors');
 const helmet = require('helmet');
 const morgan = require('morgan');
 const connectDB = require('./config/db');
+const startCronJobs = require('./utils/cronJobs');
 
 // Load env vars
 dotenv.config();
 
 // Connect to database
 connectDB();
+
+// Start Background Jobs
+startCronJobs();
 
 const app = express();
 
@@ -36,6 +40,7 @@ const orderRoutes = require('./routes/order.routes');
 const shelterRoutes = require('./routes/shelter.routes');
 const dashboardRoutes = require('./routes/dashboard.routes');
 const adminRoutes = require('./routes/admin.routes');
+const notificationRoutes = require('./routes/notification.routes');
 
 // Mount Routers
 app.use('/api/v1/auth', authRoutes);
@@ -45,6 +50,7 @@ app.use('/api/v1/orders', orderRoutes);
 app.use('/api/v1/shelter', shelterRoutes);
 app.use('/api/v1/dashboard', dashboardRoutes);
 app.use('/api/v1/admin', adminRoutes);
+app.use('/api/v1/notifications', notificationRoutes);
 
 // Start Server
 const PORT = process.env.PORT || 5000;

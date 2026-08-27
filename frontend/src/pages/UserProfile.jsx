@@ -46,7 +46,7 @@ export default function UserProfile() {
         setError(response.message || 'Failed to update profile');
       }
     } catch (err) {
-      setError('An error occurred while updating profile.');
+      setError(err.response?.data?.message || err.message || 'An error occurred while updating profile.');
     } finally {
       setIsSubmitting(false);
     }
@@ -167,3 +167,4 @@ export default function UserProfile() {
     </div>
   );
 }
+

@@ -1,4 +1,5 @@
 ﻿const Order = require('../models/Order');
+const notificationEngine = require('../utils/notificationEngine');
 
 // @desc    Create new order
 // @route   POST /api/v1/orders
@@ -24,6 +25,9 @@ const createOrder = async (req, res) => {
     });
 
     const createdOrder = await order.save();
+
+    // TRIGGER NOTIFICATION
+    await notificationEngine.notifyOrderPlaced(req.user._id, createdOrder._id, createdOrder.totalPrice);
     res.status(201).json({ success: true, data: createdOrder });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });

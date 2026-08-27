@@ -45,7 +45,7 @@ const updateAnimalStatus = async (req, res) => {
 // @access  Private/ShelterAdmin
 const addIntake = async (req, res) => {
   try {
-    const { name, species, breed, behaviorNotes, aiTriageLog } = req.body;
+    const { name, species, breed, age, behaviorNotes, aiTriageLog } = req.body;
 
     const animal = await ShelterAnimal.create({
       name,

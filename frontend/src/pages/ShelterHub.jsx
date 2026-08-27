@@ -106,25 +106,52 @@ export default function ShelterHub() {
     }, 1800);
   };
 
-  const handleAddIntake = async (e) => {
-    e.preventDefault();
-    const formData = new FormData();
-    formData.append('name', intakeForm.name);
-    formData.append('breed', intakeForm.breed);
-    formData.append('species', intakeForm.species);
-      if(intakeForm.age) formData.append('age', intakeForm.age);
-    formData.append('behaviorNotes', intakeForm.behaviorNotes);
-    if (intakeImageFile) formData.append('avatar', intakeImageFile);
-    if (aiResult) formData.append('aiTriageLog', JSON.stringify({ log: intakeForm.behaviorNotes, severity: aiResult.severity }));
+  
+  const openLogModal = (e, pet) => {
+    e.stopPropagation();
+    setLogPetId(pet._id);
+    setLogForm({ activityType: 'Feeding', notes: '' });
+    setIsLogModalOpen(true);
+  };
 
-    await shelterService.addIntake(formData);
-    
-    setIntakeForm({ name: '', breed: '', species: 'Dog', behaviorNotes: '' });
-    setIntakeImageFile(null);
-    setIntakeImagePreview(null);
-    setAiResult(null);
-    setIsIntakeDrawerOpen(false);
-    fetchPipeline();
+  const handleLogSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      const res = await shelterService.addDailyLog(logPetId, logForm);
+      if (res.success) {
+        setIsLogModalOpen(false);
+        fetchPipeline();
+      }
+    } catch (error) {
+      console.error(error);
+      alert("Failed to submit daily log");
+    }
+  };
+
+    const handleAddIntake = async (e) => {
+    e.preventDefault();
+    try {
+      const formData = new FormData();
+      formData.append('name', intakeForm.name);
+      formData.append('breed', intakeForm.breed);
+      formData.append('species', intakeForm.species);
+      if(intakeForm.age) formData.append('age', intakeForm.age);
+      formData.append('behaviorNotes', intakeForm.behaviorNotes);
+      if (intakeImageFile) formData.append('avatar', intakeImageFile);
+      if (aiResult) formData.append('aiTriageLog', JSON.stringify({ log: intakeForm.behaviorNotes, severity: aiResult.severity }));
+
+      await shelterService.addIntake(formData);
+      
+      setIntakeForm({ name: '', breed: '', species: 'Dog', age: '', behaviorNotes: '' });
+      setIntakeImageFile(null);
+      setIntakeImagePreview(null);
+      setAiResult(null);
+      setIsIntakeDrawerOpen(false);
+      fetchPipeline();
+    } catch (error) {
+      console.error(error);
+      alert('Error adding intake: ' + (error.response?.data?.message || error.message));
+    }
   };
 
   const openEditModal = (pet) => {

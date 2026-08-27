@@ -31,7 +31,7 @@ export default function Checkout() {
     setLoading(true);
     try {
       const orderData = {
-        orderItems: cart.map(item => ({ product: item._id, name: item.name, image: item.image, price: item.price, qty: item.qty })),
+        orderItems: cart.map(item => ({ product: item._id, name: item.name, image: item.image || item.imageUrl, price: item.price, qty: item.qty })),
         shippingAddress: shipping,
         paymentMethod,
         itemsPrice,
@@ -175,7 +175,7 @@ export default function Checkout() {
                       {cart.map((item, idx) => (
                         <div key={idx} className="flex items-center gap-4">
                           <div className="w-16 h-16 bg-[#FAF8F5] rounded-xl p-1 border border-camel-100">
-                            <img src={item.image.startsWith('http') ? item.image : `http://localhost:5000${item.image}`} alt={item.name} className="w-full h-full object-contain mix-blend-multiply" />
+                            <img src={((item.image || item.imageUrl) || '').startsWith('http') ? (item.image || item.imageUrl) : `http://localhost:5000${item.image || item.imageUrl}`} alt={item.name} className="w-full h-full object-contain mix-blend-multiply" />
                           </div>
                           <div className="flex-1">
                             <h4 className="font-bold text-espresso-900 text-sm line-clamp-1">{item.name}</h4>

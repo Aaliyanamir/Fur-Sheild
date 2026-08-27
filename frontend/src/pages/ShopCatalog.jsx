@@ -148,7 +148,7 @@ export default function ShopCatalog() {
               {products.map(product => (
                 <div key={product._id} className="bg-white rounded-[2rem] border border-camel-100 overflow-hidden shadow-sm hover:shadow-xl hover:border-camel-300 transition-all group flex flex-col">
                   <div className="aspect-square bg-camel-50 relative p-6 flex items-center justify-center overflow-hidden">
-                    <img src={product.image.startsWith('http') ? product.image : `http://localhost:5000${product.image}`} alt={product.name} className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-700 mix-blend-multiply" />
+                    <img src={((product.image || product.imageUrl) || '').startsWith('http') ? (product.image || product.imageUrl) : `http://localhost:5000${product.image || product.imageUrl}`} alt={product.name} className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-700 mix-blend-multiply" />
                     {product.isPrescriptionRequired && (
                       <div className="absolute top-3 left-3 bg-rose-100 text-rose-600 text-[9px] font-black uppercase tracking-widest px-2 py-1 rounded-full shadow-sm">
                         Rx Required
@@ -217,7 +217,7 @@ export default function ShopCatalog() {
                   cart.map(item => (
                     <div key={item._id} className="bg-white p-4 rounded-[1.5rem] border border-camel-100 flex items-center gap-4 shadow-sm">
                       <div className="w-16 h-16 bg-camel-50 rounded-xl p-1 shrink-0">
-                        <img src={item.image.startsWith('http') ? item.image : `http://localhost:5000${item.image}`} alt={item.name} className="w-full h-full object-contain mix-blend-multiply" />
+                        <img src={((item.image || item.imageUrl) || '').startsWith('http') ? (item.image || item.imageUrl) : `http://localhost:5000${item.image || item.imageUrl}`} alt={item.name} className="w-full h-full object-contain mix-blend-multiply" />
                       </div>
                       <div className="flex-1 min-w-0">
                         <h4 className="font-bold text-espresso-900 truncate text-sm">{item.name}</h4>

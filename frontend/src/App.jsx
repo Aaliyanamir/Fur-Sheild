@@ -15,6 +15,7 @@ import VetAppointments from './pages/VetAppointments';
 import ShelterHub from './pages/ShelterHub';
 import ShelterDashboard from './pages/ShelterDashboard';
 import ShopCatalog from './pages/ShopCatalog';
+import Checkout from './pages/Checkout';
 import UserProfile from './pages/UserProfile';
 import Settings from './pages/Settings';
 import AdoptionCatalog from './pages/AdoptionCatalog';
@@ -36,6 +37,7 @@ export default function App() {
           {/* App Routes wrapped in the Global Layout */}
           <Route element={<GlobalLayout />}>
             <Route path="/shop" element={<ShopCatalog />} />
+        <Route path="/checkout" element={<Checkout />} />
 
                         {/* Protected Routes - Only logged-in users */}
             <Route element={<ProtectedRoute />}>

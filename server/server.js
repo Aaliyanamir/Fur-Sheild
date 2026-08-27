@@ -32,6 +32,7 @@ app.get('/api/v1/health', (req, res) => {
 const authRoutes = require('./routes/auth.routes');
 const vetRoutes = require('./routes/vet.routes');
 const shopRoutes = require('./routes/shop.routes');
+const orderRoutes = require('./routes/order.routes');
 const shelterRoutes = require('./routes/shelter.routes');
 const dashboardRoutes = require('./routes/dashboard.routes');
 
@@ -39,6 +40,7 @@ const dashboardRoutes = require('./routes/dashboard.routes');
 app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/vethub', vetRoutes);
 app.use('/api/v1/shop', shopRoutes);
+app.use('/api/v1/orders', orderRoutes);
 app.use('/api/v1/shelter', shelterRoutes);
 app.use('/api/v1/dashboard', dashboardRoutes);
 

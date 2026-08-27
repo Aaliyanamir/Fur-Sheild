@@ -1,18 +1,26 @@
 ﻿import api from './api';
 
-const getProducts = async (category = 'All') => {
-  let url = '/shop/products';
-  if (category !== 'All') {
-    url += `?category=${category}`;
+const shopService = {
+  getProducts: async (category = 'All', search = '') => {
+    const res = await api.get(`/shop/products?category=${category}&search=${search}`);
+    return res.data;
+  },
+  getProductById: async (id) => {
+    const res = await api.get(`/shop/products/${id}`);
+    return res.data;
+  },
+  seedProducts: async () => {
+    const res = await api.post('/shop/seed');
+    return res.data;
+  },
+  createOrder: async (orderData) => {
+    const res = await api.post('/orders', orderData);
+    return res.data;
+  },
+  getMyOrders: async () => {
+    const res = await api.get('/orders/myorders');
+    return res.data;
   }
-  const response = await api.get(url);
-  return response.data;
 };
 
-const checkout = async (cartItems, shippingAddress) => {
-  const response = await api.post('/shop/checkout', { cartItems, shippingAddress });
-  return response.data;
-};
-
-const shopService = { getProducts, checkout };
 export default shopService;

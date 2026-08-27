@@ -1,215 +1,105 @@
-const Appointment = require('../models/Appointment');
+﻿const Appointment = require('../models/Appointment');
+const User = require('../models/User');
+const notificationEngine = require('../utils/notificationEngine');
 
-// @desc    Get active veterinary queue (excluding discharged)
-// @route   GET /api/v1/vethub/queue
-// @access  Private/Vet
-const getQueue = async (req, res) => {
+// @desc    Get vet's appointments
+const getVetAppointments = async (req, res) => {
   try {
-    const queue = await Appointment.find({ status: { $ne: 'DISCHARGED' } })
-      .populate('petId', 'name species breed avatarUrl')
-      .populate('ownerId', 'name phone')
-      .sort({ severity: -1, scheduledAt: 1 }); // Sort by severity, then time
-
-    res.status(200).json({ success: true, count: queue.length, data: queue });
+    const appointments = await Appointment.find({ vet: req.user._id }).populate('user', 'name email').populate('pet', 'name species');
+    res.status(200).json({ success: true, count: appointments.length, data: appointments });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }
 };
 
-// @desc    Update appointment status
-// @route   PATCH /api/v1/vethub/queue/:id/status
-// @access  Private/Vet
-const updateAppointmentStatus = async (req, res) => {
+// @desc    Update appointment status & add prescription/labs
+const updateAppointment = async (req, res) => {
   try {
-    const { status } = req.body;
+    const { status, prescription, labResults, notes, meetingLink } = req.body;
     
-    // Validate enum
-    if (!['WAITING', 'EXAM', 'DISCHARGED', 'CANCELLED'].includes(status)) {
-        return res.status(400).json({ success: false, message: 'Invalid status value' });
-    }
-
-    const appointment = await Appointment.findByIdAndUpdate(
-      req.params.id,
-      { status, vetId: req.user.id }, // Assign the current vet
-      { new: true, runValidators: true }
-    ).populate('petId', 'name species breed avatarUrl').populate('ownerId', 'name phone');
-
-    if (!appointment) {
-      return res.status(404).json({ success: false, message: 'Appointment not found' });
-    }
-
-    res.status(200).json({ success: true, data: appointment });
-  } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
-  }
-};
-
-// @desc    Add medical notes and vitals to appointment
-// @route   PATCH /api/v1/vethub/queue/:id/vitals
-// @access  Private/Vet
-const updateVitalsAndNotes = async (req, res) => {
-  try {
-    const { medicalNotes, vitals } = req.body;
-    let updateFields = {};
-    if (medicalNotes !== undefined) updateFields.medicalNotes = medicalNotes;
-    if (vitals !== undefined) updateFields.vitals = vitals;
-
-    const appointment = await Appointment.findByIdAndUpdate(
-      req.params.id,
-      { $set: updateFields },
-      { new: true, runValidators: true }
-    ).populate('petId', 'name species breed avatarUrl').populate('ownerId', 'name phone');
-
-    if (!appointment) {
-      return res.status(404).json({ success: false, message: 'Appointment not found' });
-    }
-
-    res.status(200).json({ success: true, data: appointment });
-  } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
-  }
-};
-
-// @desc    Create a new appointment (Walk-in)
-// @route   POST /api/v1/vethub/queue
-// @access  Private/Vet
-const createAppointment = async (req, res) => {
-  try {
-    const { petId, reason, severity, ownerId: reqOwnerId } = req.body;
-    let walkInDetails = req.body.walkInDetails;
-    
-    // If sent via FormData, walkInDetails might be a stringified JSON
-    if (typeof walkInDetails === 'string') {
-      try { walkInDetails = JSON.parse(walkInDetails); } catch(e) {}
-    }
-    
-    // Fallback if frontend sends flat fields for walkin (FormData doesn't nest easily)
-    if (!walkInDetails && req.body.petName) {
-      walkInDetails = {
-        petName: req.body.petName,
-        breed: req.body.breed,
-        species: req.body.species,
-        age: req.body.age,
-        ownerName: req.body.ownerName
-      };
-    }
-
-    if (req.files && walkInDetails) {
-      if (req.files['petAvatar']) walkInDetails.petAvatarUrl = '/uploads/' + req.files['petAvatar'][0].filename;
-      if (req.files['ownerAvatar']) walkInDetails.ownerAvatarUrl = '/uploads/' + req.files['ownerAvatar'][0].filename;
-    }
-
-    const mongoose = require('mongoose');
-    let ownerId = reqOwnerId;
-    
-    if (petId) {
-      const Pet = mongoose.model('Pet');
-      const pet = await Pet.findById(petId);
-      if (pet) ownerId = pet.ownerId;
-    }
-
-    // if no petId, it's a pure walkin
-    if (!ownerId && !walkInDetails) ownerId = req.user.id; 
-
-    const appointment = await Appointment.create({
-      petId: petId || undefined,
-      ownerId: ownerId || undefined,
-      walkInDetails,
-      vetId: req.user.id,
-      status: 'WAITING',
-      severity: severity || 'ROUTINE',
-      reason: reason || 'Walk-in',
-      scheduledAt: new Date()
-    });
-
-    const populatedAppt = await Appointment.findById(appointment._id)
-      .populate('petId', 'name species breed avatarUrl')
-      .populate('ownerId', 'name phone');
-
-    res.status(201).json({ success: true, data: populatedAppt });
-  } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
-  }
-};
-
-// @desc    Delete/Cancel appointment
-// @route   DELETE /api/v1/vethub/queue/:id
-// @access  Private/Vet
-const deleteAppointment = async (req, res) => {
-  try {
-    const appointment = await Appointment.findById(req.params.id);
-    if (!appointment) {
-      return res.status(404).json({ success: false, message: 'Appointment not found' });
-    }
-    
-    await appointment.deleteOne();
-    res.status(200).json({ success: true, data: {} });
-  } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
-  }
-};
-
-
-// @desc    Update Walk-in / Pet details
-// @route   PATCH /api/v1/vethub/queue/:id/walkin
-// @access  Private/Vet
-const updateWalkin = async (req, res) => {
-  try {
-    const appointment = await Appointment.findById(req.params.id);
+    let appointment = await Appointment.findById(req.params.id);
     if (!appointment) return res.status(404).json({ success: false, message: 'Appointment not found' });
 
-    let walkInDetails = req.body.walkInDetails;
-    if (typeof walkInDetails === 'string') {
-      try { walkInDetails = JSON.parse(walkInDetails); } catch(e) {}
+    if (appointment.vet.toString() !== req.user._id.toString()) {
+      return res.status(401).json({ success: false, message: 'Not authorized' });
+    }
+
+    appointment.status = status || appointment.status;
+    appointment.notes = notes || appointment.notes;
+    appointment.meetingLink = meetingLink || appointment.meetingLink;
+    
+    if (prescription) {
+      appointment.prescription = { ...prescription, issuedAt: Date.now() };
+      // Notify user
+      await notificationEngine.createNotification({
+        recipient: appointment.user, type: 'SYSTEM', title: 'New E-Prescription',
+        message: `Your vet has issued a new digital prescription.`, actionUrl: '/dashboard'
+      });
     }
     
-    if (!walkInDetails && req.body.petName) {
-      walkInDetails = {
-        petName: req.body.petName,
-        breed: req.body.breed,
-        species: req.body.species,
-        age: req.body.age,
-        ownerName: req.body.ownerName
-      };
+    if (labResults) {
+      appointment.labResults = { ...labResults, date: Date.now() };
+      // Notify user
+      await notificationEngine.createNotification({
+        recipient: appointment.user, type: 'SYSTEM', title: 'Lab Results Ready',
+        message: `Your pet's lab results are available for review.`, actionUrl: '/dashboard'
+      });
     }
 
-    if (appointment.walkInDetails) {
-      appointment.walkInDetails = { ...appointment.walkInDetails, ...walkInDetails };
-      if (req.files) {
-        if (req.files['petAvatar']) appointment.walkInDetails.petAvatarUrl = '/uploads/' + req.files['petAvatar'][0].filename;
-        if (req.files['ownerAvatar']) appointment.walkInDetails.ownerAvatarUrl = '/uploads/' + req.files['ownerAvatar'][0].filename;
-      }
-      await appointment.save();
-    } else if (appointment.petId) {
-      // If it's a registered pet, we update the Pet model
-      const mongoose = require('mongoose');
-      const Pet = mongoose.model('Pet');
-      const pet = await Pet.findById(appointment.petId);
-      if (pet) {
-        pet.name = walkInDetails.petName || pet.name;
-        pet.breed = walkInDetails.breed || pet.breed;
-        pet.species = walkInDetails.species || pet.species;
-        pet.age = walkInDetails.age || pet.age;
-        if (req.files) {
-          if (req.files['petAvatar']) pet.avatarUrl = '/uploads/' + req.files['petAvatar'][0].filename;
-        }
-        
-        if (req.files && req.files['ownerAvatar'] && appointment.ownerId) {
-          const User = mongoose.model('User');
-          const owner = await User.findById(appointment.ownerId);
-          if (owner) {
-            owner.avatarUrl = '/uploads/' + req.files['ownerAvatar'][0].filename;
-            await owner.save();
-          }
-        }
-        await pet.save();
-      }
-    }
-
+    await appointment.save();
     res.status(200).json({ success: true, data: appointment });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }
 };
 
-module.exports = { updateWalkin,  getQueue, updateAppointmentStatus, updateVitalsAndNotes, createAppointment, deleteAppointment };
+// Public: Get all verified Vets
+const getVerifiedVets = async (req, res) => {
+  try {
+    const vets = await User.find({ role: 'VET', isVerified: true }).select('name email avatarUrl');
+    res.status(200).json({ success: true, count: vets.length, data: vets });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// User: Book an appointment
+const bookAppointment = async (req, res) => {
+  try {
+    const { vetId, petId, date, timeSlot, reason, type } = req.body;
+    
+    const appointment = await Appointment.create({
+      user: req.user._id,
+      vet: vetId,
+      pet: petId,
+      date,
+      timeSlot,
+      reason,
+      type
+    });
+
+    const vet = await User.findById(vetId);
+
+    await notificationEngine.notifyAppointmentBooked(req.user._id, vet.name, date);
+    await notificationEngine.createNotification({
+      recipient: vetId, type: 'APPOINTMENT', title: 'New Appointment Booking',
+      message: `You have a new appointment scheduled for ${new Date(date).toLocaleDateString()}.`, actionUrl: '/vet'
+    });
+
+    res.status(201).json({ success: true, data: appointment });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// User: Get own appointments
+const getUserAppointments = async (req, res) => {
+  try {
+    const appointments = await Appointment.find({ user: req.user._id }).populate('vet', 'name email').populate('pet', 'name');
+    res.status(200).json({ success: true, data: appointments });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+module.exports = { getVetAppointments, updateAppointment, getVerifiedVets, bookAppointment, getUserAppointments };

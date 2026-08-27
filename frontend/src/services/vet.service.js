@@ -1,83 +1,26 @@
-import api from './api';
-
-const getQueue = async () => {
-  try {
-    const response = await api.get('/vethub/queue');
-    return response.data;
-  } catch (error) {
-    console.error("Error fetching vet queue:", error);
-    return {
-      success: false,
-      message: error.response?.data?.message || 'Failed to fetch queue'
-    };
-  }
-};
-
-const updateStatus = async (id, status) => {
-  try {
-    const response = await api.patch(`/vethub/queue/${id}/status`, { status });
-    return response.data;
-  } catch (error) {
-    return {
-      success: false,
-      message: error.response?.data?.message || 'Failed to update status'
-    };
-  }
-};
-
-const updateVitalsAndNotes = async (id, payload) => {
-  try {
-    const response = await api.patch(`/vethub/queue/${id}/vitals`, payload);
-    return response.data;
-  } catch (error) {
-    return {
-      success: false,
-      message: error.response?.data?.message || 'Failed to update vitals/notes'
-    };
-  }
-};
-
-const createAppointment = async (payload) => {
-  try {
-    const response = await api.post('/vethub/queue', payload);
-    return response.data;
-  } catch (error) {
-    return {
-      success: false,
-      message: error.response?.data?.message || 'Failed to create appointment'
-    };
-  }
-};
-
-const deleteAppointment = async (id) => {
-  try {
-    const response = await api.delete(`/vethub/queue/${id}`);
-    return response.data;
-  } catch (error) {
-    return {
-      success: false,
-      message: error.response?.data?.message || 'Failed to delete appointment'
-    };
-  }
-};
-
-
-const updateWalkin = async (id, payload) => {
-  try {
-    const response = await api.patch('/vethub/queue/' + id + '/walkin', payload);
-    return response.data;
-  } catch (error) {
-    return { success: false, message: error.response?.data?.message || 'Failed to update patient' };
-  }
-};
+﻿import api from './api';
 
 const vetService = {
-  updateWalkin,
-  getQueue,
-  updateStatus,
-  updateVitalsAndNotes,
-  createAppointment,
-  deleteAppointment
+  getVerifiedVets: async () => {
+    const res = await api.get('/vet/list');
+    return res.data;
+  },
+  bookAppointment: async (data) => {
+    const res = await api.post('/vet/appointments', data);
+    return res.data;
+  },
+  getUserAppointments: async () => {
+    const res = await api.get('/vet/appointments/me');
+    return res.data;
+  },
+  getVetAppointments: async () => {
+    const res = await api.get('/vet/appointments');
+    return res.data;
+  },
+  updateAppointment: async (id, data) => {
+    const res = await api.put(`/vet/appointments/${id}`, data);
+    return res.data;
+  }
 };
 
 export default vetService;

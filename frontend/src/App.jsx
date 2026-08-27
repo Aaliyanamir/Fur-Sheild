@@ -37,6 +37,12 @@ export default function App() {
                   {/* App Routes wrapped in the Global Layout */}
           <Route element={<GlobalLayout />}>
             <Route path="/adopt" element={<AdoptionCatalog />} />
+
+            <Route path="/book-vet" element={<BookAppointment />} />
+            <Route path="/about" element={<About />} />
+            <Route path="/contact" element={<Contact />} />
+            <Route path="/faq" element={<FAQ />} />
+
             <Route path="/shop" element={<ShopCatalog />} />
               <Route path="/care-hub" element={<CareArticles />} />
         <Route path="/checkout" element={<Checkout />} />

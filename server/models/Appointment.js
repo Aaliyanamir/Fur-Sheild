@@ -1,48 +1,28 @@
-const mongoose = require('mongoose');
+﻿const mongoose = require('mongoose');
 
 const appointmentSchema = new mongoose.Schema({
-  petId: { 
-    type: mongoose.Schema.Types.ObjectId, 
-    ref: 'Pet',
-    required: false
-  },
-  ownerId: { 
-    type: mongoose.Schema.Types.ObjectId, 
-    ref: 'User',
-    required: false
-  },
-  walkInDetails: {
-    petName: String,
-    breed: String,
-    species: String,
-    age: String,
-    ownerName: String,
-    petAvatarUrl: String,
-    ownerAvatarUrl: String
-  },
-  vetId: { 
-    type: mongoose.Schema.Types.ObjectId, 
-    ref: 'User' 
-  },
-  status: { 
-    type: String, 
-    enum: ['WAITING', 'EXAM', 'DISCHARGED', 'CANCELLED'], 
-    default: 'WAITING' 
-  },
-  severity: { 
-    type: String, 
-    enum: ['ROUTINE', 'URGENT', 'EMERGENCY'],
-    required: true
-  },
+  user: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+  vet: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+  pet: { type: mongoose.Schema.Types.ObjectId, ref: 'Pet' }, // Optional if new pet
+  date: { type: Date, required: true },
+  timeSlot: { type: String, required: true },
   reason: { type: String, required: true },
-  medicalNotes: { type: String },
-  vitals: {
-    weight: Number,
-    temperature: Number,
-    heartRate: Number
+  status: { type: String, enum: ['PENDING', 'CONFIRMED', 'COMPLETED', 'CANCELLED'], default: 'PENDING' },
+  type: { type: String, enum: ['IN_PERSON', 'TELEHEALTH'], default: 'IN_PERSON' },
+  meetingLink: { type: String }, // For telehealth
+  prescription: {
+    medication: String,
+    dosage: String,
+    instructions: String,
+    issuedAt: Date
   },
-  scheduledAt: { type: Date, required: true },
-  completedAt: { type: Date }
+  labResults: {
+    testName: String,
+    resultSummary: String,
+    documentUrl: String,
+    date: Date
+  },
+  notes: String
 }, { timestamps: true });
 
 module.exports = mongoose.model('Appointment', appointmentSchema);

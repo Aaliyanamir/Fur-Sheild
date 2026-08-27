@@ -148,7 +148,7 @@ export default function Navbar() {
             </Link>
 
             {/* Desktop Center: Navigation */}
-            <nav className="hidden md:flex items-center gap-1 md:gap-2 lg:gap-6 h-full pt-1">
+            <nav className="hidden md:flex items-center gap-1 md:gap-2 lg:gap-4 h-full pt-1">
               {navItems.map((item) => {
                 const Icon = item.icon;
                 return (
@@ -179,7 +179,7 @@ export default function Navbar() {
                             </svg>
                           )}
                           <span className={cn(
-                            "relative z-10 text-[12px] lg:text-[13px] tracking-wide transition-colors duration-300",
+                            "relative z-10 text-[12px] lg:text-[13px] tracking-wide transition-colors duration-300 whitespace-nowrap",
                             isActive ? "text-camel-900 font-bold" : "text-espresso-600 font-semibold group-hover:text-camel-800"
                           )}>
                             {item.name}
@@ -193,7 +193,7 @@ export default function Navbar() {
             </nav>
 
             {/* Desktop Right: Actions */}
-            <div className="hidden md:flex items-center gap-1 lg:gap-3 pr-2 pl-2 lg:pl-8 h-full shrink-0">
+            <div className="hidden md:flex items-center gap-1 lg:gap-2 pr-2 pl-2 lg:pl-6 h-full shrink-0">
               <button className="p-1.5 lg:p-2 text-espresso-500 hover:text-camel-700 transition-colors rounded-full hover:bg-white/50">
                 <Search size={18} strokeWidth={2.5} />
               </button>

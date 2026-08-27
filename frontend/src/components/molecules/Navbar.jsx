@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { NavLink, Link, useLocation } from 'react-router-dom';
 import { AuthContext } from '../../context/AuthContext';
-import { LayoutDashboard, Stethoscope, HeartHandshake, ShoppingBag, Bell, Search, PawPrint, Menu, X, User, Settings, LogOut, Calendar, ClipboardList, Activity, Home } from 'lucide-react';
+import { BookOpen, LayoutDashboard, Stethoscope, HeartHandshake, ShoppingBag, Bell, Search, PawPrint, Menu, X, User, Settings, LogOut, Calendar, ClipboardList, Activity, Home } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import { AnimatePresence, motion } from 'framer-motion';
 import notificationService from '../../services/notification.service';
@@ -55,6 +55,7 @@ export default function Navbar() {
         { name: 'Home', path: '/', icon: Home },
         { name: 'Adopt', path: '/adopt', icon: HeartHandshake },
         { name: 'Shop', path: '/shop', icon: ShoppingBag },
+        { name: 'Care Hub', path: '/care-hub', icon: BookOpen },
         { name: 'Find a Vet', path: '/vet', icon: Stethoscope },
       ];
     }

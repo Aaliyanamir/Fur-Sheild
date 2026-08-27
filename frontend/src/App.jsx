@@ -23,6 +23,7 @@ import AdoptionCatalog from './pages/AdoptionCatalog';
 import BookAppointment from './pages/BookAppointment';
 import MyOrders from './pages/MyOrders';
 import NotFound from './pages/NotFound';
+import CareArticles from './pages/CareArticles';
 
 export default function App() {
   return (
@@ -37,6 +38,7 @@ export default function App() {
           <Route element={<GlobalLayout />}>
             <Route path="/adopt" element={<AdoptionCatalog />} />
             <Route path="/shop" element={<ShopCatalog />} />
+              <Route path="/care-hub" element={<CareArticles />} />
         <Route path="/checkout" element={<Checkout />} />
 
                         {/* Protected Routes - Only logged-in users */}

@@ -2,6 +2,7 @@
 import { Outlet, useLocation } from 'react-router-dom';
 import Navbar from '../molecules/Navbar';
 import Footer from '../molecules/Footer';
+import ChatAssistant from './ChatAssistant';
 
 export default function GlobalLayout() {
   const location = useLocation();
@@ -17,6 +18,7 @@ export default function GlobalLayout() {
         <Outlet />
       </main>
       <Footer />
+      <ChatAssistant />
     </div>
   );
 }

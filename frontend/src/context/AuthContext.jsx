@@ -1,10 +1,12 @@
 ﻿import React, { createContext, useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import authService from '../services/auth.service';
 import api from '../services/api'; // to handle interceptors if needed
 
 export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
+  const navigate = useNavigate();
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -64,7 +66,7 @@ export const AuthProvider = ({ children }) => {
     sessionStorage.removeItem('user');
     document.cookie = "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
     setUser(null);
-    window.location.href = '/login';
+    navigate('/login', { replace: true });
   };
 
   return (

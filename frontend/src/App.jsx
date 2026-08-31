@@ -37,11 +37,11 @@ import Status from './pages/Status';
 
 export default function App() {
   return (
-    <AuthProvider>
-      <ToastProvider>
-      <CartProvider>
-      <Router>
-        <Routes>
+    <Router>
+      <AuthProvider>
+        <ToastProvider>
+          <CartProvider>
+            <Routes>
           {/* All App Routes wrapped in Global Layout */}
           <Route element={<GlobalLayout />}>
             <Route path="/" element={<LandingPage />} />
@@ -96,10 +96,10 @@ export default function App() {
           {/* Catch-all 404 */}
           <Route path="*" element={<NotFound />} />
         </Routes>
-      </Router>
-      </CartProvider>
-      </ToastProvider>
-    </AuthProvider>
+          </CartProvider>
+        </ToastProvider>
+      </AuthProvider>
+    </Router>
   );
 }
 

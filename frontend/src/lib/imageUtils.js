@@ -1,6 +1,8 @@
 /**
  * Resolves image URLs cleanly across Vite frontend assets (/images) and Express backend uploads (/uploads).
  */
+const backendBaseUrl = (import.meta.env.VITE_API_URL || 'http://localhost:5000/api/v1').replace(/\/api\/v1\/?$/, '');
+
 export const getImageUrl = (url, fallback = '/images/dash-dog-1.jpg') => {
   if (!url || typeof url !== 'string' || url.trim() === '' || url.includes('placeholder')) {
     return fallback;
@@ -20,11 +22,11 @@ export const getImageUrl = (url, fallback = '/images/dash-dog-1.jpg') => {
 
   // If stored under Express backend /uploads/
   if (cleanUrl.startsWith('/uploads/')) {
-    return `http://localhost:5000${cleanUrl}`;
+    return `${backendBaseUrl}${cleanUrl}`;
   }
 
   if (cleanUrl.startsWith('uploads/')) {
-    return `http://localhost:5000/${cleanUrl}`;
+    return `${backendBaseUrl}/${cleanUrl}`;
   }
 
   // Default fallback if path is relative

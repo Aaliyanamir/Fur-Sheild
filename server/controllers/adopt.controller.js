@@ -5,7 +5,7 @@ const User = require('../models/User');
 
 const getAdoptableAnimals = async (req, res) => {
   try {
-    const animals = await ShelterAnimal.find({ status: 'ADOPTABLE' }).populate('shelterId', 'name email');
+    const animals = await ShelterAnimal.find({ status: 'ADOPTABLE' }).sort({ createdAt: -1 });
     res.status(200).json({ success: true, count: animals.length, data: animals });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });

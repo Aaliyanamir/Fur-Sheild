@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Search, Heart, CheckCircle2, X, Loader2, Filter } from 'lucide-react';
 import adoptService from '../services/adopt.service';
 import { AuthContext } from '../context/AuthContext';
+import { getImageUrl } from '../lib/imageUtils';
 
 export default function AdoptionCatalog() {
   const { user } = useContext(AuthContext);
@@ -140,13 +141,7 @@ export default function AdoptionCatalog() {
              No pets match your search criteria. Please check back soon!
            </div>
         ) : filteredAnimals.map(animal => {
-          const imageSrc = animal.avatarUrl 
-            ? (animal.avatarUrl.startsWith('http') 
-                ? animal.avatarUrl 
-                : animal.avatarUrl.startsWith('/') 
-                  ? animal.avatarUrl 
-                  : `http://localhost:5000${animal.avatarUrl}`) 
-            : '/images/pet-1.jpg';
+          const imageSrc = getImageUrl(animal.avatarUrl, '/images/pet-1.jpg');
 
           return (
             <div key={animal._id} className="bg-white rounded-[2rem] border border-camel-100 overflow-hidden shadow-sm hover:shadow-xl hover:border-camel-300 transition-all group flex flex-col">

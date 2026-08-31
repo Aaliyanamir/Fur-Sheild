@@ -1,4 +1,4 @@
-﻿const mongoose = require('mongoose');
+const mongoose = require('mongoose');
 const dotenv = require('dotenv');
 const connectDB = require('./config/db');
 const User = require('./models/User');
@@ -17,32 +17,42 @@ const importData = async () => {
     await ShelterAnimal.deleteMany();
     await Pet.deleteMany();
 
-    // 2. Seed Users (1 Admin/Owner, 1 Vet, 1 Shelter Admin)
+    // 2. Seed Users (SuperAdmin, User, Owner, Vet, Shelter Admin)
     const users = await User.create([
-      { name: 'Raza Hussain', email: 'raza@furshield.com', password: 'password123', role: 'OWNER' },
-      { name: 'Dr. Sarah', email: 'vet@furshield.com', password: 'password123', role: 'VET' },
-      { name: 'Admin Shelter', email: 'shelter@furshield.com', password: 'password123', role: 'SHELTER_ADMIN' }
+      { name: 'System Admin', email: 'admin@furshield.com', password: 'password123', role: 'SUPER_ADMIN', isVerified: true },
+      { name: 'John User', email: 'user@furshield.com', password: 'password123', role: 'USER', isVerified: true },
+      { name: 'Raza Hussain', email: 'raza@furshield.com', password: 'password123', role: 'OWNER', isVerified: true },
+      { name: 'Dr. Sarah Smith', email: 'vet@furshield.com', password: 'password123', role: 'VET', isVerified: true },
+      { name: 'Rescue Shelter Admin', email: 'shelter@furshield.com', password: 'password123', role: 'SHELTER_ADMIN', isVerified: true }
     ]);
-    const ownerId = users[0]._id;
+    const ownerId = users[2]._id;
 
-    // 3. Seed Pets
+    // 3. Seed Owner Pets
     await Pet.create([
-      { ownerId, name: 'Buddy', species: 'Dog', breed: 'Golden Retriever', weightHistory: [{ weight: 65 }] },
-      { ownerId, name: 'Luna', species: 'Cat', breed: 'Maine Coon', weightHistory: [{ weight: 12 }] }
+      { ownerId, name: 'Buddy', species: 'Dog', breed: 'Golden Retriever', weightHistory: [{ weight: 65 }], avatarUrl: '/images/dash-dog-1.jpg' },
+      { ownerId, name: 'Luna', species: 'Cat', breed: 'Maine Coon', weightHistory: [{ weight: 12 }], avatarUrl: '/images/dash-cat-1.jpg' }
     ]);
 
-    // 4. Seed Products (Shop)
+    // 4. Seed Products (Shop) with All Categories including Birds
     await Product.create([
-      { name: 'Advanced Joint Support', category: 'SUPPLEMENTS', price: 45.00, stock: 100, rxRequired: false, imageUrl: 'https://images.unsplash.com/photo-1584362917165-526a968579e8?auto=format&fit=crop&w=400&q=80' },
-      { name: 'Flea & Tick Prevention', category: 'PRESCRIPTIONS', price: 85.00, stock: 50, rxRequired: true, autoShipEligible: true, imageUrl: 'https://images.unsplash.com/photo-1628544498308-3cb96716a5ec?auto=format&fit=crop&w=400&q=80' },
-      { name: 'Hypoallergenic Salmon Diet', category: 'NUTRITION', price: 65.50, stock: 30, rxRequired: false, autoShipEligible: true, imageUrl: 'https://images.unsplash.com/photo-1589924691995-400dc9ecc119?auto=format&fit=crop&w=400&q=80' }
+      { name: 'Premium Salmon Kibble', description: 'High protein nutrition for healthy active dogs.', price: 45.99, category: 'Food', stock: 50, image: '/images/food.jpg', rating: 4.8, reviewsCount: 12 },
+      { name: 'Orthopedic Pet Bed', description: 'Memory foam bed for ultimate joint and back support.', price: 89.99, category: 'Accessories', stock: 15, image: '/images/bed.jpg', rating: 4.5, reviewsCount: 8 },
+      { name: 'Flea & Tick Treatment', description: 'Fast-acting monthly preventative formula.', price: 29.99, category: 'Health', stock: 100, image: '/images/meds.jpg', rating: 4.9, reviewsCount: 45, isPrescriptionRequired: false },
+      { name: 'Interactive Laser Toy', description: 'Automatic multi-angle laser toy for playful cats.', price: 24.99, category: 'Toys', stock: 30, image: '/images/toy.jpg', rating: 4.2, reviewsCount: 22 },
+      { name: 'Tropical Bird Seed Mix', description: 'Nutrient-rich seed, nut and fruit blend for parrots and cockatiels.', price: 18.50, category: 'Birds', stock: 40, image: '/images/signup-bird.jpg', rating: 4.9, reviewsCount: 15 },
+      { name: 'Bird Playground Stand', description: 'Interactive wooden perch with ladder and swing.', price: 34.99, category: 'Birds', stock: 20, image: '/images/signup-bird.jpg', rating: 4.7, reviewsCount: 9 },
+      { name: 'Crunchy Dental Chews', description: 'Keeps dog teeth clean and breath fresh.', price: 15.99, category: 'Food', stock: 75, image: '/images/shop-chews.jpg', rating: 4.6, reviewsCount: 31 },
+      { name: 'Multivitamin Supplement Powder', description: 'Essential daily vitamins and minerals for pets.', price: 22.00, category: 'Health', stock: 60, image: '/images/shop-supplements.jpg', rating: 4.8, reviewsCount: 18 }
     ]);
 
-    // 5. Seed Shelter Animals (Kanban)
+    // 5. Seed Shelter Animals (Adoptable & Kanban Pipeline)
     await ShelterAnimal.create([
-      { name: 'Oliver', species: 'Dog', status: 'INTAKE', behaviorNotes: 'Very shy, found near highway' },
-      { name: 'Daisy', species: 'Cat', status: 'VET_HOLD', medicalHolds: ['Spay Surgery'] },
-      { name: 'Milo', species: 'Dog', status: 'ADOPTABLE' }
+      { name: 'Max', species: 'Dog', breed: 'Beagle', age: '2 Years', status: 'ADOPTABLE', avatarUrl: '/images/pet-1.jpg', behaviorNotes: 'Friendly, playful, loves kids and long walks.' },
+      { name: 'Cleo', species: 'Cat', breed: 'Persian', age: '1 Year', status: 'ADOPTABLE', avatarUrl: '/images/pet-2.jpg', behaviorNotes: 'Calm and affectionate lap cat.' },
+      { name: 'Sunny', species: 'Bird', breed: 'Sun Conure', age: '3 Years', status: 'ADOPTABLE', avatarUrl: '/images/signup-bird.jpg', behaviorNotes: 'Vibrant, vocal, and hand-trained parrot.' },
+      { name: 'Rio', species: 'Bird', breed: 'Cockatiel', age: '1.5 Years', status: 'ADOPTABLE', avatarUrl: '/images/signup-bird.jpg', behaviorNotes: 'Loves whistling melodies and perching on shoulders.' },
+      { name: 'Oliver', species: 'Dog', breed: 'Labrador Mix', age: '6 Months', status: 'INTAKE', avatarUrl: '/images/dash-dog-1.jpg', behaviorNotes: 'Shy puppy rescued near suburban park.' },
+      { name: 'Daisy', species: 'Cat', breed: 'Siamese', age: '3 Years', status: 'VET_HOLD', avatarUrl: '/images/pet-3.jpg', medicalHolds: ['Spay Surgery Recovery'], behaviorNotes: 'Under vet observation post-op.' }
     ]);
 
     console.log('Data Imported Successfully! 🌱');

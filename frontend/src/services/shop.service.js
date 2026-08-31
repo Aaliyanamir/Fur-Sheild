@@ -1,4 +1,4 @@
-﻿import api from './api';
+import api from './api';
 
 const shopService = {
   getProducts: async (category = 'All', search = '') => {
@@ -7,6 +7,19 @@ const shopService = {
   },
   getProductById: async (id) => {
     const res = await api.get(`/shop/products/${id}`);
+    return res.data;
+  },
+  createProduct: async (productData) => {
+    // Check if productData is FormData (for file uploads) or normal object
+    const res = await api.post('/shop/products', productData);
+    return res.data;
+  },
+  updateProduct: async (id, productData) => {
+    const res = await api.put(`/shop/products/${id}`, productData);
+    return res.data;
+  },
+  deleteProduct: async (id) => {
+    const res = await api.delete(`/shop/products/${id}`);
     return res.data;
   },
   seedProducts: async () => {
@@ -24,3 +37,4 @@ const shopService = {
 };
 
 export default shopService;
+

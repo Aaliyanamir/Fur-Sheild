@@ -2,7 +2,7 @@ import React, { useState, useContext } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowRight, Mail, Lock, User, AlertCircle, CheckCircle2 } from 'lucide-react';
+import { ArrowRight, Mail, Lock, User, AlertCircle, CheckCircle2, Eye, EyeOff } from 'lucide-react';
 import Navbar from '../components/molecules/Navbar';
 import Footer from '../components/molecules/Footer';
 import { cn } from '../lib/utils';
@@ -12,8 +12,9 @@ export default function Signup() {
     name: '',
     email: '',
     password: '',
-    role: 'OWNER'
+    role: 'USER'
   });
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
   const { register } = useContext(AuthContext);
@@ -34,7 +35,7 @@ export default function Signup() {
       setTimeout(() => {
         if (result.role === 'VET') navigate('/vet');
         else if (result.role === 'SHELTER_ADMIN') navigate('/shelter');
-        else navigate('/dashboard');
+        else navigate('/');
       }, 1500);
     } else {
       setError(result.message);
@@ -42,11 +43,10 @@ export default function Signup() {
   };
 
   return (
-    <div className="min-h-screen bg-bg-primary flex flex-col font-sans">
-      <Navbar />
+    <div className="w-full font-sans">
       
       {/* Split Screen Container */}
-      <main className="flex-1 flex flex-col lg:flex-row mt-[88px] md:mt-[104px]">
+      <main className="flex-1 flex flex-col lg:flex-row min-h-[75vh]">
         
         {/* Left Side: Image */}
         <div className="hidden md:block md:w-1/2 relative p-6 md:pr-0 md:py-12 lg:py-16">
@@ -98,7 +98,7 @@ export default function Signup() {
               
               {/* Role Selection */}
               <div className="flex bg-camel-50 p-1.5 rounded-2xl mb-8">
-                {['OWNER', 'VET', 'SHELTER_ADMIN'].map((r) => (
+                {['USER', 'OWNER', 'VET', 'SHELTER_ADMIN'].map((r) => (
                   <button
                     key={r}
                     type="button"
@@ -110,7 +110,7 @@ export default function Signup() {
                         : "text-espresso-400 hover:text-espresso-900"
                     )}
                   >
-                    {r.replace('_', ' ')}
+                    {r === 'USER' ? 'User' : r.replace('_', ' ')}
                   </button>
                 ))}
               </div>
@@ -150,13 +150,21 @@ export default function Signup() {
                 <div className="relative">
                   <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-espresso-300" size={18} />
                   <input
-                    type="password"
+                    type={showPassword ? "text" : "password"}
                     value={formData.password}
                     onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                    className="w-full bg-white border border-camel-200 rounded-2xl pl-12 pr-5 py-4 text-sm font-medium focus:outline-none focus:border-camel-500 focus:ring-4 focus:ring-camel-50 transition-all text-espresso-900 shadow-sm"
+                    className="w-full bg-white border border-camel-200 rounded-2xl pl-12 pr-12 py-4 text-sm font-medium focus:outline-none focus:border-camel-500 focus:ring-4 focus:ring-camel-50 transition-all text-espresso-900 shadow-sm"
                     placeholder="••••••••"
                     required
                   />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-espresso-400 hover:text-camel-700 transition-colors p-1"
+                    aria-label="Toggle password visibility"
+                  >
+                    {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                  </button>
                 </div>
               </div>
 
@@ -182,8 +190,6 @@ export default function Signup() {
         </div>
 
       </main>
-      
-      <Footer />
     </div>
   );
 }

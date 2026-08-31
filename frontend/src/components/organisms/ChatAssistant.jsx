@@ -1,7 +1,10 @@
-﻿import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { MessageSquare, X, Send, Bot, User, Loader2 } from 'lucide-react';
-import { Link, useNavigate } from 'react-router-dom';
+import { MessageSquare, X, Send, Bot, User } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import chatService from '../../services/chat.service';
+
+const EMERGENCY_RE = /\b(sos|emergency|bleeding|blood|seizure|unconscious|collapse|poison|not breathing|can't breathe|cant breathe)\b/i;
 
 export default function ChatAssistant() {
   const [isOpen, setIsOpen] = useState(false);
@@ -23,49 +26,54 @@ export default function ChatAssistant() {
     }
   }, [messages, isOpen]);
 
-  const handleSend = (e) => {
-    e.preventDefault();
-    if (!inputValue.trim()) return;
+  const sendText = async (raw) => {
+    const text = (raw || '').trim();
+    if (!text || isTyping) return;
 
-    const userMsg = { id: Date.now(), sender: 'user', text: inputValue };
+    const userMsg = { id: Date.now(), sender: 'user', text };
     setMessages(prev => [...prev, userMsg]);
     setInputValue('');
     setIsTyping(true);
 
-    // Mock AI Logic Engine
-    setTimeout(() => {
-      let aiResponseText = '';
-      let linkAction = null;
-      const lowerInput = userMsg.text.toLowerCase();
-
-      // Rule 1: Emergency
-      if (lowerInput.match(/vomit|diarrhea|blood|pain|emergency|hurt/)) {
-        aiResponseText = "This sounds like a potential medical emergency. Please seek professional veterinary care immediately.";
-        linkAction = { text: "Find a Vet Now", url: "/vet" };
-      } 
-      // Rule 2: Vaccines
-      else if (lowerInput.match(/vaccine|shot|immunization/)) {
-        aiResponseText = "Vaccinations are crucial! Puppies/kittens usually start shots at 6-8 weeks. Adult pets need annual or 3-year boosters depending on the vaccine. Would you like to check your pet's health records?";
-        linkAction = { text: "View Health Records", url: "/dashboard" };
-      }
-      // Rule 3: Food
-      else if (lowerInput.match(/food|diet|eat|hungry/)) {
-        aiResponseText = "Nutrition is the foundation of health. Ensure you're feeding high-quality, life-stage appropriate food. Check out our curated selection in the shop!";
-        linkAction = { text: "Browse Shop", url: "/shop" };
-      }
-      // Rule 4: Behavior
-      else if (lowerInput.match(/bark|bite|chew|scratch|behavior/)) {
-        aiResponseText = "Behavioral issues often stem from anxiety, boredom, or medical issues. Ensure your pet gets enough exercise. You can also read our Care Hub articles for training tips.";
-        linkAction = { text: "Read Care Articles", url: "/care-hub" };
-      }
-      // Fallback
-      else {
-        aiResponseText = "I'm a learning AI and might not have the exact answer for that. For precise medical advice, I recommend consulting a verified vet on our platform.";
-      }
-
-      setMessages(prev => [...prev, { id: Date.now() + 1, sender: 'ai', text: aiResponseText, link: linkAction }]);
+    if (EMERGENCY_RE.test(text)) {
+      setMessages(prev => [...prev, {
+        id: Date.now() + 1,
+        sender: 'ai',
+        text: 'This sounds urgent. Tap SOS on the bottom-left for nearby 24/7 clinics, and book a veterinarian right away. FurBot cannot replace emergency care.',
+        link: { text: 'Find a Vet & Book Appointment', url: '/book-vet' },
+      }]);
       setIsTyping(false);
-    }, 1200); // simulate network delay
+      return;
+    }
+
+    const history = messages.slice(1).map((m) => ({
+      role: m.sender === 'user' ? 'user' : 'model',
+      text: m.text,
+    }));
+
+    try {
+      const data = await chatService.sendMessage(text, history);
+      setMessages(prev => [...prev, {
+        id: Date.now() + 1,
+        sender: 'ai',
+        text: data.text,
+        link: data.link || null,
+      }]);
+    } catch (err) {
+      const apiMessage = err.response?.data?.message;
+      setMessages(prev => [...prev, {
+        id: Date.now() + 1,
+        sender: 'ai',
+        text: apiMessage || 'FurBot could not reach the server. Check that the API is running and try again.',
+      }]);
+    } finally {
+      setIsTyping(false);
+    }
+  };
+
+  const handleSend = (e) => {
+    e.preventDefault();
+    sendText(inputValue);
   };
 
   return (
@@ -116,6 +124,20 @@ export default function ChatAssistant() {
 
             {/* Chat History */}
             <div className="flex-1 overflow-y-auto p-5 bg-[#FAF8F5] flex flex-col gap-4 scrollbar-hide">
+              {messages.length === 1 && (
+                <div className="flex flex-wrap gap-2 mb-1">
+                  {['Book a vet', 'Adopt a pet', 'Shop food', 'Vaccine records'].map((chip) => (
+                    <button
+                      key={chip}
+                      type="button"
+                      onClick={() => sendText(chip)}
+                      className="text-[11px] font-bold px-3 py-1.5 rounded-full bg-white border border-camel-200 text-espresso-700 hover:bg-camel-50"
+                    >
+                      {chip}
+                    </button>
+                  ))}
+                </div>
+              )}
               {messages.map((msg) => (
                 <div key={msg.id} className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
                   <div className={`flex items-end gap-2 max-w-[85%] ${msg.sender === 'user' ? 'flex-row-reverse' : 'flex-row'}`}>

@@ -1,6 +1,8 @@
-﻿import React from 'react';
+import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
+import { ToastProvider } from './context/ToastContext';
+import { CartProvider } from './context/CartContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import GlobalLayout from './components/organisms/GlobalLayout';
 
@@ -28,25 +30,33 @@ import CareArticles from './pages/CareArticles';
 import About from './pages/About';
 import Contact from './pages/Contact';
 import FAQ from './pages/FAQ';
+import Privacy from './pages/Privacy';
+import Terms from './pages/Terms';
+import Status from './pages/Status';
 
 
 export default function App() {
   return (
     <AuthProvider>
+      <ToastProvider>
+      <CartProvider>
       <Router>
         <Routes>
-          {/* Public Routes */}
-          <Route path="/" element={<LandingPage />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/signup" element={<Signup />} />
-                  {/* App Routes wrapped in the Global Layout */}
+          {/* All App Routes wrapped in Global Layout */}
           <Route element={<GlobalLayout />}>
+            <Route path="/" element={<LandingPage />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/signup" element={<Signup />} />
             <Route path="/adopt" element={<AdoptionCatalog />} />
 
             <Route path="/book-vet" element={<BookAppointment />} />
             <Route path="/about" element={<About />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/faq" element={<FAQ />} />
+            <Route path="/privacy" element={<Privacy />} />
+            <Route path="/terms" element={<Terms />} />
+            <Route path="/status" element={<Status />} />
+            <Route path="/blog" element={<Navigate to="/care-hub" replace />} />
 
             <Route path="/shop" element={<ShopCatalog />} />
               <Route path="/care-hub" element={<CareArticles />} />
@@ -87,6 +97,8 @@ export default function App() {
           <Route path="*" element={<NotFound />} />
         </Routes>
       </Router>
+      </CartProvider>
+      </ToastProvider>
     </AuthProvider>
   );
 }

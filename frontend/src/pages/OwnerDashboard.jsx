@@ -1,9 +1,10 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { Calendar, Plus, Flame, Moon, Droplets, CheckCircle2, Circle, ArrowRight, Footprints, PawPrint, HeartHandshake, Syringe, Stethoscope, AlertCircle, X, Edit2, Trash2, Camera, Upload, FileText, Activity } from 'lucide-react';
 import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip } from 'recharts';
 import dashboardService from '../services/dashboard.service';
+import { getImageUrl, getSpeciesFallback } from '../lib/imageUtils';
 
 export default function OwnerDashboard() {
   const navigate = useNavigate();
@@ -72,7 +73,7 @@ export default function OwnerDashboard() {
       microchipId: pet.microchipId || ''
     });
     setAvatarFile(null);
-    setAvatarPreview(pet.avatarUrl ? (pet.avatarUrl.startsWith('http') ? pet.avatarUrl : `http://localhost:5000${pet.avatarUrl}`) : null);
+    setAvatarPreview(pet.avatarUrl ? getImageUrl(pet.avatarUrl, getSpeciesFallback(pet.species)) : null);
     setModalError('');
     setIsModalOpen(true);
   };
@@ -279,7 +280,6 @@ export default function OwnerDashboard() {
   }
 
   const activePet = pets[activePetIndex];
-
   return (
     <div className="w-full relative">
       {/* Header & Multi-Pet Tabs */}
@@ -308,7 +308,12 @@ export default function OwnerDashboard() {
                   <motion.div layoutId="activeTab" className="absolute inset-0 bg-camel-100 rounded-full -z-10" />
                 )}
                 <div className="w-6 h-6 rounded-full bg-camel-200 overflow-hidden">
-                   <img src={pet.avatarUrl ? (pet.avatarUrl.startsWith('http') ? pet.avatarUrl : `http://localhost:5000${pet.avatarUrl}`) : '/images/product-placeholder.jpg'} alt={pet.name} className="w-full h-full object-cover mix-blend-multiply" />
+                   <img 
+                     src={getImageUrl(pet.avatarUrl, getSpeciesFallback(pet.species))} 
+                     alt={pet.name} 
+                     className="w-full h-full object-cover mix-blend-multiply" 
+                     onError={(e) => { e.target.onerror = null; e.target.src = getSpeciesFallback(pet.species); }}
+                   />
                 </div>
                 <span className="text-sm">{pet.name}</span>
               </button>
@@ -343,16 +348,21 @@ export default function OwnerDashboard() {
             <div className="lg:col-span-4 lg:sticky lg:top-32 flex flex-col gap-6">
               <div className="bg-white rounded-[2rem] p-6 border border-camel-100 shadow-sm flex flex-col">
                 <div className="w-full aspect-[4/5] rounded-[1.5rem] overflow-hidden mb-6 relative group bg-camel-50 flex items-center justify-center">
-                  <img src={activePet.avatarUrl ? (activePet.avatarUrl.startsWith('http') ? activePet.avatarUrl : `http://localhost:5000${activePet.avatarUrl}`) : '/images/product-placeholder.jpg'} alt={activePet.name} className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 mix-blend-multiply" />
+                  <img 
+                    src={getImageUrl(activePet.avatarUrl, getSpeciesFallback(activePet.species))} 
+                    alt={activePet.name} 
+                    className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 mix-blend-multiply" 
+                    onError={(e) => { e.target.onerror = null; e.target.src = getSpeciesFallback(activePet.species); }}
+                  />
                 </div>
                 
                                   <div className="flex justify-between items-start mb-6">
                     <div>
                       <h2 className="text-3xl font-display font-black text-espresso-900 tracking-tight">{activePet.name}</h2>
                       <div className="flex flex-wrap items-center gap-x-2 gap-y-1 mt-1">
-                        <span className="text-camel-600 font-bold">{activePet.breed} • {activePet.species}</span>
-                        {activePet.age && <span className="text-camel-600 font-bold">• {activePet.age} yrs</span>}
-                        {activePet.gender && <span className="text-camel-600 font-bold">• {activePet.gender}</span>}
+                        <span className="text-camel-600 font-bold">{activePet.breed} â€¢ {activePet.species}</span>
+                        {activePet.age && <span className="text-camel-600 font-bold">â€¢ {activePet.age} yrs</span>}
+                        {activePet.gender && <span className="text-camel-600 font-bold">â€¢ {activePet.gender}</span>}
                       </div>
                     </div>
                     <div className="flex gap-2">
@@ -554,7 +564,12 @@ export default function OwnerDashboard() {
                  <div className="flex justify-between items-start mb-4">
                    <div className="flex items-center gap-3">
                      <div className="w-12 h-12 rounded-full bg-camel-100 overflow-hidden border border-camel-200">
-                       <img src={appt.petId?.avatarUrl ? (appt.petId.avatarUrl.startsWith('http') ? appt.petId.avatarUrl : `http://localhost:5000${appt.petId.avatarUrl}`) : '/images/product-placeholder.jpg'} alt="" className="w-full h-full object-cover" />
+                       <img 
+                         src={getImageUrl(appt.petId?.avatarUrl, getSpeciesFallback(appt.petId?.species))} 
+                         alt={appt.petId?.name || 'Pet'} 
+                         className="w-full h-full object-cover" 
+                         onError={(e) => { e.target.onerror = null; e.target.src = getSpeciesFallback(appt.petId?.species); }}
+                       />
                      </div>
                      <div>
                        <h3 className="font-black text-espresso-900 leading-tight">{appt.petId?.name}</h3>

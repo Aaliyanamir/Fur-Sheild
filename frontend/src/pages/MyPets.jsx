@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Plus, CheckCircle2, ArrowRight, Edit2, Trash2, Camera, Upload, AlertCircle, X, Activity, PawPrint } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import dashboardService from '../services/dashboard.service';
+import { getImageUrl, getSpeciesFallback } from '../lib/imageUtils';
 
 export default function MyPets() {
   const navigate = useNavigate();
@@ -70,7 +71,7 @@ export default function MyPets() {
       microchipId: pet.microchipId || ''
     });
     setAvatarFile(null);
-    setAvatarPreview(pet.avatarUrl ? (pet.avatarUrl.startsWith('http') ? pet.avatarUrl : `http://localhost:5000${pet.avatarUrl}`) : null);
+    setAvatarPreview(pet.avatarUrl ? getImageUrl(pet.avatarUrl, getSpeciesFallback(pet.species)) : null);
     setModalError('');
     setIsModalOpen(true);
   };
@@ -216,9 +217,10 @@ export default function MyPets() {
                 {/* Top Image Section */}
                 <div className="relative w-full aspect-[4/3] bg-camel-50 overflow-hidden">
                   <img 
-                    src={pet.avatarUrl ? (pet.avatarUrl.startsWith('http') ? pet.avatarUrl : `http://localhost:5000${pet.avatarUrl}`) : '/images/product-placeholder.jpg'} 
+                    src={getImageUrl(pet.avatarUrl, getSpeciesFallback(pet.species))} 
                     alt={pet.name} 
                     className="absolute inset-0 w-full h-full object-cover mix-blend-multiply group-hover:scale-105 transition-transform duration-700 ease-out" 
+                    onError={(e) => { e.target.onerror = null; e.target.src = getSpeciesFallback(pet.species); }}
                   />
                   
                   {/* Healthy Pill */}

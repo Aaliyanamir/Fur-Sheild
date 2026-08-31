@@ -3,24 +3,24 @@ import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Truck, CreditCard, ClipboardList, CheckCircle2, ArrowRight, Loader2, Lock } from 'lucide-react';
 import shopService from '../services/shop.service';
+import { useCart } from '../context/CartContext';
+import { useToast } from '../context/ToastContext';
 
 export default function Checkout() {
   const navigate = useNavigate();
+  const { cart, clearCart } = useCart();
+  const { toast } = useToast();
   const [step, setStep] = useState(1);
-  const [cart, setCart] = useState([]);
   const [loading, setLoading] = useState(false);
 
   const [shipping, setShipping] = useState({ address: '', city: '', postalCode: '', country: '' });
   const [paymentMethod, setPaymentMethod] = useState('Credit Card');
 
   useEffect(() => {
-    const savedCart = sessionStorage.getItem('furshield_cart');
-    if (savedCart) {
-      setCart(JSON.parse(savedCart));
-    } else {
+    if (!cart.length && step < 4) {
       navigate('/shop');
     }
-  }, [navigate]);
+  }, [cart.length, navigate, step]);
 
   const itemsPrice = cart.reduce((acc, item) => acc + item.price * item.qty, 0);
   const shippingPrice = itemsPrice > 50 ? 0 : 10;
@@ -41,12 +41,13 @@ export default function Checkout() {
       };
       const res = await shopService.createOrder(orderData);
       if (res.success) {
-        sessionStorage.removeItem('furshield_cart');
         setStep(4);
+        clearCart();
+        toast('Order placed successfully');
       }
     } catch (error) {
       console.error(error);
-      alert('Error placing order: ' + (error.response?.data?.message || error.message));
+      toast(error.response?.data?.message || 'Could not place order. Please sign in and try again.', 'error');
     } finally {
       setLoading(false);
     }

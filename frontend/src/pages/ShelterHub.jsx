@@ -2,17 +2,19 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Search, Filter, Plus, MoreHorizontal, Clock, Heart, AlertCircle, LayoutGrid, List, Activity, Users, X, Sparkles, Loader2, FileDigit, Trash2, Edit3 } from 'lucide-react';
 import shelterService from '../services/shelter.service';
+import { getImageUrl, getSpeciesFallback } from '../lib/imageUtils';
 
-const Avatar = ({ src, alt, name, className }) => {
+const Avatar = ({ src, alt, name, species, className }) => {
   const [error, setError] = useState(false);
-  if (error || !src || src.includes('product-placeholder')) {
+  const fallback = getSpeciesFallback(species);
+  const finalSrc = getImageUrl(src, fallback);
+
+  if (error) {
     return (
-      <div className={`flex items-center justify-center font-bold text-espresso-500 bg-camel-100 ${className}`}>
-        {name ? name.charAt(0).toUpperCase() : 'U'}
-      </div>
+      <img src={fallback} alt={alt || name} className={className} />
     );
   }
-  return <img src={src} alt={alt} className={className} onError={() => setError(true)} />;
+  return <img src={finalSrc} alt={alt || name} className={className} onError={() => setError(true)} />;
 };
 
 export default function ShelterHub() {
@@ -83,6 +85,7 @@ export default function ShelterHub() {
 
     if (activeFilter === 'Dogs Only') return pet.species === 'Dog';
     if (activeFilter === 'Cats Only') return pet.species === 'Cat';
+    if (activeFilter === 'Birds Only') return pet.species === 'Bird';
     if (activeFilter === 'Urgent Medical') return pet.status === 'VET_HOLD' || (pet.aiTriageLog && pet.aiTriageLog[0]?.severity === 'URGENT VET CONSULT');
     return true;
   });
@@ -304,7 +307,7 @@ export default function ShelterHub() {
 
       {/* Filter Tabs */}
       <div className={`flex gap-2 mb-6 overflow-x-auto pb-2 shrink-0 ${noScrollbar}`}>
-        {['All Rescues', 'Dogs Only', 'Cats Only', 'Urgent Medical'].map(filter => (
+        {['All Rescues', 'Dogs Only', 'Cats Only', 'Birds Only', 'Urgent Medical'].map(filter => (
           <button 
             key={filter}
             onClick={() => setActiveFilter(filter)}
@@ -351,9 +354,10 @@ export default function ShelterHub() {
                         >
                           <div className="flex gap-4">
                             <Avatar 
-                               src={pet.avatarUrl ? (pet.avatarUrl.startsWith('http') ? pet.avatarUrl : `http://localhost:5000${pet.avatarUrl}`) : '/images/product-placeholder.jpg'} 
+                               src={pet.avatarUrl} 
                                alt={pet.name} 
                                name={pet.name}
+                               species={pet.species}
                                className="w-16 h-16 rounded-2xl object-cover bg-camel-50 shrink-0 border border-camel-100" 
                             />
                             <div className="flex-1 min-w-0 pt-1">

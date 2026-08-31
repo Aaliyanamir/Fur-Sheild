@@ -1,14 +1,15 @@
-﻿import React, { useState, useContext } from 'react';
+import React, { useState, useContext } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
 import { motion } from 'framer-motion';
-import { ArrowRight, Mail, Lock, AlertCircle } from 'lucide-react';
+import { ArrowRight, Mail, Lock, AlertCircle, Eye, EyeOff } from 'lucide-react';
 import Navbar from '../components/molecules/Navbar';
 import Footer from '../components/molecules/Footer';
 
 export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const { login } = useContext(AuthContext);
   const navigate = useNavigate();
@@ -18,20 +19,20 @@ export default function Login() {
     setError('');
     const result = await login(email, password);
     if (result.success) {
-      if (result.role === 'VET') navigate('/vet');
+      if (result.role === 'SUPER_ADMIN' || result.role === 'SYSTEM_ADMIN') navigate('/admin');
+      else if (result.role === 'VET') navigate('/vet');
       else if (result.role === 'SHELTER_ADMIN') navigate('/shelter');
-      else navigate('/dashboard');
+      else navigate('/');
     } else {
       setError(result.message);
     }
   };
 
   return (
-    <div className="min-h-screen bg-bg-primary flex flex-col font-sans">
-      <Navbar />
+    <div className="w-full font-sans">
       
       {/* Split Screen Container */}
-      <main className="flex-1 flex flex-col lg:flex-row mt-[88px] md:mt-[104px]">
+      <main className="flex-1 flex flex-col lg:flex-row min-h-[75vh]">
         
         {/* Left Side: Form */}
         <div className="w-full md:w-1/2 flex items-center justify-center p-8 md:p-12 lg:p-16 relative z-10">
@@ -85,13 +86,21 @@ export default function Login() {
                 <div className="relative">
                   <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-espresso-300" size={18} />
                   <input
-                    type="password"
+                    type={showPassword ? "text" : "password"}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="w-full bg-white border border-camel-200 rounded-2xl pl-12 pr-5 py-4 text-sm font-medium focus:outline-none focus:border-camel-500 focus:ring-4 focus:ring-camel-50 transition-all text-espresso-900 shadow-sm"
+                    className="w-full bg-white border border-camel-200 rounded-2xl pl-12 pr-12 py-4 text-sm font-medium focus:outline-none focus:border-camel-500 focus:ring-4 focus:ring-camel-50 transition-all text-espresso-900 shadow-sm"
                     placeholder="••••••••"
                     required
                   />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-espresso-400 hover:text-camel-700 transition-colors p-1"
+                    aria-label="Toggle password visibility"
+                  >
+                    {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                  </button>
                 </div>
               </div>
 
@@ -132,8 +141,6 @@ export default function Login() {
         </div>
 
       </main>
-      
-      <Footer />
     </div>
   );
 }

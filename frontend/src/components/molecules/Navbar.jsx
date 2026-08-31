@@ -6,6 +6,7 @@ import { cn } from '../../lib/utils';
 import { AnimatePresence, motion } from 'framer-motion';
 import notificationService from '../../services/notification.service';
 import { useNavigate } from 'react-router-dom';
+import { useCart } from '../../context/CartContext';
 
 export default function Navbar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -16,6 +17,7 @@ export default function Navbar() {
   const [isNotifOpen, setIsNotifOpen] = useState(false);
     const [isSearchOpen, setIsSearchOpen] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
+    const { cartCount, setIsCartOpen } = useCart();
 
   useEffect(() => {
     if (user) {
@@ -25,11 +27,20 @@ export default function Navbar() {
 
   const handleSearch = (e) => {
       e.preventDefault();
-      if(searchQuery.trim()) {
-        navigate(`/shop?search=${searchQuery}`);
-        setIsSearchOpen(false);
-        setSearchQuery('');
+      const q = searchQuery.trim();
+      if (!q) return;
+      const lower = q.toLowerCase();
+      if (/\b(adopt|dog|cat|bird|puppy|kitten|rescue|shelter)\b/.test(lower)) {
+        navigate(`/adopt?search=${encodeURIComponent(q)}`);
+      } else if (/\b(article|care|guide|train|groom)\b/.test(lower)) {
+        navigate('/care-hub');
+      } else if (/\b(vet|clinic|doctor|appointment)\b/.test(lower)) {
+        navigate('/book-vet');
+      } else {
+        navigate(`/shop?search=${encodeURIComponent(q)}`);
       }
+      setIsSearchOpen(false);
+      setSearchQuery('');
     };
 
     const fetchNotifications = async () => {
@@ -60,20 +71,29 @@ export default function Navbar() {
     setIsMobileMenuOpen(false);
   }, [location]);
 
-    const getNavItems = (user) => {
+  const getNavItems = (user) => {
     if (!user) {
       return [
         { name: 'Home', path: '/', icon: Home },
         { name: 'Adopt', path: '/adopt', icon: HeartHandshake },
         { name: 'Shop', path: '/shop', icon: ShoppingBag },
         { name: 'Care Hub', path: '/care-hub', icon: BookOpen },
-        { name: 'Find a Vet', path: '/vet', icon: Stethoscope },
+        { name: 'Find a Vet', path: '/book-vet', icon: Stethoscope },
       ];
     }
     
     switch (user.role) {
+      case 'USER':
+        return [
+          { name: 'Home', path: '/', icon: Home },
+          { name: 'Adopt', path: '/adopt', icon: HeartHandshake },
+          { name: 'Shop', path: '/shop', icon: ShoppingBag },
+          { name: 'Care Hub', path: '/care-hub', icon: BookOpen },
+          { name: 'Find a Vet', path: '/book-vet', icon: Stethoscope },
+        ];
       case 'OWNER':
         return [
+          { name: 'Home', path: '/', icon: Home },
           { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
           { name: 'My Pets', path: '/my-pets', icon: PawPrint },
           { name: 'Adopt', path: '/adopt', icon: HeartHandshake },
@@ -81,24 +101,30 @@ export default function Navbar() {
         ];
       case 'VET':
         return [
+          { name: 'Home', path: '/', icon: Home },
           { name: 'Clinical Queue', path: '/vet', icon: Stethoscope },
           { name: 'Appointments', path: '/appointments', icon: Calendar },
           { name: 'Shop', path: '/shop', icon: ShoppingBag },
         ];
       case 'SUPER_ADMIN':
+      case 'SYSTEM_ADMIN':
         return [
+          { name: 'Home', path: '/', icon: Home },
           { name: 'Admin Hub', path: '/admin', icon: LayoutDashboard },
           { name: 'Shop', path: '/shop', icon: ShoppingBag },
+          { name: 'Adopt', path: '/adopt', icon: HeartHandshake },
         ];
       case 'SHELTER_ADMIN':
         return [
+          { name: 'Home', path: '/', icon: Home },
           { name: 'Shelter Portal', path: '/shelter', icon: HeartHandshake },
           { name: 'Rescue Pipeline', path: '/pipeline', icon: ClipboardList },
           { name: 'Shop', path: '/shop', icon: ShoppingBag },
         ];
       default:
         return [
-          { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
+          { name: 'Home', path: '/', icon: Home },
+          { name: 'Adopt', path: '/adopt', icon: HeartHandshake },
           { name: 'Shop', path: '/shop', icon: ShoppingBag },
         ];
     }
@@ -208,8 +234,22 @@ export default function Navbar() {
               <button onClick={() => setIsSearchOpen(true)} className="p-1.5 lg:p-2 text-espresso-500 hover:text-camel-700 transition-colors rounded-full hover:bg-white/50">
                 <Search size={18} strokeWidth={2.5} />
               </button>
+
+              <button
+                onClick={() => setIsCartOpen(true)}
+                className="relative p-1.5 lg:p-2 text-espresso-500 hover:text-camel-700 transition-colors rounded-full hover:bg-white/50"
+                aria-label="Open cart"
+              >
+                <ShoppingBag size={18} strokeWidth={2.5} />
+                {cartCount > 0 && (
+                  <span className="absolute -top-0.5 -right-0.5 min-w-[16px] h-4 px-1 rounded-full bg-camel-700 text-white text-[9px] font-black flex items-center justify-center">
+                    {cartCount}
+                  </span>
+                )}
+              </button>
               
               
+                {user && (
                 <div className="relative">
                   <button 
                     onClick={() => setIsNotifOpen(!isNotifOpen)}
@@ -274,6 +314,7 @@ export default function Navbar() {
                     )}
                   </AnimatePresence>
                 </div>
+                )}
 
               
               {user ? (
@@ -351,22 +392,22 @@ export default function Navbar() {
       {/* Search Modal */}
       <AnimatePresence>
         {isSearchOpen && (
-          <div className="fixed inset-0 z-[100] flex items-start justify-center pt-24 px-4">
+          <div className="fixed inset-0 z-[300] flex items-start justify-center pt-24 px-4 pointer-events-auto">
             <motion.div 
               initial={{ opacity: 0 }} 
               animate={{ opacity: 1 }} 
               exit={{ opacity: 0 }}
               onClick={() => setIsSearchOpen(false)}
-              className="absolute inset-0 bg-espresso-900/60 backdrop-blur-sm"
+              className="absolute inset-0 bg-espresso-900/60 backdrop-blur-sm cursor-pointer"
             />
             <motion.div
               initial={{ opacity: 0, y: -20, scale: 0.95 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: -20, scale: 0.95 }}
-              className="relative w-full max-w-2xl bg-white rounded-[2rem] shadow-2xl overflow-hidden border border-camel-100"
+              className="relative z-10 w-full max-w-2xl bg-white rounded-[2rem] shadow-2xl overflow-hidden border border-camel-100"
             >
               <form onSubmit={handleSearch} className="flex items-center p-4">
-                <Search className="text-camel-400 ml-4" size={24} />
+                <Search className="text-camel-400 ml-4 shrink-0" size={24} />
                 <input 
                   autoFocus
                   type="text" 
@@ -375,7 +416,12 @@ export default function Navbar() {
                   placeholder="Search for products, pets, or care articles..." 
                   className="w-full bg-transparent border-none outline-none px-6 py-4 text-xl font-medium text-espresso-900 placeholder:text-camel-300"
                 />
-                <button type="button" onClick={() => setIsSearchOpen(false)} className="p-3 text-camel-300 hover:text-red-500 transition-colors rounded-full hover:bg-red-50 mr-2">
+                <button 
+                  type="button" 
+                  onClick={() => setIsSearchOpen(false)} 
+                  className="p-3 text-espresso-400 hover:text-red-500 transition-colors rounded-full hover:bg-red-50 mr-2 shrink-0 cursor-pointer"
+                  aria-label="Close search"
+                >
                   <X size={24} />
                 </button>
               </form>
@@ -383,9 +429,8 @@ export default function Navbar() {
           </div>
         )}
       </AnimatePresence>
-  
       </div>
-
+  
       {/* Mobile Navigation Drawer */}
       <AnimatePresence>
         {isMobileMenuOpen && (
@@ -470,7 +515,7 @@ export default function Navbar() {
                    {/* Mobile Actions */}
                    <div className="flex items-center justify-between mt-2">
                      <div className="flex items-center gap-2">
-                       <button className="p-3 bg-white text-espresso-600 hover:text-camel-800 hover:bg-camel-50 transition-colors rounded-xl shadow-sm border border-camel-100">
+                       <button onClick={() => { setIsMobileMenuOpen(false); setIsSearchOpen(true); }} className="p-3 bg-white text-espresso-600 hover:text-camel-800 hover:bg-camel-50 transition-colors rounded-xl shadow-sm border border-camel-100">
                          <Search size={18} />
                        </button>
                        <button className="p-3 bg-white text-espresso-600 hover:text-camel-800 hover:bg-camel-50 transition-colors rounded-xl shadow-sm border border-camel-100 relative">
@@ -493,13 +538,21 @@ export default function Navbar() {
                    </div>
                  </>
                ) : (
-                 <Link 
-                   to="/login" 
-                   onClick={() => setIsMobileMenuOpen(false)}
-                   className="w-full mt-2 p-4 bg-camel-800 text-white rounded-2xl font-bold text-sm text-center flex items-center justify-center gap-2 shadow-md hover:bg-camel-900 transition-colors"
-                 >
-                   <User size={18} /> Sign In / Join
-                 </Link>
+                  <div className="flex flex-col gap-3 mt-2">
+                    <button 
+                      onClick={() => { setIsMobileMenuOpen(false); setIsSearchOpen(true); }}
+                      className="w-full p-3.5 bg-white border border-camel-200 text-espresso-700 rounded-2xl font-bold text-sm text-center flex items-center justify-center gap-2 shadow-sm hover:bg-camel-50 transition-colors"
+                    >
+                      <Search size={18} /> Search Platform
+                    </button>
+                    <Link 
+                      to="/login" 
+                      onClick={() => setIsMobileMenuOpen(false)}
+                      className="w-full p-4 bg-camel-800 text-white rounded-2xl font-bold text-sm text-center flex items-center justify-center gap-2 shadow-md hover:bg-camel-900 transition-colors"
+                    >
+                      <User size={18} /> Sign In / Join
+                    </Link>
+                  </div>
                )}
               </div>
             </motion.div>
@@ -509,10 +562,3 @@ export default function Navbar() {
     </>
   );
 }
-
-
-
-
-
-
-

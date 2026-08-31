@@ -1,4 +1,4 @@
-﻿import api from './api';
+import api from './api';
 
 const adoptService = {
   getAdoptableAnimals: async () => {
@@ -8,7 +8,12 @@ const adoptService = {
   submitAdoptionRequest: async (data) => {
     const res = await api.post('/adopt/request', data);
     return res.data;
+  },
+  adoptPetDirect: async (petId) => {
+    const res = await api.post(`/adopt/${petId}/adopt`);
+    return res.data;
   }
 };
 
 export default adoptService;
+

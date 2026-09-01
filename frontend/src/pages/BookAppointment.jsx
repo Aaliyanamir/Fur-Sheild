@@ -27,14 +27,14 @@ export default function BookAppointment() {
     const fetchData = async () => {
       try {
         const DEFAULT_VETS = [
-          { _id: 'vet1_demo', name: 'Dr. Sarah Smith', specialty: 'General Practice & Small Animal Care', avatarUrl: '/images/dash-dog-1.jpg' },
-          { _id: 'vet2_demo', name: 'Dr. Ayesha Khan', specialty: 'Surgery & Orthopedics', avatarUrl: '/images/pet-1.jpg' },
-          { _id: 'vet3_demo', name: 'Dr. Daniel Park', specialty: 'Internal Medicine & Vaccination', avatarUrl: '/images/pet-2.jpg' }
+          { _id: '650000000000000000000010', name: 'Dr. Sarah Smith', specialty: 'General Practice & Small Animal Care', avatarUrl: '/images/dash-dog-1.jpg' },
+          { _id: '650000000000000000000011', name: 'Dr. Ayesha Khan', specialty: 'Surgery & Orthopedics', avatarUrl: '/images/pet-1.jpg' },
+          { _id: '650000000000000000000012', name: 'Dr. Daniel Park', specialty: 'Internal Medicine & Vaccination', avatarUrl: '/images/pet-2.jpg' }
         ];
 
         const DEFAULT_PETS = [
-          { _id: 'pet1_demo', name: 'Buddy', species: 'Dog', breed: 'Golden Retriever' },
-          { _id: 'pet2_demo', name: 'Luna', species: 'Cat', breed: 'Maine Coon' }
+          { _id: '650000000000000000000020', name: 'Buddy', species: 'Dog', breed: 'Golden Retriever' },
+          { _id: '650000000000000000000021', name: 'Luna', species: 'Cat', breed: 'Maine Coon' }
         ];
 
         const [vetRes, petRes] = await Promise.all([

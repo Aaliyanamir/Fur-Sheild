@@ -90,6 +90,22 @@ export default function VetAppointments() {
   }, []);
 
 
+  const handleUpdateAppointmentStatus = async (apptId, newStatus) => {
+    try {
+      const vetService = (await import('../services/vet.service')).default;
+      const res = await vetService.updateAppointment(apptId, { status: newStatus });
+      if (res.success) {
+        setAppointmentsData(prev => prev.map(group => ({
+          ...group,
+          appointments: group.appointments.map(a => a.id === apptId ? { ...a, status: newStatus } : a)
+        })));
+        alert(`Appointment ${newStatus === 'CONFIRMED' ? 'accepted successfully! Notification sent to owner.' : 'updated.'}`);
+      }
+    } catch (err) {
+      alert('Error updating appointment: ' + (err.response?.data?.message || err.message));
+    }
+  };
+
   const getSeverityBadge = (severity) => {
     switch(severity) {
       case 'EMERGENCY': return <span className="bg-rose-100 text-rose-700 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider">Emergency</span>;
@@ -181,9 +197,34 @@ export default function VetAppointments() {
                           </button>
                         </div>
                         
-                        <div className="mt-4 bg-[#FAF8F5] p-3 rounded-xl border border-camel-100 flex items-center gap-3">
-                          <FileText size={16} className="text-camel-400"/>
-                          <p className="text-sm font-medium text-espresso-700">{appt.reason}</p>
+                        <div className="mt-4 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-[#FAF8F5] p-3.5 rounded-2xl border border-camel-100">
+                          <div className="flex items-center gap-3">
+                            <FileText size={16} className="text-camel-400 shrink-0"/>
+                            <p className="text-sm font-medium text-espresso-700">{appt.reason}</p>
+                          </div>
+
+                          <div className="flex items-center gap-2 shrink-0">
+                            {['CONFIRMED', 'Approved', 'ACCEPTED', 'Confirmed'].includes(appt.status) ? (
+                              <span className="bg-emerald-100 text-emerald-800 text-xs font-black px-3.5 py-1.5 rounded-xl flex items-center gap-1">
+                                <CheckCircle2 size={14} /> Accepted
+                              </span>
+                            ) : (
+                              <>
+                                <button 
+                                  onClick={() => handleUpdateAppointmentStatus(appt.id, 'CONFIRMED')}
+                                  className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-3 py-1.5 rounded-xl transition-all shadow-sm flex items-center gap-1 cursor-pointer"
+                                >
+                                  <CheckCircle2 size={14} /> Accept Booking
+                                </button>
+                                <button 
+                                  onClick={() => handleUpdateAppointmentStatus(appt.id, 'CANCELLED')}
+                                  className="bg-rose-100 hover:bg-rose-200 text-rose-700 text-xs font-bold px-3 py-1.5 rounded-xl transition-all cursor-pointer"
+                                >
+                                  Decline
+                                </button>
+                              </>
+                            )}
+                          </div>
                         </div>
                       </div>
 

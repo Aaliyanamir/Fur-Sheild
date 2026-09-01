@@ -58,12 +58,12 @@ export default function AdoptionCatalog() {
         setAnimals(res.data);
       } else {
         setAnimals([
-          { _id: 'demo1', name: 'Max', species: 'Dog', breed: 'Beagle', age: '2 Years', status: 'ADOPTABLE', adoptionFee: 0, pickupAddress: 'Gulberg III, Lahore', avatarUrl: '/images/pet-1.jpg', behaviorNotes: 'Friendly, playful, loves children and long walks.' },
-          { _id: 'demo2', name: 'Cleo', species: 'Cat', breed: 'Persian', age: '1 Year', status: 'ADOPTABLE', adoptionFee: 15, pickupAddress: 'DHA Phase 5, Karachi', avatarUrl: '/images/pet-2.jpg', behaviorNotes: 'Calm and affectionate lap cat.' },
-          { _id: 'demo3', name: 'Sunny', species: 'Bird', breed: 'Sun Conure', age: '3 Years', status: 'ADOPTABLE', adoptionFee: 0, pickupAddress: 'F-7/2, Islamabad', avatarUrl: '/images/signup-bird.jpg', behaviorNotes: 'Social, cheerful, and hand-trained.' },
-          { _id: 'demo4', name: 'Nova', species: 'Dog', breed: 'German Shepherd Mix', age: '8 Months', status: 'ADOPTABLE', adoptionFee: 20, pickupAddress: 'Johar Town, Lahore', avatarUrl: '/images/dash-dog-1.jpg', behaviorNotes: 'Young and energetic, needs gentle socialization.' },
-          { _id: 'demo5', name: 'Bella', species: 'Cat', breed: 'Tabby', age: '2 Years', status: 'ADOPTABLE', adoptionFee: 0, pickupAddress: 'Clifton Block 4, Karachi', avatarUrl: '/images/pet-3.jpg', behaviorNotes: 'Playful and curious, loves interactive toys.' },
-          { _id: 'demo6', name: 'Whiskers', species: 'Cat', breed: 'Siamese Mix', age: '4 Months', status: 'ADOPTED', adoptionFee: 0, pickupAddress: 'F-6, Islamabad', avatarUrl: '/images/pet-2.jpg', behaviorNotes: 'Tiny kitten, very affectionate.', adopterInfo: { applicantName: 'Amina Sheikh', email: 'amina@gmail.com', phone: '+92 300 9876543', paymentStatus: 'Paid' } }
+          { _id: '650000000000000000000001', name: 'Max', species: 'Dog', breed: 'Beagle', age: '2 Years', status: 'ADOPTABLE', adoptionFee: 0, pickupAddress: 'Gulberg III, Lahore', avatarUrl: '/images/pet-1.jpg', behaviorNotes: 'Friendly, playful, loves children and long walks.' },
+          { _id: '650000000000000000000002', name: 'Cleo', species: 'Cat', breed: 'Persian', age: '1 Year', status: 'ADOPTABLE', adoptionFee: 15, pickupAddress: 'DHA Phase 5, Karachi', avatarUrl: '/images/pet-2.jpg', behaviorNotes: 'Calm and affectionate lap cat.' },
+          { _id: '650000000000000000000003', name: 'Sunny', species: 'Bird', breed: 'Sun Conure', age: '3 Years', status: 'ADOPTABLE', adoptionFee: 0, pickupAddress: 'F-7/2, Islamabad', avatarUrl: '/images/signup-bird.jpg', behaviorNotes: 'Social, cheerful, and hand-trained.' },
+          { _id: '650000000000000000000004', name: 'Nova', species: 'Dog', breed: 'German Shepherd Mix', age: '8 Months', status: 'ADOPTABLE', adoptionFee: 20, pickupAddress: 'Johar Town, Lahore', avatarUrl: '/images/dash-dog-1.jpg', behaviorNotes: 'Young and energetic, needs gentle socialization.' },
+          { _id: '650000000000000000000005', name: 'Bella', species: 'Cat', breed: 'Tabby', age: '2 Years', status: 'ADOPTABLE', adoptionFee: 0, pickupAddress: 'Clifton Block 4, Karachi', avatarUrl: '/images/pet-3.jpg', behaviorNotes: 'Playful and curious, loves interactive toys.' },
+          { _id: '650000000000000000000006', name: 'Whiskers', species: 'Cat', breed: 'Siamese Mix', age: '4 Months', status: 'ADOPTED', adoptionFee: 0, pickupAddress: 'F-6, Islamabad', avatarUrl: '/images/pet-2.jpg', behaviorNotes: 'Tiny kitten, very affectionate.', adopterInfo: { applicantName: 'Amina Sheikh', email: 'amina@gmail.com', phone: '+92 300 9876543', paymentStatus: 'Paid' } }
         ]);
       }
     } catch (error) {

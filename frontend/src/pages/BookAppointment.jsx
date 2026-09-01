@@ -113,19 +113,30 @@ export default function BookAppointment() {
                         key={pet._id}
                         type="button"
                         onClick={() => setFormData((prev) => ({ ...prev, petId: pet._id }))}
-                        className={`cursor-pointer p-4 rounded-2xl border-2 text-left transition-all ${formData.petId === pet._id ? 'border-camel-600 bg-camel-50' : 'border-camel-100 hover:border-camel-300'}`}
+                        className={`cursor-pointer rounded-[2rem] border-2 text-left transition-all overflow-hidden shadow-sm hover:shadow-lg ${formData.petId === pet._id ? 'border-camel-600 bg-camel-50 shadow-md' : 'border-camel-100 hover:border-camel-300 bg-white'}`}
                       >
-                        <div className="w-12 h-12 bg-camel-200 rounded-full flex items-center justify-center mb-3">
-                          <PawPrint size={18} className="text-camel-800" />
+                        <div className="p-5 flex flex-col items-center gap-4">
+                          <div className="w-16 h-16 bg-gradient-to-br from-camel-200 to-camel-300 rounded-full flex items-center justify-center shadow-sm">
+                            <PawPrint size={24} className="text-camel-900" />
+                          </div>
+                          <div className="w-full text-center">
+                            <p className="font-black text-espresso-900 text-lg">{pet.name}</p>
+                            <p className="text-xs font-bold text-camel-600 uppercase tracking-widest mt-1">{pet.species || 'Pet'}</p>
+                            {pet.breed && <p className="text-xs text-espresso-500 mt-0.5">{pet.breed}</p>}
+                          </div>
+                          {formData.petId === pet._id && (
+                            <div className="w-full flex items-center justify-center gap-1 text-xs font-black text-camel-700 bg-camel-100 rounded-lg py-2 mt-2">
+                              ✓ Selected
+                            </div>
+                          )}
                         </div>
-                        <p className="font-bold text-espresso-900">{pet.name}</p>
-                        <p className="text-xs text-espresso-500">{pet.species || 'Pet'}</p>
                       </button>
                     ))}
                   </div>
                 ) : (
-                  <div className="rounded-2xl border border-dashed border-camel-200 bg-camel-50 p-5 text-sm text-espresso-600">
-                    Add a pet profile to book an appointment.
+                  <div className="rounded-[2rem] border-2 border-dashed border-camel-200 bg-camel-50 p-8 text-center">
+                    <PawPrint size={32} className="text-camel-400 mx-auto mb-3" />
+                    <p className="text-sm font-bold text-espresso-600">Add a pet profile to book an appointment.</p>
                   </div>
                 )}
               </div>
@@ -139,19 +150,32 @@ export default function BookAppointment() {
                         key={vet._id}
                         type="button"
                         onClick={() => setFormData((prev) => ({ ...prev, vetId: vet._id }))}
-                        className={`cursor-pointer p-4 rounded-2xl border-2 text-left transition-all ${formData.vetId === vet._id ? 'border-camel-600 bg-camel-50' : 'border-camel-100 hover:border-camel-300'}`}
+                        className={`cursor-pointer rounded-[2rem] border-2 text-left transition-all overflow-hidden shadow-sm hover:shadow-lg ${formData.vetId === vet._id ? 'border-camel-600 bg-camel-50 shadow-md' : 'border-camel-100 hover:border-camel-300 bg-white'}`}
                       >
-                        <div className="w-12 h-12 bg-camel-200 rounded-full flex items-center justify-center mb-3">
-                          <User size={20} className="text-camel-800" />
+                        <div className="p-5 flex flex-col items-center gap-4">
+                          <div className="w-16 h-16 bg-gradient-to-br from-emerald-200 to-emerald-300 rounded-full flex items-center justify-center shadow-sm">
+                            <Stethoscope size={24} className="text-emerald-900" />
+                          </div>
+                          <div className="w-full text-center">
+                            <p className="font-black text-espresso-900 text-lg">Dr. {vet.name.split(' ').pop()}</p>
+                            <p className="text-xs font-bold text-emerald-600 uppercase tracking-widest mt-1">{vet.specialty || 'Veterinarian'}</p>
+                            <div className="text-[10px] text-espresso-500 mt-2 flex items-center justify-center gap-1">
+                              <span className="w-2 h-2 bg-emerald-500 rounded-full"></span> Available
+                            </div>
+                          </div>
+                          {formData.vetId === vet._id && (
+                            <div className="w-full flex items-center justify-center gap-1 text-xs font-black text-camel-700 bg-camel-100 rounded-lg py-2 mt-2">
+                              ✓ Selected
+                            </div>
+                          )}
                         </div>
-                        <p className="font-bold text-espresso-900">{vet.name}</p>
-                        <p className="text-xs text-espresso-500">{vet.specialty || 'General Practice'}</p>
                       </button>
                     ))}
                   </div>
                 ) : (
-                  <div className="rounded-2xl border border-dashed border-camel-200 bg-camel-50 p-5 text-sm text-espresso-600">
-                    No vets are available right now. Please try again later.
+                  <div className="rounded-[2rem] border-2 border-dashed border-camel-200 bg-camel-50 p-8 text-center">
+                    <Stethoscope size={32} className="text-camel-400 mx-auto mb-3" />
+                    <p className="text-sm font-bold text-espresso-600">No vets are available right now. Please try again later.</p>
                   </div>
                 )}
               </div>

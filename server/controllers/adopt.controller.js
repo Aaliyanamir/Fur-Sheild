@@ -23,8 +23,8 @@ const submitPublicAdoptionRequest = async (req, res) => {
 
     const request = await AdoptionRequest.create({
       animalId,
-      shelterId: animal.shelterId,
-      userId,
+      user: userId,
+      shelterId: animal.shelterId || undefined,
       applicantName,
       email,
       phone,

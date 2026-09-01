@@ -46,7 +46,7 @@ const chatRoutes = require('./routes/chat.routes');
 
 // Mount Routers
 app.use('/api/v1/auth', authRoutes);
-app.use('/api/v1/vethub', vetRoutes);
+app.use('/api/v1/vet', vetRoutes);
 app.use('/api/v1/shop', shopRoutes);
 app.use('/api/v1/orders', orderRoutes);
 app.use('/api/v1/shelter', shelterRoutes);

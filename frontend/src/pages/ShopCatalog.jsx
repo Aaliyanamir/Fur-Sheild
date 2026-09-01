@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, ShoppingBag, Star, X, Plus, Loader2, ShieldCheck, Truck, Trash2, PackagePlus } from 'lucide-react';
+import { Search, ShoppingBag, Star, X, Plus, Loader2, ShieldCheck, Truck, Trash2, PackagePlus, Pencil } from 'lucide-react';
 import shopService from '../services/shop.service';
 import { AuthContext } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
@@ -20,9 +20,13 @@ export default function ShopCatalog() {
   const [sortBy, setSortBy] = useState('featured');
   const [quickView, setQuickView] = useState(null);
 
-  // Add Product Modal State for Admin/Owner
+  // Product Modal State for Admin/Owner
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [editingProductId, setEditingProductId] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [imageFile, setImageFile] = useState(null);
+  const [imagePreview, setImagePreview] = useState('');
   const [newProduct, setNewProduct] = useState({
     name: '',
     description: '',
@@ -63,20 +67,114 @@ export default function ShopCatalog() {
     fetchProducts();
   };
 
+  const resetProductForm = () => {
+    setNewProduct({
+      name: '',
+      description: '',
+      price: '',
+      category: 'Food',
+      stock: '20',
+      image: '/images/food.jpg',
+      isPrescriptionRequired: false
+    });
+    setImageFile(null);
+    setImagePreview('');
+  };
+
+  const openAddProductModal = () => {
+    resetProductForm();
+    setEditingProductId(null);
+    setIsEditModalOpen(false);
+    setIsAddModalOpen(true);
+  };
+
+  const openEditProductModal = (product) => {
+    setEditingProductId(product._id);
+    setIsAddModalOpen(false);
+    setIsEditModalOpen(true);
+    setNewProduct({
+      name: product.name || '',
+      description: product.description || '',
+      price: product.price || '',
+      category: product.category || 'Food',
+      stock: product.stock || '0',
+      image: product.image || product.imageUrl || '/images/food.jpg',
+      isPrescriptionRequired: Boolean(product.isPrescriptionRequired)
+    });
+    setImagePreview(product.image || product.imageUrl ? getImageUrl(product.image || product.imageUrl, '/images/food.jpg') : '');
+    setImageFile(null);
+  };
+
+  const handleImageChange = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) {
+      setImageFile(null);
+      setImagePreview(newProduct.image ? getImageUrl(newProduct.image, '/images/food.jpg') : '');
+      return;
+    }
+
+    setImageFile(file);
+    const objectUrl = URL.createObjectURL(file);
+    setImagePreview(objectUrl);
+  };
+
+  const buildProductFormData = () => {
+    const formData = new FormData();
+
+    formData.append('name', newProduct.name);
+    formData.append('description', newProduct.description);
+    formData.append('price', String(newProduct.price));
+    formData.append('category', newProduct.category);
+    formData.append('stock', String(newProduct.stock));
+    formData.append('isPrescriptionRequired', String(Boolean(newProduct.isPrescriptionRequired)));
+
+    if (imageFile) {
+      formData.append('image', imageFile);
+    } else if (newProduct.image) {
+      formData.append('image', newProduct.image);
+    }
+
+    return formData;
+  };
+
   const handleAddProductSubmit = async (e) => {
     e.preventDefault();
     try {
       setIsSubmitting(true);
-      const res = await shopService.createProduct(newProduct);
+      const formData = buildProductFormData();
+      const res = await shopService.createProduct(formData);
       if (res.success) {
         setIsAddModalOpen(false);
-        setNewProduct({ name: '', description: '', price: '', category: 'Food', stock: '20', image: '/images/food.jpg', isPrescriptionRequired: false });
+        resetProductForm();
         fetchProducts();
         toast('Product added to catalog.');
       }
     } catch (error) {
       console.error('Error adding product:', error);
       toast(error.response?.data?.message || 'Failed to add product', 'error');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleEditProductSubmit = async (e) => {
+    e.preventDefault();
+    if (!editingProductId) return;
+
+    try {
+      setIsSubmitting(true);
+      const formData = buildProductFormData();
+      const res = await shopService.updateProduct(editingProductId, formData);
+      if (res.success) {
+        setIsEditModalOpen(false);
+        setEditingProductId(null);
+        resetProductForm();
+        fetchProducts();
+        toast('Product updated successfully.');
+      }
+    } catch (error) {
+      console.error('Error updating product:', error);
+      toast(error.response?.data?.message || 'Failed to update product', 'error');
     } finally {
       setIsSubmitting(false);
     }
@@ -190,7 +288,7 @@ export default function ShopCatalog() {
               </select>
               {canManageProducts && (
                 <button 
-                  onClick={() => setIsAddModalOpen(true)}
+                  onClick={openAddProductModal}
                   className="bg-camel-600 hover:bg-camel-700 text-white px-4 py-2 rounded-full font-bold text-xs uppercase tracking-widest shadow-sm flex items-center gap-2 transition-all"
                 >
                   <PackagePlus size={16} /> Add Product
@@ -218,13 +316,22 @@ export default function ShopCatalog() {
                 <div key={product._id} className="bg-white rounded-[2rem] border border-camel-100 overflow-hidden shadow-sm hover:shadow-xl hover:border-camel-300 transition-all group flex flex-col relative">
                   
                   {canManageProducts && (
-                    <button 
-                      onClick={() => handleDeleteProduct(product._id)}
-                      className="absolute top-3 right-3 z-10 w-8 h-8 bg-red-50 hover:bg-red-500 text-red-500 hover:text-white rounded-full flex items-center justify-center transition-colors shadow-sm"
-                      title="Delete Product"
-                    >
-                      <Trash2 size={14} />
-                    </button>
+                    <div className="absolute top-3 right-3 z-10 flex items-center gap-2">
+                      <button 
+                        onClick={() => openEditProductModal(product)}
+                        className="w-8 h-8 bg-camel-100 hover:bg-camel-600 text-camel-700 hover:text-white rounded-full flex items-center justify-center transition-colors shadow-sm"
+                        title="Edit Product"
+                      >
+                        <Pencil size={14} />
+                      </button>
+                      <button 
+                        onClick={() => handleDeleteProduct(product._id)}
+                        className="w-8 h-8 bg-red-50 hover:bg-red-500 text-red-500 hover:text-white rounded-full flex items-center justify-center transition-colors shadow-sm"
+                        title="Delete Product"
+                      >
+                        <Trash2 size={14} />
+                      </button>
+                    </div>
                   )}
 
                   <div className="aspect-square bg-camel-50 relative p-6 flex items-center justify-center overflow-hidden">
@@ -266,21 +373,21 @@ export default function ShopCatalog() {
         </div>
       </div>
 
-      {/* Add Product Modal (For Admin / Owner) */}
+      {/* Product Modal (For Admin / Owner) */}
       <AnimatePresence>
-        {isAddModalOpen && (
+        {(isAddModalOpen || isEditModalOpen) && (
           <>
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 bg-espresso-900/60 backdrop-blur-sm z-[200]" onClick={() => setIsAddModalOpen(false)} />
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 bg-espresso-900/60 backdrop-blur-sm z-[200]" onClick={() => { setIsAddModalOpen(false); setIsEditModalOpen(false); setEditingProductId(null); resetProductForm(); }} />
             <div className="fixed inset-0 z-[210] flex items-center justify-center p-4 pointer-events-none">
               <motion.div initial={{ opacity: 0, scale: 0.95, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 20 }} className="bg-white rounded-[2rem] w-full max-w-lg shadow-2xl pointer-events-auto flex flex-col overflow-hidden">
                 <div className="p-6 border-b border-camel-100 flex justify-between items-center bg-[#FAF8F5]">
                   <h2 className="text-xl font-display font-black text-espresso-900 flex items-center gap-2">
-                    <PackagePlus size={20} className="text-camel-600" /> Add New Product
+                    {isEditModalOpen ? <Pencil size={20} className="text-camel-600" /> : <PackagePlus size={20} className="text-camel-600" />} {isEditModalOpen ? 'Edit Product' : 'Add New Product'}
                   </h2>
-                  <button onClick={() => setIsAddModalOpen(false)} className="w-8 h-8 rounded-full bg-white border border-camel-200 flex items-center justify-center text-espresso-400 hover:text-espresso-900 transition-colors shadow-sm"><X size={16}/></button>
+                  <button onClick={() => { setIsAddModalOpen(false); setIsEditModalOpen(false); setEditingProductId(null); resetProductForm(); }} className="w-8 h-8 rounded-full bg-white border border-camel-200 flex items-center justify-center text-espresso-400 hover:text-espresso-900 transition-colors shadow-sm"><X size={16}/></button>
                 </div>
                 
-                <form onSubmit={handleAddProductSubmit} className="p-6 space-y-4 max-h-[80vh] overflow-y-auto">
+                <form onSubmit={isEditModalOpen ? handleEditProductSubmit : handleAddProductSubmit} className="p-6 space-y-4 max-h-[80vh] overflow-y-auto">
                   <div>
                     <label className="block text-xs font-bold text-espresso-900 uppercase tracking-widest mb-1">Product Title</label>
                     <input type="text" required value={newProduct.name} onChange={e => setNewProduct({...newProduct, name: e.target.value})} className="w-full bg-[#FAF8F5] border border-camel-200 rounded-xl px-4 py-3 text-sm focus:border-camel-500 font-medium" placeholder="e.g. Parakeet Bird Seed Mix" />
@@ -310,10 +417,35 @@ export default function ShopCatalog() {
                       <input type="number" required value={newProduct.stock} onChange={e => setNewProduct({...newProduct, stock: e.target.value})} className="w-full bg-[#FAF8F5] border border-camel-200 rounded-xl px-4 py-3 text-sm focus:border-camel-500 font-medium" placeholder="50" />
                     </div>
 
-                    <div>
-                      <label className="block text-xs font-bold text-espresso-900 uppercase tracking-widest mb-1">Image URL / Path</label>
-                      <input type="text" value={newProduct.image} onChange={e => setNewProduct({...newProduct, image: e.target.value})} className="w-full bg-[#FAF8F5] border border-camel-200 rounded-xl px-4 py-3 text-sm focus:border-camel-500 font-medium" placeholder="/images/food.jpg" />
+                    <div className="flex items-center pt-7">
+                      <label className="inline-flex items-center gap-2 text-sm font-bold text-espresso-700">
+                        <input type="checkbox" checked={newProduct.isPrescriptionRequired} onChange={e => setNewProduct({...newProduct, isPrescriptionRequired: e.target.checked})} className="h-4 w-4 rounded border-camel-300 text-camel-600 focus:ring-camel-500" />
+                        Rx Required
+                      </label>
                     </div>
+                  </div>
+
+                  <div className="space-y-3">
+                    <label className="block text-xs font-bold text-espresso-900 uppercase tracking-widest mb-1">Product Image</label>
+
+                    <div className="flex items-center gap-3">
+                      <label className="cursor-pointer inline-flex items-center justify-center px-4 py-2.5 rounded-xl bg-camel-100 text-camel-800 font-bold text-xs uppercase tracking-widest hover:bg-camel-200 transition-colors">
+                        Upload Image
+                        <input type="file" accept="image/*" onChange={handleImageChange} className="hidden" />
+                      </label>
+                      <span className="text-xs text-espresso-500">or keep current URL fallback</span>
+                    </div>
+
+                    <input type="text" value={newProduct.image} onChange={e => {
+                      setNewProduct({...newProduct, image: e.target.value});
+                      if (!imageFile) setImagePreview(e.target.value ? getImageUrl(e.target.value, '/images/food.jpg') : '');
+                    }} className="w-full bg-[#FAF8F5] border border-camel-200 rounded-xl px-4 py-3 text-sm focus:border-camel-500 font-medium" placeholder="/images/food.jpg or https://example.com/image.jpg" />
+
+                    {(imagePreview || newProduct.image) && (
+                      <div className="rounded-2xl border border-camel-200 bg-camel-50 p-3">
+                        <img src={imagePreview || getImageUrl(newProduct.image, '/images/food.jpg')} alt="Product preview" className="max-h-28 mx-auto object-contain mix-blend-multiply" onError={(e) => { e.target.src = '/images/food.jpg'; }} />
+                      </div>
+                    )}
                   </div>
 
                   <div>
@@ -322,7 +454,7 @@ export default function ShopCatalog() {
                   </div>
 
                   <button type="submit" disabled={isSubmitting} className="w-full bg-espresso-900 hover:bg-espresso-800 disabled:opacity-50 text-white py-4 rounded-xl font-bold text-sm tracking-wide transition-all shadow-md mt-2 flex justify-center items-center gap-2">
-                    {isSubmitting ? <Loader2 size={16} className="animate-spin" /> : 'Save Product to Database'}
+                    {isSubmitting ? <Loader2 size={16} className="animate-spin" /> : isEditModalOpen ? 'Update Product' : 'Save Product to Database'}
                   </button>
                 </form>
               </motion.div>

@@ -2,6 +2,8 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { BookOpen, X, ChevronRight, Clock, User } from 'lucide-react';
 
+const FALLBACK_ARTICLE_IMAGE = '/images/pet-owner.jpg';
+
 const MOCK_ARTICLES = [
   {
     id: 1,
@@ -69,13 +71,15 @@ const MOCK_ARTICLES = [
   }
 ];
 
+const getArticleImage = (image) => image || FALLBACK_ARTICLE_IMAGE;
+
 export default function CareArticles() {
   const [selectedArticle, setSelectedArticle] = useState(null);
 
+  const openArticle = (article) => setSelectedArticle(article);
+
   return (
     <div className="flex-1 w-full bg-[#FAF8F5] min-h-screen pb-20">
-      
-      {/* Hero Section */}
       <div className="bg-espresso-900 pt-20 pb-24 px-4 text-center relative overflow-hidden">
         <div className="max-w-3xl mx-auto relative z-10">
           <div className="w-16 h-16 bg-camel-500/20 rounded-2xl flex items-center justify-center mx-auto mb-6 text-camel-200">
@@ -84,26 +88,34 @@ export default function CareArticles() {
           <h1 className="text-4xl md:text-5xl font-display font-black text-white mb-6 tracking-tight">Pet Care Knowledge Base</h1>
           <p className="text-lg text-camel-100/80 font-medium">Empower yourself with expert-written articles to provide the best possible life for your furry companions.</p>
         </div>
-        {/* Decorative Background Elements */}
         <div className="absolute top-0 right-0 w-96 h-96 bg-camel-600 rounded-full mix-blend-multiply filter blur-[100px] opacity-40 translate-x-1/2 -translate-y-1/2"></div>
         <div className="absolute bottom-0 left-0 w-96 h-96 bg-espresso-800 rounded-full mix-blend-multiply filter blur-[100px] opacity-40 -translate-x-1/2 translate-y-1/2"></div>
       </div>
 
-      {/* Articles Grid */}
       <div className="max-w-7xl mx-auto px-4 -mt-10 relative z-20">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-8">
           {MOCK_ARTICLES.map((article) => (
-            <motion.div 
+            <motion.article
               key={article.id}
               whileHover={{ y: -8 }}
               className="bg-white rounded-[2rem] border border-camel-100 shadow-sm overflow-hidden flex flex-col group cursor-pointer transition-shadow hover:shadow-xl hover:border-camel-300"
-              onClick={() => setSelectedArticle(article)}
+              onClick={() => openArticle(article)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  openArticle(article);
+                }
+              }}
+              tabIndex={0}
+              role="button"
+              aria-label={`Open article: ${article.title}`}
             >
               <div className="h-64 relative overflow-hidden bg-camel-50">
-                <img 
-                  src={article.image} 
-                  alt={article.title} 
+                <img
+                  src={getArticleImage(article.image)}
+                  alt={article.title}
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                  onError={(e) => { e.target.onerror = null; e.target.src = FALLBACK_ARTICLE_IMAGE; }}
                 />
                 <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-sm px-4 py-1.5 rounded-full text-xs font-black uppercase tracking-widest text-espresso-900 shadow-sm">
                   {article.category}
@@ -116,27 +128,26 @@ export default function CareArticles() {
                 <p className="text-espresso-500 font-medium leading-relaxed mb-6 flex-1">
                   {article.excerpt}
                 </p>
-                
+
                 <div className="flex items-center justify-between pt-6 border-t border-camel-100/50 mt-auto">
                   <div className="flex items-center gap-4 text-xs font-bold text-camel-600 uppercase tracking-wider">
                     <div className="flex items-center gap-1.5"><User size={14}/> {article.author}</div>
                     <div className="flex items-center gap-1.5"><Clock size={14}/> {article.readTime}</div>
                   </div>
-                  <button className="w-10 h-10 rounded-full bg-camel-50 text-camel-700 flex items-center justify-center group-hover:bg-camel-600 group-hover:text-white transition-colors">
+                  <button type="button" className="w-10 h-10 rounded-full bg-camel-50 text-camel-700 flex items-center justify-center group-hover:bg-camel-600 group-hover:text-white transition-colors" aria-label={`Read article ${article.title}`}>
                     <ChevronRight size={18} />
                   </button>
                 </div>
               </div>
-            </motion.div>
+            </motion.article>
           ))}
         </div>
       </div>
 
-      {/* Reading Modal */}
       <AnimatePresence>
         {selectedArticle && (
           <>
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
@@ -150,19 +161,18 @@ export default function CareArticles() {
               transition={{ type: 'spring', damping: 25, stiffness: 200 }}
               className="fixed inset-x-0 bottom-0 md:top-10 md:bottom-10 md:inset-x-auto md:left-1/2 md:-translate-x-1/2 md:w-full md:max-w-3xl bg-[#FDFBF7] md:rounded-[3rem] rounded-t-[3rem] shadow-2xl z-[210] flex flex-col overflow-hidden border border-camel-100"
             >
-              {/* Modal Header Image */}
               <div className="relative h-64 md:h-80 shrink-0">
-                <img src={selectedArticle.image} alt={selectedArticle.title} className="w-full h-full object-cover" />
+                <img src={getArticleImage(selectedArticle.image)} alt={selectedArticle.title} className="w-full h-full object-cover" onError={(e) => { e.target.onerror = null; e.target.src = FALLBACK_ARTICLE_IMAGE; }} />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
-                <button 
+                <button
                   onClick={() => setSelectedArticle(null)}
                   className="absolute top-6 right-6 w-10 h-10 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center text-white hover:bg-white/40 transition-colors"
+                  aria-label="Close article"
                 >
                   <X size={20} />
                 </button>
               </div>
 
-              {/* Modal Body */}
               <div className="flex-1 overflow-y-auto p-8 md:p-12 scrollbar-hide">
                 <div className="max-w-2xl mx-auto">
                   <div className="flex items-center gap-2 text-xs font-black uppercase tracking-widest text-camel-600 mb-4">
@@ -173,13 +183,12 @@ export default function CareArticles() {
                   <h2 className="text-3xl md:text-4xl font-display font-black text-espresso-900 leading-tight mb-8">
                     {selectedArticle.title}
                   </h2>
-                  
-                  {/* The actual article content in Serif typography for premium readability */}
-                  <div 
+
+                  <div
                     className="prose prose-lg prose-camel font-serif text-espresso-700 leading-relaxed"
                     dangerouslySetInnerHTML={{ __html: selectedArticle.content }}
                   />
-                  
+
                   <div className="mt-12 pt-8 border-t border-camel-200 flex items-center gap-4">
                     <div className="w-12 h-12 bg-camel-100 rounded-full flex items-center justify-center text-camel-800 font-bold">
                       {selectedArticle.author.charAt(0)}
@@ -195,7 +204,6 @@ export default function CareArticles() {
           </>
         )}
       </AnimatePresence>
-
     </div>
   );
 }

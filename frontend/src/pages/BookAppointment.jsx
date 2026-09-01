@@ -1,35 +1,72 @@
-﻿import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect, useContext } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Calendar as CalendarIcon, Clock, User, Stethoscope, Loader2, CheckCircle2 } from 'lucide-react';
+import { Calendar as CalendarIcon, Clock, User, Stethoscope, Loader2, CheckCircle2, PawPrint } from 'lucide-react';
 import vetService from '../services/vet.service';
+import dashboardService from '../services/dashboard.service';
+import { AuthContext } from '../context/AuthContext';
 
 export default function BookAppointment() {
+  const navigate = useNavigate();
+  const { user } = useContext(AuthContext);
   const [vets, setVets] = useState([]);
+  const [pets, setPets] = useState([]);
   const [loading, setLoading] = useState(true);
-  
-  const [step, setStep] = useState(1);
-  const [formData, setFormData] = useState({ vetId: '', date: '', timeSlot: '', type: 'IN_PERSON', reason: '' });
+  const [formData, setFormData] = useState({
+    vetId: '',
+    petId: '',
+    date: '',
+    timeSlot: '',
+    type: 'IN_PERSON',
+    reason: ''
+  });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
 
   useEffect(() => {
-    const fetchVets = async () => {
+    const fetchData = async () => {
       try {
-        const res = await vetService.getVerifiedVets();
-        if (res.success) setVets(res.data);
+        const [vetRes, petRes] = await Promise.all([
+          vetService.getVerifiedVets(),
+          user ? dashboardService.getOwnerDashboardData() : Promise.resolve({ success: true, data: [] })
+        ]);
+
+        if (vetRes.success) {
+          const vetList = vetRes.data || [];
+          setVets(vetList.length ? vetList : (vetRes.fallback || []));
+        }
+
+        if (petRes.success) {
+          const ownerPets = petRes.data || [];
+          setPets(ownerPets);
+          if (ownerPets.length) {
+            setFormData((prev) => ({ ...prev, petId: ownerPets[0]._id }));
+          }
+        }
       } catch (error) {
         console.error(error);
       } finally {
         setLoading(false);
       }
     };
-    fetchVets();
-  }, []);
+
+    fetchData();
+  }, [user]);
 
   const timeSlots = ['09:00 AM', '10:00 AM', '11:00 AM', '01:00 PM', '02:00 PM', '03:00 PM', '04:00 PM'];
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (!user) {
+      navigate('/login', { state: { from: '/book-vet' } });
+      return;
+    }
+
+    if (!formData.petId) {
+      return;
+    }
+
     setIsSubmitting(true);
     try {
       const res = await vetService.bookAppointment(formData);
@@ -62,32 +99,63 @@ export default function BookAppointment() {
                 <CheckCircle2 size={40} />
               </div>
               <h2 className="text-3xl font-black text-espresso-900 mb-4">Appointment Confirmed!</h2>
-              <p className="text-espresso-600 mb-8">We have sent a confirmation email with details.</p>
-              <button onClick={() => window.location.href = '/dashboard'} className="px-8 py-3 bg-camel-600 text-white rounded-full font-bold">Go to Dashboard</button>
+              <p className="text-espresso-600 mb-8">Your vet appointment was successfully scheduled.</p>
+              <button onClick={() => navigate('/dashboard')} className="px-8 py-3 bg-camel-600 text-white rounded-full font-bold">Go to Dashboard</button>
             </div>
           ) : (
             <form onSubmit={handleSubmit} className="space-y-8">
-              {/* Step 1: Select Vet */}
               <div>
-                <h3 className="text-xl font-bold text-espresso-900 mb-4 flex items-center gap-2"><Stethoscope className="text-camel-600"/> Select Veterinarian</h3>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  {vets.map(vet => (
-                    <div 
-                      key={vet._id} 
-                      onClick={() => setFormData({...formData, vetId: vet._id})}
-                      className={`cursor-pointer p-4 rounded-2xl border-2 transition-all ${formData.vetId === vet._id ? 'border-camel-600 bg-camel-50' : 'border-camel-100 hover:border-camel-300'}`}
-                    >
-                      <div className="w-12 h-12 bg-camel-200 rounded-full flex items-center justify-center mb-3">
-                        <User size={20} className="text-camel-800" />
-                      </div>
-                      <p className="font-bold text-espresso-900">{vet.name}</p>
-                      <p className="text-xs text-espresso-500">General Practice</p>
-                    </div>
-                  ))}
-                </div>
+                <h3 className="text-xl font-bold text-espresso-900 mb-4 flex items-center gap-2"><PawPrint className="text-camel-600"/> Select Pet</h3>
+                {pets.length ? (
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    {pets.map((pet) => (
+                      <button
+                        key={pet._id}
+                        type="button"
+                        onClick={() => setFormData((prev) => ({ ...prev, petId: pet._id }))}
+                        className={`cursor-pointer p-4 rounded-2xl border-2 text-left transition-all ${formData.petId === pet._id ? 'border-camel-600 bg-camel-50' : 'border-camel-100 hover:border-camel-300'}`}
+                      >
+                        <div className="w-12 h-12 bg-camel-200 rounded-full flex items-center justify-center mb-3">
+                          <PawPrint size={18} className="text-camel-800" />
+                        </div>
+                        <p className="font-bold text-espresso-900">{pet.name}</p>
+                        <p className="text-xs text-espresso-500">{pet.species || 'Pet'}</p>
+                      </button>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="rounded-2xl border border-dashed border-camel-200 bg-camel-50 p-5 text-sm text-espresso-600">
+                    Add a pet profile to book an appointment.
+                  </div>
+                )}
               </div>
 
-              {/* Step 2: Date & Time */}
+              <div>
+                <h3 className="text-xl font-bold text-espresso-900 mb-4 flex items-center gap-2"><Stethoscope className="text-camel-600"/> Select Veterinarian</h3>
+                {vets.length ? (
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    {vets.map(vet => (
+                      <button
+                        key={vet._id}
+                        type="button"
+                        onClick={() => setFormData((prev) => ({ ...prev, vetId: vet._id }))}
+                        className={`cursor-pointer p-4 rounded-2xl border-2 text-left transition-all ${formData.vetId === vet._id ? 'border-camel-600 bg-camel-50' : 'border-camel-100 hover:border-camel-300'}`}
+                      >
+                        <div className="w-12 h-12 bg-camel-200 rounded-full flex items-center justify-center mb-3">
+                          <User size={20} className="text-camel-800" />
+                        </div>
+                        <p className="font-bold text-espresso-900">{vet.name}</p>
+                        <p className="text-xs text-espresso-500">{vet.specialty || 'General Practice'}</p>
+                      </button>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="rounded-2xl border border-dashed border-camel-200 bg-camel-50 p-5 text-sm text-espresso-600">
+                    No vets are available right now. Please try again later.
+                  </div>
+                )}
+              </div>
+
               {formData.vetId && (
                 <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="pt-6 border-t border-camel-100">
                   <h3 className="text-xl font-bold text-espresso-900 mb-4 flex items-center gap-2"><CalendarIcon className="text-camel-600"/> Select Date & Time</h3>
@@ -121,7 +189,6 @@ export default function BookAppointment() {
                 </motion.div>
               )}
 
-              {/* Step 3: Details */}
               {formData.timeSlot && (
                 <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="pt-6 border-t border-camel-100">
                   <h3 className="text-xl font-bold text-espresso-900 mb-4">Appointment Details</h3>
@@ -153,7 +220,7 @@ export default function BookAppointment() {
 
               <button 
                 type="submit"
-                disabled={!formData.vetId || !formData.date || !formData.timeSlot || !formData.reason || isSubmitting}
+                disabled={!formData.vetId || !formData.petId || !formData.date || !formData.timeSlot || !formData.reason || isSubmitting}
                 className="w-full py-4 bg-espresso-900 text-white rounded-2xl font-black text-lg disabled:opacity-50 flex justify-center"
               >
                 {isSubmitting ? <Loader2 className="animate-spin" /> : 'Confirm Booking'}

@@ -2,10 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Users, Stethoscope, HeartHandshake, PawPrint, ShieldCheck, Ban, Loader2, CheckCircle2, AlertCircle, LayoutDashboard, Search, X } from 'lucide-react';
 import adminService from '../services/admin.service';
+import articleService from '../services/article.service';
+import { BookOpen, Check, Trash2 } from 'lucide-react';
 
 export default function SuperAdmin() {
   const [stats, setStats] = useState({ users: 0, vets: 0, shelters: 0, pets: 0, appointments: 0 });
   const [users, setUsers] = useState([]);
+  const [articles, setArticles] = useState([]);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
@@ -28,17 +31,44 @@ export default function SuperAdmin() {
   const fetchData = async () => {
     try {
       setLoading(true);
-      const [statsRes, usersRes] = await Promise.all([
+      const [statsRes, usersRes, articlesRes] = await Promise.all([
         adminService.getStats(),
-        adminService.getUsers()
+        adminService.getUsers(),
+        articleService.getAllArticles().catch(() => ({ success: false }))
       ]);
       if (statsRes.success) setStats(statsRes.data);
       if (usersRes.success) setUsers(usersRes.data);
+      if (articlesRes && articlesRes.success) setArticles(articlesRes.data);
     } catch (error) {
       console.error('Error fetching admin data:', error);
       showToast('Error loading dashboard data', 'error');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleArticleStatusUpdate = async (articleId, status) => {
+    try {
+      const res = await articleService.updateArticleStatus(articleId, status);
+      if (res.success) {
+        setArticles(prev => prev.map(a => a._id === articleId ? { ...a, status } : a));
+        showToast(`Article ${status === 'APPROVED' ? 'approved and published live!' : 'rejected.'}`, 'success');
+      }
+    } catch (error) {
+      showToast('Failed to update article status', 'error');
+    }
+  };
+
+  const handleDeleteArticle = async (articleId) => {
+    if (!window.confirm('Delete this article?')) return;
+    try {
+      const res = await articleService.deleteArticle(articleId);
+      if (res.success) {
+        setArticles(prev => prev.filter(a => a._id !== articleId));
+        showToast('Article deleted', 'success');
+      }
+    } catch (error) {
+      showToast('Failed to delete article', 'error');
     }
   };
 
@@ -272,6 +302,88 @@ export default function SuperAdmin() {
                     ))
                   )}
                 </AnimatePresence>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        {/* Blog Articles Moderation Section */}
+        <div className="bg-white rounded-[2.5rem] border border-camel-100 shadow-[0_8px_30px_rgb(90,56,37,0.06)] overflow-hidden mt-12">
+          <div className="p-8 border-b border-camel-100 flex items-center justify-between">
+            <div>
+              <h2 className="text-xl font-black text-espresso-900 flex items-center gap-2">
+                <BookOpen size={22} className="text-camel-600" /> Blog Article Moderation
+              </h2>
+              <p className="text-xs text-espresso-500 font-medium mt-0.5">Review, approve, or manage blog submissions from users, vets, and owners</p>
+            </div>
+            <span className="bg-camel-100 text-camel-800 text-xs font-black px-3.5 py-1.5 rounded-full">
+              {articles.filter(a => a.status === 'PENDING').length} Pending Review
+            </span>
+          </div>
+
+          <div className="overflow-x-auto scrollbar-hide">
+            <table className="w-full text-left border-collapse">
+              <thead>
+                <tr className="bg-[#FAF8F5] border-b border-camel-100">
+                  <th className="py-4 px-8 text-[10px] font-bold uppercase tracking-widest text-espresso-500">Article</th>
+                  <th className="py-4 px-8 text-[10px] font-bold uppercase tracking-widest text-espresso-500">Author</th>
+                  <th className="py-4 px-8 text-[10px] font-bold uppercase tracking-widest text-espresso-500">Status</th>
+                  <th className="py-4 px-8 text-[10px] font-bold uppercase tracking-widest text-espresso-500 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {articles.length === 0 ? (
+                  <tr>
+                    <td colSpan="4" className="py-12 text-center text-sm font-medium text-espresso-500">No blog articles found.</td>
+                  </tr>
+                ) : (
+                  articles.map((article) => (
+                    <tr key={article._id} className="border-b border-camel-50 hover:bg-camel-50/30 transition-colors">
+                      <td className="py-5 px-8 max-w-xs">
+                        <p className="font-black text-espresso-900 line-clamp-1">{article.title}</p>
+                        <p className="text-xs text-camel-600 font-medium line-clamp-1 mt-0.5">{article.category} &bull; {article.excerpt}</p>
+                      </td>
+                      <td className="py-5 px-8">
+                        <p className="font-bold text-sm text-espresso-900">{article.author}</p>
+                        <p className="text-[10px] font-bold text-camel-600 uppercase tracking-widest">{article.authorRole || 'User'}</p>
+                      </td>
+                      <td className="py-5 px-8">
+                        <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${
+                          article.status === 'APPROVED' ? 'bg-emerald-100 text-emerald-800' : article.status === 'REJECTED' ? 'bg-rose-100 text-rose-800' : 'bg-amber-100 text-amber-800'
+                        }`}>
+                          {article.status}
+                        </span>
+                      </td>
+                      <td className="py-5 px-8">
+                        <div className="flex justify-end gap-2">
+                          {article.status !== 'APPROVED' && (
+                            <button
+                              onClick={() => handleArticleStatusUpdate(article._id, 'APPROVED')}
+                              className="px-3.5 py-1.5 rounded-xl bg-emerald-600 text-white text-xs font-bold hover:bg-emerald-700 transition-colors shadow-sm flex items-center gap-1 cursor-pointer"
+                            >
+                              <Check size={14} /> Approve
+                            </button>
+                          )}
+                          {article.status !== 'REJECTED' && (
+                            <button
+                              onClick={() => handleArticleStatusUpdate(article._id, 'REJECTED')}
+                              className="px-3.5 py-1.5 rounded-xl bg-rose-100 text-rose-700 text-xs font-bold hover:bg-rose-200 transition-colors cursor-pointer"
+                            >
+                              Reject
+                            </button>
+                          )}
+                          <button
+                            onClick={() => handleDeleteArticle(article._id)}
+                            className="p-2 rounded-xl bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors cursor-pointer"
+                            title="Delete Article"
+                          >
+                            <Trash2 size={16} />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                )}
               </tbody>
             </table>
           </div>

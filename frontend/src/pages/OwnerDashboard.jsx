@@ -328,9 +328,14 @@ export default function OwnerDashboard() {
                {pets.length > 0 ? `${activePet?.name}'s Health` : 'Welcome to FurShield'}
              </h1>
            </div>
-           <button onClick={openAddModal} className="flex items-center gap-2 bg-espresso-900 hover:bg-espresso-800 text-white px-6 py-2.5 rounded-full font-bold text-sm transition-all shadow-md hover:-translate-y-0.5 w-max">
-             <Plus size={18} /> Add Pet
-           </button>
+           <div className="flex flex-wrap items-center gap-2">
+             <button onClick={() => navigate('/care-hub')} className="flex items-center gap-2 bg-camel-600 hover:bg-camel-700 text-white px-5 py-2.5 rounded-full font-bold text-sm transition-all shadow-md hover:-translate-y-0.5 w-max cursor-pointer">
+               <FileText size={18} /> Post Care Article
+             </button>
+             <button onClick={openAddModal} className="flex items-center gap-2 bg-espresso-900 hover:bg-espresso-800 text-white px-6 py-2.5 rounded-full font-bold text-sm transition-all shadow-md hover:-translate-y-0.5 w-max cursor-pointer">
+               <Plus size={18} /> Add Pet
+             </button>
+           </div>
         </div>
 
         {pets.length > 0 && (

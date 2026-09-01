@@ -39,3 +39,16 @@ export const getSpeciesFallback = (species) => {
   if (s.includes('bird')) return '/images/signup-bird.jpg';
   return '/images/dash-dog-1.jpg';
 };
+
+/**
+ * Converts a File object to a permanent Base64 Data URI string.
+ */
+export const fileToBase64 = (file) => {
+  return new Promise((resolve, reject) => {
+    if (!file) resolve(null);
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = (error) => reject(error);
+  });
+};

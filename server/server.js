@@ -1,4 +1,4 @@
-﻿const express = require('express');
+const express = require('express');
 const path = require('path');
 const dotenv = require('dotenv');
 const cors = require('cors');
@@ -43,6 +43,7 @@ const adminRoutes = require('./routes/admin.routes');
 const notificationRoutes = require('./routes/notification.routes');
 const adoptRoutes = require('./routes/adopt.routes');
 const chatRoutes = require('./routes/chat.routes');
+const articleRoutes = require('./routes/article.routes');
 
 // Mount Routers
 app.use('/api/v1/auth', authRoutes);
@@ -55,6 +56,7 @@ app.use('/api/v1/admin', adminRoutes);
 app.use('/api/v1/notifications', notificationRoutes);
 app.use('/api/v1/adopt', adoptRoutes);
 app.use('/api/v1/chat', chatRoutes);
+app.use('/api/v1/articles', articleRoutes);
 
 // Start Server
 const PORT = process.env.PORT || 5000;

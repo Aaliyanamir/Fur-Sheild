@@ -46,7 +46,7 @@ const listUserPetForAdoption = async (req, res) => {
       behaviorNotes: behaviorNotes || 'Looking for a safe and loving home.',
       pickupAddress: pickupAddress || 'Contact owner for pickup address',
       adoptionFee: Number(adoptionFee) || 0,
-      avatarUrl: req.file ? '/uploads/' + req.file.filename : undefined,
+      avatarUrl: req.body.avatarUrl || (req.file ? '/uploads/' + req.file.filename : undefined),
       postedBy: req.user._id,
       ownerContact: {
         name: req.user.name,

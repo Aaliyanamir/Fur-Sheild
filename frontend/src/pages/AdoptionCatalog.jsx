@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Search, Heart, CheckCircle2, X, Loader2, Plus, MapPin, DollarSign, Phone, User, ShieldCheck, CreditCard, Wallet, Camera, Upload } from 'lucide-react';
 import adoptService from '../services/adopt.service';
 import { AuthContext } from '../context/AuthContext';
-import { getImageUrl } from '../lib/imageUtils';
+import { getImageUrl, fileToBase64 } from '../lib/imageUtils';
 
 export default function AdoptionCatalog() {
   const { user } = useContext(AuthContext);
@@ -120,6 +120,11 @@ export default function AdoptionCatalog() {
     }
     setIsSubmittingListPet(true);
     try {
+      let base64Avatar = null;
+      if (listPetPhoto) {
+        base64Avatar = await fileToBase64(listPetPhoto);
+      }
+
       const formData = new FormData();
       formData.append('name', listPetData.name);
       formData.append('species', listPetData.species);
@@ -130,7 +135,9 @@ export default function AdoptionCatalog() {
       formData.append('pickupAddress', listPetData.pickupAddress);
       formData.append('phone', listPetData.phone);
       formData.append('behaviorNotes', listPetData.behaviorNotes);
-      if (listPetPhoto) {
+      if (base64Avatar) {
+        formData.append('avatarUrl', base64Avatar);
+      } else if (listPetPhoto) {
         formData.append('avatar', listPetPhoto);
       }
 
@@ -153,11 +160,12 @@ export default function AdoptionCatalog() {
     }
   };
 
-  const handlePhotoChange = (e) => {
+  const handlePhotoChange = async (e) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
       setListPetPhoto(file);
-      setListPetPhotoPreview(URL.createObjectURL(file));
+      const b64 = await fileToBase64(file);
+      setListPetPhotoPreview(b64);
     }
   };
 

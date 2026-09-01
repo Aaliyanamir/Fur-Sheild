@@ -1,9 +1,10 @@
-﻿import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { Calendar, Plus, Flame, Moon, Droplets, CheckCircle2, Circle, ArrowRight, Footprints, PawPrint, HeartHandshake, Syringe, Stethoscope, AlertCircle, X, Edit2, Trash2, Camera, Upload, FileText, Activity } from 'lucide-react';
 import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip } from 'recharts';
 import dashboardService from '../services/dashboard.service';
+import adoptService from '../services/adopt.service';
 import { getImageUrl, getSpeciesFallback } from '../lib/imageUtils';
 
 export default function OwnerDashboard() {
@@ -12,6 +13,7 @@ export default function OwnerDashboard() {
   const [appointments, setAppointments] = useState([]);
   const [activePetIndex, setActivePetIndex] = useState(0);
   const [activeViewTab, setActiveViewTab] = useState('Overview');
+  const [myAdoptionListings, setMyAdoptionListings] = useState([]);
 
   // Medical Modals
   const [isVaccineModalOpen, setIsVaccineModalOpen] = useState(false);
@@ -21,6 +23,41 @@ export default function OwnerDashboard() {
   const [docFile, setDocFile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+
+  const fetchMyAdoptionListings = async () => {
+    try {
+      const res = await adoptService.getMyAdoptionListings();
+      if (res.success) {
+        setMyAdoptionListings(res.data);
+      }
+    } catch (err) {
+      console.error('Error fetching adoption listings:', err);
+    }
+  };
+
+  const handleToggleListingStatus = async (id, currentStatus) => {
+    try {
+      const newStatus = currentStatus === 'ADOPTED' ? 'ADOPTABLE' : 'ADOPTED';
+      const res = await adoptService.updateMyListingStatus(id, newStatus);
+      if (res.success) {
+        fetchMyAdoptionListings();
+      }
+    } catch (err) {
+      alert('Failed to update status');
+    }
+  };
+
+  const handleDeleteListing = async (id) => {
+    if (!window.confirm('Are you sure you want to remove this adoption listing?')) return;
+    try {
+      const res = await adoptService.deleteMyListing(id);
+      if (res.success) {
+        fetchMyAdoptionListings();
+      }
+    } catch (err) {
+      alert('Failed to remove listing');
+    }
+  };
   
 
   // Add Pet / Edit Pet Modal State
@@ -395,10 +432,9 @@ export default function OwnerDashboard() {
             
               {/* RIGHT COLUMN: Health Data & Analytics */}
               <div className="lg:col-span-8 flex flex-col gap-8">
-                
-                {/* Tabs */}
+                      {/* Tabs */}
                 <div className="flex items-center gap-4 border-b border-camel-100 pb-2">
-                  {['Overview', 'Health Records'].map(tab => (
+                  {['Overview', 'Health Records', 'My Adoption Listings'].map(tab => (
                     <button 
                       key={tab}
                       onClick={() => setActiveViewTab(tab)}
@@ -532,6 +568,85 @@ export default function OwnerDashboard() {
                       </div>
                     </div>
 
+                  </div>
+                )}
+
+                {activeViewTab === 'My Adoption Listings' && (
+                  <div className="space-y-6 animate-in fade-in duration-300">
+                    <div className="flex justify-between items-center mb-2">
+                      <h3 className="font-display font-bold text-xl text-espresso-900">Pets You Listed For Adoption</h3>
+                      <button onClick={() => navigate('/adoption')} className="flex items-center gap-2 bg-camel-600 hover:bg-camel-700 text-white px-4 py-2 rounded-full text-xs font-bold transition-all shadow-sm">
+                        <Plus size={14} /> Add New Listing
+                      </button>
+                    </div>
+
+                    {myAdoptionListings.length === 0 ? (
+                      <div className="bg-white rounded-[2rem] p-10 border border-camel-100 text-center">
+                        <PawPrint size={36} className="mx-auto text-camel-300 mb-3" />
+                        <h4 className="text-base font-black text-espresso-900 mb-1">No Adoption Listings Yet</h4>
+                        <p className="text-xs text-espresso-500 max-w-sm mx-auto mb-4">You haven't posted any pet for adoption yet. You can list a pet for adoption so other users can view, contact, and adopt it.</p>
+                        <button onClick={() => navigate('/adoption')} className="bg-espresso-900 hover:bg-espresso-800 text-white px-6 py-2.5 rounded-full text-xs font-bold shadow-md">
+                          List Pet For Adoption
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="space-y-4">
+                        {myAdoptionListings.map(listing => (
+                          <div key={listing._id} className="bg-white rounded-3xl p-6 border border-camel-100 shadow-sm flex flex-col md:flex-row gap-6 items-start md:items-center justify-between">
+                            <div className="flex items-center gap-4">
+                              <div className="w-20 h-20 rounded-2xl bg-camel-100 overflow-hidden shrink-0 border border-camel-200">
+                                <img 
+                                  src={getImageUrl(listing.avatarUrl, getSpeciesFallback(listing.species))} 
+                                  alt={listing.name} 
+                                  className="w-full h-full object-cover" 
+                                  onError={(e) => { e.target.onerror = null; e.target.src = getSpeciesFallback(listing.species); }}
+                                />
+                              </div>
+                              <div>
+                                <div className="flex items-center gap-2 mb-1">
+                                  <h4 className="text-xl font-black text-espresso-900">{listing.name}</h4>
+                                  <span className={`text-[10px] font-black uppercase px-2.5 py-0.5 rounded-full ${listing.status === 'ADOPTED' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}`}>
+                                    {listing.status === 'ADOPTED' ? 'Adopted' : 'Available'}
+                                  </span>
+                                </div>
+                                <p className="text-xs font-bold text-camel-600 uppercase tracking-widest">{listing.breed || listing.species} &bull; Fee: ${listing.adoptionFee || 0}</p>
+                                {listing.pickupAddress && <p className="text-xs text-espresso-500 mt-1 font-medium">Pickup: {listing.pickupAddress}</p>}
+                              </div>
+                            </div>
+
+                            {/* If adopted, show Adopter info */}
+                            {listing.status === 'ADOPTED' && (
+                              <div className="bg-emerald-50 border border-emerald-200 p-4 rounded-2xl text-xs space-y-1 w-full md:w-auto shrink-0">
+                                <p className="font-black text-emerald-900 uppercase tracking-wider text-[10px] mb-1">Adopter Details</p>
+                                <p className="text-espresso-900 font-bold">Name: {listing.adopterInfo?.applicantName || listing.adoptedBy?.name || 'N/A'}</p>
+                                <p className="text-espresso-700">Phone: {listing.adopterInfo?.phone || listing.adoptedBy?.phone || 'N/A'}</p>
+                                <p className="text-espresso-700">Email: {listing.adopterInfo?.email || listing.adoptedBy?.email || 'N/A'}</p>
+                                <p className="text-espresso-700">Payment: {listing.adopterInfo?.paymentMethod || 'Paid'} ({listing.adopterInfo?.paymentStatus || 'Paid'})</p>
+                              </div>
+                            )}
+
+                            {/* Action Buttons */}
+                            <div className="flex items-center gap-2 shrink-0 w-full md:w-auto justify-end">
+                              <button 
+                                onClick={() => handleToggleListingStatus(listing._id, listing.status)} 
+                                className={`px-4 py-2 rounded-xl text-xs font-bold transition-all shadow-sm ${
+                                  listing.status === 'ADOPTED' ? 'bg-amber-50 text-amber-800 hover:bg-amber-100 border border-amber-200' : 'bg-emerald-600 text-white hover:bg-emerald-700'
+                                }`}
+                              >
+                                {listing.status === 'ADOPTED' ? 'Mark as Available' : 'Mark as Adopted'}
+                              </button>
+                              <button 
+                                onClick={() => handleDeleteListing(listing._id)} 
+                                className="p-2.5 rounded-xl bg-rose-50 text-rose-600 hover:bg-rose-100 border border-rose-200 transition-colors" 
+                                title="Remove Listing"
+                              >
+                                <Trash2 size={16} />
+                              </button>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 )}
 

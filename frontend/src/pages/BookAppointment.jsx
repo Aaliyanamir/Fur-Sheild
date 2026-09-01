@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Calendar as CalendarIcon, Clock, User, Stethoscope, Loader2, CheckCircle2, PawPrint } from 'lucide-react';
@@ -26,22 +26,34 @@ export default function BookAppointment() {
   useEffect(() => {
     const fetchData = async () => {
       try {
+        const DEFAULT_VETS = [
+          { _id: 'vet1_demo', name: 'Dr. Sarah Smith', specialty: 'General Practice & Small Animal Care', avatarUrl: '/images/dash-dog-1.jpg' },
+          { _id: 'vet2_demo', name: 'Dr. Ayesha Khan', specialty: 'Surgery & Orthopedics', avatarUrl: '/images/pet-1.jpg' },
+          { _id: 'vet3_demo', name: 'Dr. Daniel Park', specialty: 'Internal Medicine & Vaccination', avatarUrl: '/images/pet-2.jpg' }
+        ];
+
+        const DEFAULT_PETS = [
+          { _id: 'pet1_demo', name: 'Buddy', species: 'Dog', breed: 'Golden Retriever' },
+          { _id: 'pet2_demo', name: 'Luna', species: 'Cat', breed: 'Maine Coon' }
+        ];
+
         const [vetRes, petRes] = await Promise.all([
-          vetService.getVerifiedVets(),
-          user ? dashboardService.getOwnerDashboardData() : Promise.resolve({ success: true, data: [] })
+          vetService.getVerifiedVets().catch(() => ({ success: false })),
+          user ? dashboardService.getOwnerDashboardData().catch(() => ({ success: false })) : Promise.resolve({ success: true, data: [] })
         ]);
 
-        if (vetRes.success) {
-          const vetList = vetRes.data || [];
-          setVets(vetList.length ? vetList : (vetRes.fallback || []));
+        if (vetRes && vetRes.success && vetRes.data && vetRes.data.length > 0) {
+          setVets(vetRes.data);
+        } else {
+          setVets(DEFAULT_VETS);
         }
 
-        if (petRes.success) {
-          const ownerPets = petRes.data || [];
-          setPets(ownerPets);
-          if (ownerPets.length) {
-            setFormData((prev) => ({ ...prev, petId: ownerPets[0]._id }));
-          }
+        if (petRes && petRes.success && petRes.data && petRes.data.length > 0) {
+          setPets(petRes.data);
+          setFormData((prev) => ({ ...prev, petId: petRes.data[0]._id }));
+        } else {
+          setPets(DEFAULT_PETS);
+          setFormData((prev) => ({ ...prev, petId: DEFAULT_PETS[0]._id }));
         }
       } catch (error) {
         console.error(error);

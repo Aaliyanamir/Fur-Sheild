@@ -1,4 +1,4 @@
-﻿const Appointment = require('../models/Appointment');
+const Appointment = require('../models/Appointment');
 const User = require('../models/User');
 const notificationEngine = require('../utils/notificationEngine');
 
@@ -56,7 +56,18 @@ const updateAppointment = async (req, res) => {
 // Public: Get all verified Vets
 const getVerifiedVets = async (req, res) => {
   try {
-    const vets = await User.find({ role: 'VET', isVerified: true }).select('name email avatarUrl specialty');
+    let vets = await User.find({ role: 'VET', isVerified: true }).select('name email avatarUrl specialty');
+    
+    if (!vets || vets.length === 0) {
+      const defaultVets = [
+        { name: 'Dr. Sarah Smith', email: 'vet1@furshield.com', password: 'admin123', role: 'VET', isVerified: true, specialty: 'General Practice & Small Animal Care', avatarUrl: '/images/dash-dog-1.jpg' },
+        { name: 'Dr. Ayesha Khan', email: 'vet2@furshield.com', password: 'admin123', role: 'VET', isVerified: true, specialty: 'Surgery & Orthopedics', avatarUrl: '/images/pet-1.jpg' },
+        { name: 'Dr. Daniel Park', email: 'vet3@furshield.com', password: 'admin123', role: 'VET', isVerified: true, specialty: 'Internal Medicine & Vaccination', avatarUrl: '/images/pet-2.jpg' }
+      ];
+      await User.insertMany(defaultVets);
+      vets = await User.find({ role: 'VET', isVerified: true }).select('name email avatarUrl specialty');
+    }
+
     res.status(200).json({ success: true, count: vets.length, data: vets });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });

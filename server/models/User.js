@@ -16,6 +16,7 @@ const userSchema = new mongoose.Schema({
     default: 'USER' 
   },
   phone: { type: String },
+  specialty: { type: String }, // For vets
   address: {
     street: String,
     city: String,

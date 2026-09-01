@@ -66,9 +66,9 @@ const main = async () => {
     const usersToCreate = [
       { name: 'System Admin', email: 'admin@furshield.com', password: DEMO_PASSWORD, role: 'SUPER_ADMIN' },
       { name: 'Rescue Shelter Admin', email: 'shelter@furshield.com', password: DEMO_PASSWORD, role: 'SHELTER_ADMIN' },
-      { name: 'Dr. Sarah Smith', email: 'vet@furshield.com', password: DEMO_PASSWORD, role: 'VET' },
-      { name: 'Dr. Ayesha Khan', email: 'vet2@furshield.com', password: DEMO_PASSWORD, role: 'VET' },
-      { name: 'Dr. Daniel Park', email: 'vet3@furshield.com', password: DEMO_PASSWORD, role: 'VET' },
+      { name: 'Dr. Sarah Smith', email: 'vet@furshield.com', password: DEMO_PASSWORD, role: 'VET', specialty: 'General Practice', avatarUrl: '/images/dash-dog-1.jpg' },
+      { name: 'Dr. Ayesha Khan', email: 'vet2@furshield.com', password: DEMO_PASSWORD, role: 'VET', specialty: 'Surgery & Orthopedics', avatarUrl: '/images/pet-1.jpg' },
+      { name: 'Dr. Daniel Park', email: 'vet3@furshield.com', password: DEMO_PASSWORD, role: 'VET', specialty: 'Internal Medicine', avatarUrl: '/images/pet-2.jpg' },
       { name: 'Raza Hussain', email: 'raza@furshield.com', password: DEMO_PASSWORD, role: 'OWNER' },
       { name: 'Ayesha Ali', email: 'owner2@furshield.com', password: DEMO_PASSWORD, role: 'OWNER' },
       { name: 'Hassan Mehmood', email: 'owner3@furshield.com', password: DEMO_PASSWORD, role: 'OWNER' },
@@ -118,8 +118,13 @@ const main = async () => {
       { name: 'Max', species: 'Dog', breed: 'Beagle', age: '2 Years', status: 'ADOPTABLE', avatarUrl: '/images/pet-1.jpg', behaviorNotes: 'Friendly, playful, loves children and long walks.' },
       { name: 'Cleo', species: 'Cat', breed: 'Persian', age: '1 Year', status: 'ADOPTABLE', avatarUrl: '/images/pet-2.jpg', behaviorNotes: 'Calm and affectionate lap cat.' },
       { name: 'Sunny', species: 'Bird', breed: 'Sun Conure', age: '3 Years', status: 'ADOPTABLE', avatarUrl: '/images/signup-bird.jpg', behaviorNotes: 'Social, cheerful, and hand-trained.' },
-      { name: 'Nova', species: 'Dog', breed: 'German Shepherd Mix', age: '8 Months', status: 'INTAKE', avatarUrl: '/images/dash-dog-1.jpg', behaviorNotes: 'Young and energetic, needs gentle socialization.' },
-      { name: 'Bella', species: 'Cat', breed: 'Tabby', age: '2 Years', status: 'VET_HOLD', avatarUrl: '/images/pet-3.jpg', medicalHolds: ['Vaccination review'], behaviorNotes: 'Under observation after a mild treatment plan.' },
+      { name: 'Nova', species: 'Dog', breed: 'German Shepherd Mix', age: '8 Months', status: 'ADOPTABLE', avatarUrl: '/images/dash-dog-1.jpg', behaviorNotes: 'Young and energetic, needs gentle socialization.' },
+      { name: 'Bella', species: 'Cat', breed: 'Tabby', age: '2 Years', status: 'ADOPTABLE', avatarUrl: '/images/pet-3.jpg', behaviorNotes: 'Playful and curious, loves interactive toys.' },
+      { name: 'Rocky', species: 'Dog', breed: 'Boxer', age: '3 Years', status: 'ADOPTABLE', avatarUrl: '/images/pet-1.jpg', behaviorNotes: 'Muscular and loyal, excellent family companion.' },
+      { name: 'Whiskers', species: 'Cat', breed: 'Siamese Mix', age: '4 Months', status: 'ADOPTABLE', avatarUrl: '/images/pet-2.jpg', behaviorNotes: 'Tiny kitten, very affectionate and playful.' },
+      { name: 'Charlie', species: 'Dog', breed: 'Poodle Mix', age: '1 Year', status: 'ADOPTABLE', avatarUrl: '/images/dash-dog-1.jpg', behaviorNotes: 'Smart and trainable, loves outdoor activities.' },
+      { name: 'Tweety', species: 'Bird', breed: 'Canary', age: '2 Years', status: 'ADOPTABLE', avatarUrl: '/images/signup-bird.jpg', behaviorNotes: 'Beautiful singer, requires spacious cage.' },
+      { name: 'Shadow', species: 'Cat', breed: 'Black Domestic', age: '6 Months', status: 'ADOPTABLE', avatarUrl: '/images/pet-3.jpg', behaviorNotes: 'Shy but warming up, needs patient family.' },
     ];
 
     for (const animal of shelterAnimals) {

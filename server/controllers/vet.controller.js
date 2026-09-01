@@ -56,7 +56,7 @@ const updateAppointment = async (req, res) => {
 // Public: Get all verified Vets
 const getVerifiedVets = async (req, res) => {
   try {
-    const vets = await User.find({ role: 'VET', isVerified: true }).select('name email avatarUrl');
+    const vets = await User.find({ role: 'VET', isVerified: true }).select('name email avatarUrl specialty');
     res.status(200).json({ success: true, count: vets.length, data: vets });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });

@@ -17,6 +17,10 @@ const vetService = {
     const res = await api.get('/vet/appointments');
     return res.data;
   },
+  getQueue: async () => {
+    const res = await api.get('/vet/appointments');
+    return res.data;
+  },
   updateAppointment: async (id, data) => {
     const res = await api.put(`/vet/appointments/${id}`, data);
     return res.data;

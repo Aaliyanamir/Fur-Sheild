@@ -24,31 +24,29 @@ export default function VetAppointments() {
   useEffect(() => {
     const fetchAppointments = async () => {
       try {
-        const { default: vetService } = await import('../services/vet.service');
+        const vetService = (await import('../services/vet.service')).default;
         const res = await vetService.getQueue();
         if (res.success) {
-          // Group by Date
           const grouped = {};
-          res.data.forEach(appt => {
-            const date = new Date(appt.scheduledAt);
-            // Format as YYYY-MM-DD for grouping
+
+          res.data.forEach((appt) => {
+            const date = new Date(appt.date);
             const dateStr = date.toISOString().split('T')[0];
-            
+
             if (!grouped[dateStr]) {
-              // Create friendly label
               const today = new Date();
               const tomorrow = new Date(today);
               tomorrow.setDate(tomorrow.getDate() + 1);
-              
+
               let label = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
               if (dateStr === today.toISOString().split('T')[0]) {
-                label = "Today, " + label;
+                label = 'Today, ' + label;
               } else if (dateStr === tomorrow.toISOString().split('T')[0]) {
-                label = "Tomorrow, " + label;
+                label = 'Tomorrow, ' + label;
               } else {
                 label = date.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' });
               }
-              
+
               grouped[dateStr] = {
                 _id: dateStr,
                 dateLabel: label,
@@ -56,27 +54,29 @@ export default function VetAppointments() {
                 appointments: []
               };
             }
-            
-            const isWalkin = !appt.petId && appt.walkInDetails;
-            const petAvatarUrl = isWalkin ? appt.walkInDetails.petAvatarUrl : appt.petId?.avatarUrl;
-            
+
+            const petName = appt.pet?.name || 'Unknown Pet';
+            const petBreed = appt.pet?.species || 'Pet';
+            const ownerName = appt.user?.name || 'Unknown Owner';
+            const petImage = appt.pet?.avatarUrl || '/images/pet-1.jpg';
+            const severity = appt.severity || 'ROUTINE';
+
             grouped[dateStr].appointments.push({
               id: appt._id,
-              time: date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-              duration: "30 min", // default mock duration
-              patient: { 
-                name: isWalkin ? appt.walkInDetails.petName : (appt.petId?.name || 'Unknown'), 
-                breed: isWalkin ? appt.walkInDetails.breed : (appt.petId?.breed || 'Unknown'), 
-                image: petAvatarUrl ? (petAvatarUrl.startsWith('http') ? petAvatarUrl : `http://localhost:5000${petAvatarUrl}`) : '/images/product-placeholder.jpg'
+              time: new Date(appt.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+              duration: '30 min',
+              patient: {
+                name: petName,
+                breed: petBreed,
+                image: petImage
               },
-              owner: { name: isWalkin ? appt.walkInDetails.ownerName : (appt.ownerId?.name || 'Unknown') },
-              reason: appt.reason,
-              severity: appt.severity,
-              status: appt.status
+              owner: { name: ownerName },
+              reason: appt.reason || 'Consultation',
+              severity,
+              status: appt.status || 'PENDING'
             });
           });
-          
-          // Convert to array and sort by date
+
           const groupedArray = Object.values(grouped).sort((a, b) => a.timestamp - b.timestamp);
           setAppointmentsData(groupedArray);
         }

@@ -345,7 +345,7 @@ export default function Navbar() {
                     <Link to="/settings" className="px-4 py-2.5 text-sm font-bold text-espresso-700 hover:bg-camel-50 hover:text-camel-900 rounded-2xl transition-colors flex items-center gap-3">
                       <Settings size={18} /> Settings
                     </Link>
-                    {user.role === 'OWNER' && (
+                    {(user.role === 'OWNER' || user.role === 'USER') && (
                       <Link to="/orders" className="px-4 py-2.5 text-sm font-bold text-espresso-700 hover:bg-camel-50 hover:text-camel-900 rounded-2xl transition-colors flex items-center gap-3">
                         <ShoppingBag size={18} /> My Orders
                       </Link>

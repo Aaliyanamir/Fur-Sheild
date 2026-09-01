@@ -1,10 +1,12 @@
 ﻿import React, { useEffect, useState } from 'react';
-import { Loader2, PackageCheck, Truck, MapPin, ShieldCheck } from 'lucide-react';
+import { Loader2, PackageCheck, Truck, MapPin, ShieldCheck, ChevronDown, CheckCircle2 } from 'lucide-react';
 import shopService from '../services/shop.service';
+import { motion, AnimatePresence } from 'framer-motion';
 
 export default function MyOrders() {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [expandedOrder, setExpandedOrder] = useState(null);
 
   useEffect(() => {
     const fetchOrders = async () => {
@@ -22,6 +24,16 @@ export default function MyOrders() {
 
     fetchOrders();
   }, []);
+
+  const getTrackingStages = (order) => {
+    const stages = [
+      { label: 'Order Placed', completed: true, date: new Date(order.createdAt).toLocaleDateString() },
+      { label: 'Processing', completed: order.isPaid, date: order.isPaid ? 'Processing' : 'Pending payment' },
+      { label: 'Shipped', completed: order.isDelivered && !order.isPaid ? false : order.isPaid, date: order.isPaid ? 'In transit' : 'Awaiting' },
+      { label: 'Delivered', completed: order.isDelivered, date: order.isDelivered ? 'Completed' : 'Expected in 3-5 days' }
+    ];
+    return stages;
+  };
 
   if (loading) {
     return (
@@ -108,10 +120,43 @@ export default function MyOrders() {
                     <p className="text-xs font-bold uppercase tracking-[0.2em] text-camel-500">Total</p>
                     <p className="text-2xl font-black text-espresso-900">${Number(order.totalPrice || 0).toFixed(2)}</p>
                   </div>
-                  <button className="rounded-full bg-espresso-900 text-white px-5 py-3 text-sm font-bold hover:bg-espresso-800 transition-colors">
+                  <button 
+                    onClick={() => setExpandedOrder(expandedOrder === order._id ? null : order._id)}
+                    className="rounded-full bg-espresso-900 text-white px-5 py-3 text-sm font-bold hover:bg-espresso-800 transition-all flex items-center gap-2"
+                  >
                     Track Order
+                    <ChevronDown size={16} className={`transition-transform ${expandedOrder === order._id ? 'rotate-180' : ''}`} />
                   </button>
                 </div>
+
+                {/* Tracking Timeline */}
+                <AnimatePresence>
+                  {expandedOrder === order._id && (
+                    <motion.div
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: 'auto' }}
+                      exit={{ opacity: 0, height: 0 }}
+                      className="mt-6 pt-6 border-t border-camel-100"
+                    >
+                      <h4 className="text-sm font-black text-espresso-900 mb-6">Order Tracking</h4>
+                      <div className="space-y-4">
+                        {getTrackingStages(order).map((stage, idx) => (
+                          <div key={idx} className="flex gap-4 items-start">
+                            <div className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center font-black text-white ${stage.completed ? 'bg-emerald-500' : 'bg-camel-200'}`}>
+                              {stage.completed ? <CheckCircle2 size={18} /> : idx + 1}
+                            </div>
+                            <div className="flex-1 pt-1">
+                              <p className={`font-bold ${stage.completed ? 'text-emerald-700' : 'text-camel-600'}`}>
+                                {stage.label}
+                              </p>
+                              <p className="text-xs text-espresso-500 mt-0.5">{stage.date}</p>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
             </div>
           ))}

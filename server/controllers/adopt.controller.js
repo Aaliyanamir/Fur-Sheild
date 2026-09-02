@@ -21,7 +21,10 @@ const seedFallbackAnimals = async () => {
 
 const getAdoptableAnimals = async (req, res) => {
   try {
-    await seedFallbackAnimals();
+    const totalAnimals = await ShelterAnimal.countDocuments();
+    if (totalAnimals === 0) {
+      await seedFallbackAnimals();
+    }
 
     const animals = await ShelterAnimal.find({ status: { $in: ['ADOPTABLE', 'ADOPTED'] } })
       .populate('postedBy', 'name email phone')
@@ -30,7 +33,7 @@ const getAdoptableAnimals = async (req, res) => {
 
     res.status(200).json({ success: true, count: animals.length, data: animals });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: 'Unable to load adoption listings.', error: error.message });
   }
 };
 
@@ -142,7 +145,7 @@ const submitPublicAdoptionRequest = async (req, res) => {
     const request = await AdoptionRequest.create({
       animalId: animal._id,
       user: userId,
-      shelterId: animal.postedBy || animal.shelterId || undefined,
+      shelterId: animal.postedBy || undefined,
       applicantName: safeApplicantName,
       email: safeEmail,
       phone: safePhone,

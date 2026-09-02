@@ -21,7 +21,8 @@ const app = express();
 // Enterprise Middlewares
 app.use(helmet({ crossOriginResourcePolicy: false })); // Security headers
 app.use(cors()); // Enable CORS
-app.use(express.json());
+app.use(express.json({ limit: '20mb' }));
+app.use(express.urlencoded({ extended: true, limit: '20mb' }));
 app.use('/uploads', express.static(path.join(__dirname, 'uploads'))); // Body parser
 if (process.env.NODE_ENV === 'development') {
   app.use(morgan('dev')); // HTTP request logging

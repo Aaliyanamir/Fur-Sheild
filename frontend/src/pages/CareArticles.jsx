@@ -68,9 +68,13 @@ export default function CareArticles() {
         b64Image = await fileToBase64(articleImageFile);
       }
 
+      const safeImage = typeof b64Image === 'string' && b64Image.length > 700000
+        ? '/images/pet-owner.jpg'
+        : (b64Image || '/images/pet-owner.jpg');
+
       const res = await articleService.createArticle({
         ...articleForm,
-        image: b64Image || '/images/pet-owner.jpg'
+        image: safeImage
       });
 
       if (res.success) {

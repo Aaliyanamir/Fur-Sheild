@@ -54,20 +54,15 @@ export default function AdoptionCatalog() {
     try {
       setLoading(true);
       const res = await adoptService.getAdoptableAnimals().catch(() => ({ success: false }));
-      if (res && res.success && res.data && res.data.length > 0) {
+
+      if (res && res.success && Array.isArray(res.data)) {
         setAnimals(res.data);
       } else {
-        setAnimals([
-          { _id: '650000000000000000000001', name: 'Max', species: 'Dog', breed: 'Beagle', age: '2 Years', status: 'ADOPTABLE', adoptionFee: 0, pickupAddress: 'Gulberg III, Lahore', avatarUrl: '/images/pet-1.jpg', behaviorNotes: 'Friendly, playful, loves children and long walks.' },
-          { _id: '650000000000000000000002', name: 'Cleo', species: 'Cat', breed: 'Persian', age: '1 Year', status: 'ADOPTABLE', adoptionFee: 15, pickupAddress: 'DHA Phase 5, Karachi', avatarUrl: '/images/pet-2.jpg', behaviorNotes: 'Calm and affectionate lap cat.' },
-          { _id: '650000000000000000000003', name: 'Sunny', species: 'Bird', breed: 'Sun Conure', age: '3 Years', status: 'ADOPTABLE', adoptionFee: 0, pickupAddress: 'F-7/2, Islamabad', avatarUrl: '/images/signup-bird.jpg', behaviorNotes: 'Social, cheerful, and hand-trained.' },
-          { _id: '650000000000000000000004', name: 'Nova', species: 'Dog', breed: 'German Shepherd Mix', age: '8 Months', status: 'ADOPTABLE', adoptionFee: 20, pickupAddress: 'Johar Town, Lahore', avatarUrl: '/images/dash-dog-1.jpg', behaviorNotes: 'Young and energetic, needs gentle socialization.' },
-          { _id: '650000000000000000000005', name: 'Bella', species: 'Cat', breed: 'Tabby', age: '2 Years', status: 'ADOPTABLE', adoptionFee: 0, pickupAddress: 'Clifton Block 4, Karachi', avatarUrl: '/images/pet-3.jpg', behaviorNotes: 'Playful and curious, loves interactive toys.' },
-          { _id: '650000000000000000000006', name: 'Whiskers', species: 'Cat', breed: 'Siamese Mix', age: '4 Months', status: 'ADOPTED', adoptionFee: 0, pickupAddress: 'F-6, Islamabad', avatarUrl: '/images/pet-2.jpg', behaviorNotes: 'Tiny kitten, very affectionate.', adopterInfo: { applicantName: 'Amina Sheikh', email: 'amina@gmail.com', phone: '+92 300 9876543', paymentStatus: 'Paid' } }
-        ]);
+        setAnimals([]);
       }
     } catch (error) {
       console.error(error);
+      setAnimals([]);
     } finally {
       setLoading(false);
     }
@@ -91,21 +86,29 @@ export default function AdoptionCatalog() {
 
   const handleAdoptSubmit = async (e) => {
     e.preventDefault();
+
+    if (!selectedAnimal || !selectedAnimal._id) {
+      alert('Please choose a valid pet before submitting your adoption request.');
+      return;
+    }
+
     setIsSubmittingAdopt(true);
     try {
-      const res = await adoptService.submitAdoptionRequest({ 
-        ...adoptFormData, 
+      const res = await adoptService.submitAdoptionRequest({
+        ...adoptFormData,
         animalId: selectedAnimal._id,
-        paymentAmount: selectedAnimal.adoptionFee || 0
+        paymentAmount: Number(selectedAnimal.adoptionFee || 0)
       });
+
       if (res.success) {
         setAdoptSuccess(true);
-        // Refresh catalog to reflect adopted status immediately
         await fetchAnimals();
+      } else {
+        alert(res.message || 'Unable to submit adoption request right now.');
       }
     } catch (error) {
       console.error(error);
-      alert('Error submitting adoption application: ' + (error.response?.data?.message || error.message));
+      alert(error.response?.data?.message || 'Error submitting adoption application. Please try again.');
     } finally {
       setIsSubmittingAdopt(false);
     }

@@ -1,7 +1,3 @@
-const Appointment = require('../models/Appointment');
-const User = require('../models/User');
-const notificationEngine = require('../utils/notificationEngine');
-
 const mongoose = require('mongoose');
 const Appointment = require('../models/Appointment');
 const User = require('../models/User');

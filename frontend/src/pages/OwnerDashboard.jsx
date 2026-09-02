@@ -176,7 +176,12 @@ export default function OwnerDashboard() {
   };
 
   useEffect(() => {
-    fetchDashboardData();
+    const loadDashboard = async () => {
+      await fetchDashboardData();
+      await fetchMyAdoptionListings();
+    };
+
+    loadDashboard();
   }, []);
 
   const handleImageChange = (e) => {

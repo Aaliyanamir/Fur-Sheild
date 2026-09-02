@@ -3,25 +3,30 @@ const AdoptionRequest = require('../models/AdoptionRequest');
 const notificationEngine = require('../utils/notificationEngine');
 const User = require('../models/User');
 
+const seedFallbackAnimals = async () => {
+  const defaultAnimals = [
+    { name: 'Max', species: 'Dog', breed: 'Beagle', age: '2 Years', status: 'ADOPTABLE', adoptionFee: 0, pickupAddress: 'Gulberg III, Lahore', avatarUrl: '/images/pet-1.jpg', behaviorNotes: 'Friendly, playful, loves children and long walks.' },
+    { name: 'Cleo', species: 'Cat', breed: 'Persian', age: '1 Year', status: 'ADOPTABLE', adoptionFee: 15, pickupAddress: 'DHA Phase 5, Karachi', avatarUrl: '/images/pet-2.jpg', behaviorNotes: 'Calm and affectionate lap cat.' },
+    { name: 'Sunny', species: 'Bird', breed: 'Sun Conure', age: '3 Years', status: 'ADOPTABLE', adoptionFee: 0, pickupAddress: 'F-7/2, Islamabad', avatarUrl: '/images/signup-bird.jpg', behaviorNotes: 'Social, cheerful, and hand-trained.' },
+    { name: 'Nova', species: 'Dog', breed: 'German Shepherd Mix', age: '8 Months', status: 'ADOPTABLE', adoptionFee: 20, pickupAddress: 'Johar Town, Lahore', avatarUrl: '/images/dash-dog-1.jpg', behaviorNotes: 'Young and energetic, needs gentle socialization.' },
+    { name: 'Bella', species: 'Cat', breed: 'Tabby', age: '2 Years', status: 'ADOPTABLE', adoptionFee: 0, pickupAddress: 'Clifton Block 4, Karachi', avatarUrl: '/images/pet-3.jpg', behaviorNotes: 'Playful and curious, loves interactive toys.' },
+    { name: 'Whiskers', species: 'Cat', breed: 'Siamese Mix', age: '4 Months', status: 'ADOPTED', adoptionFee: 0, pickupAddress: 'F-6, Islamabad', avatarUrl: '/images/pet-2.jpg', behaviorNotes: 'Tiny kitten, very affectionate.', adopterInfo: { applicantName: 'Amina Sheikh', email: 'amina@gmail.com', phone: '+92 300 9876543', paymentStatus: 'Paid' } }
+  ];
+
+  const existingCount = await ShelterAnimal.countDocuments();
+  if (existingCount === 0) {
+    await ShelterAnimal.insertMany(defaultAnimals);
+  }
+};
+
 const getAdoptableAnimals = async (req, res) => {
   try {
-    let animals = await ShelterAnimal.find({ status: { $in: ['ADOPTABLE', 'ADOPTED'] } })
+    await seedFallbackAnimals();
+
+    const animals = await ShelterAnimal.find({ status: { $in: ['ADOPTABLE', 'ADOPTED'] } })
       .populate('postedBy', 'name email phone')
       .populate('adoptedBy', 'name email phone')
       .sort({ createdAt: -1 });
-
-    if (!animals || animals.length === 0) {
-      const defaultAnimals = [
-        { name: 'Max', species: 'Dog', breed: 'Beagle', age: '2 Years', status: 'ADOPTABLE', adoptionFee: 0, pickupAddress: 'Gulberg III, Lahore', avatarUrl: '/images/pet-1.jpg', behaviorNotes: 'Friendly, playful, loves children and long walks.' },
-        { name: 'Cleo', species: 'Cat', breed: 'Persian', age: '1 Year', status: 'ADOPTABLE', adoptionFee: 15, pickupAddress: 'DHA Phase 5, Karachi', avatarUrl: '/images/pet-2.jpg', behaviorNotes: 'Calm and affectionate lap cat.' },
-        { name: 'Sunny', species: 'Bird', breed: 'Sun Conure', age: '3 Years', status: 'ADOPTABLE', adoptionFee: 0, pickupAddress: 'F-7/2, Islamabad', avatarUrl: '/images/signup-bird.jpg', behaviorNotes: 'Social, cheerful, and hand-trained.' },
-        { name: 'Nova', species: 'Dog', breed: 'German Shepherd Mix', age: '8 Months', status: 'ADOPTABLE', adoptionFee: 20, pickupAddress: 'Johar Town, Lahore', avatarUrl: '/images/dash-dog-1.jpg', behaviorNotes: 'Young and energetic, needs gentle socialization.' },
-        { name: 'Bella', species: 'Cat', breed: 'Tabby', age: '2 Years', status: 'ADOPTABLE', adoptionFee: 0, pickupAddress: 'Clifton Block 4, Karachi', avatarUrl: '/images/pet-3.jpg', behaviorNotes: 'Playful and curious, loves interactive toys.' },
-        { name: 'Whiskers', species: 'Cat', breed: 'Siamese Mix', age: '4 Months', status: 'ADOPTED', adoptionFee: 0, pickupAddress: 'F-6, Islamabad', avatarUrl: '/images/pet-2.jpg', behaviorNotes: 'Tiny kitten, very affectionate.', adopterInfo: { applicantName: 'Amina Sheikh', email: 'amina@gmail.com', phone: '+92 300 9876543', paymentStatus: 'Paid' } }
-      ];
-      await ShelterAnimal.insertMany(defaultAnimals);
-      animals = await ShelterAnimal.find({ status: { $in: ['ADOPTABLE', 'ADOPTED'] } }).sort({ createdAt: -1 });
-    }
 
     res.status(200).json({ success: true, count: animals.length, data: animals });
   } catch (error) {
@@ -102,29 +107,25 @@ const deleteMyListing = async (req, res) => {
 
 const submitPublicAdoptionRequest = async (req, res) => {
   try {
-    let { animalId, applicantName, email, phone, livingSituation, experience, message, paymentMethod, paymentAmount } = req.body;
     const mongoose = require('mongoose');
+    let { animalId, applicantName, email, phone, livingSituation, experience, message, paymentMethod, paymentAmount } = req.body;
 
-    let animal;
+    let animal = null;
     if (animalId && mongoose.Types.ObjectId.isValid(animalId)) {
       animal = await ShelterAnimal.findById(animalId);
     }
 
     if (!animal) {
       animal = await ShelterAnimal.findOne({ status: 'ADOPTABLE' });
-      if (!animal) {
-        animal = await ShelterAnimal.create({
-          name: 'Cleo',
-          species: 'Cat',
-          breed: 'Persian',
-          age: '1 Year',
-          status: 'ADOPTABLE',
-          adoptionFee: 15,
-          pickupAddress: 'DHA Phase 5, Karachi',
-          avatarUrl: '/images/pet-2.jpg',
-          behaviorNotes: 'Calm and affectionate lap cat.'
-        });
-      }
+    }
+
+    if (!animal) {
+      await seedFallbackAnimals();
+      animal = await ShelterAnimal.findOne({ status: 'ADOPTABLE' });
+    }
+
+    if (!animal) {
+      return res.status(404).json({ success: false, message: 'Animal not found. Please try again later.' });
     }
 
     if (animal.status === 'ADOPTED') {
@@ -132,49 +133,62 @@ const submitPublicAdoptionRequest = async (req, res) => {
     }
 
     const userId = req.user ? req.user._id : null;
+    const safeApplicantName = applicantName || (req.user ? req.user.name : 'Adopter');
+    const safeEmail = email || (req.user ? req.user.email : '');
+    const safePhone = phone || (req.user ? req.user.phone : '');
+    const chosenPaymentMethod = paymentMethod || 'Cash on Pickup';
+    const chosenPaymentAmount = Number(paymentAmount) || Number(animal.adoptionFee || 0);
 
     const request = await AdoptionRequest.create({
       animalId: animal._id,
       user: userId,
-      shelterId: animal.shelterId || undefined,
-      applicantName: applicantName || (req.user ? req.user.name : 'Adopter'),
-      email: email || (req.user ? req.user.email : ''),
-      phone: phone || (req.user ? req.user.phone : ''),
+      shelterId: animal.postedBy || animal.shelterId || undefined,
+      applicantName: safeApplicantName,
+      email: safeEmail,
+      phone: safePhone,
       livingSituation: livingSituation || 'N/A',
       experience: experience || 'N/A',
       message: message || '',
-      status: 'Approved'
+      paymentMethod: chosenPaymentMethod,
+      paymentAmount: chosenPaymentAmount,
+      paymentStatus: 'Paid',
+      status: 'Approved',
+      petSnapshot: {
+        name: animal.name,
+        species: animal.species,
+        breed: animal.breed,
+        age: animal.age,
+        adoptionFee: Number(animal.adoptionFee || 0),
+        pickupAddress: animal.pickupAddress
+      }
     });
 
-    // Link adopter and update animal status to ADOPTED
     animal.status = 'ADOPTED';
     animal.adoptedBy = userId;
     animal.adoptedAt = new Date();
     animal.adopterInfo = {
-      applicantName: applicantName || (req.user ? req.user.name : 'Adopter'),
-      email: email || (req.user ? req.user.email : ''),
-      phone: phone || (req.user ? req.user.phone : ''),
+      applicantName: safeApplicantName,
+      email: safeEmail,
+      phone: safePhone,
       livingSituation: livingSituation || 'N/A',
       experience: experience || 'N/A',
-      paymentMethod: paymentMethod || 'Cash on Pickup',
+      paymentMethod: chosenPaymentMethod,
       paymentStatus: 'Paid',
-      paymentAmount: Number(paymentAmount) || animal.adoptionFee || 0,
+      paymentAmount: chosenPaymentAmount,
       message: message || ''
     };
     await animal.save();
 
-    // Notify original owner if posted by a user
     if (animal.postedBy) {
       await notificationEngine.createNotification({
         recipient: animal.postedBy,
         type: 'ADOPTION',
         title: 'Pet Adopted!',
-        message: `Great news! ${applicantName || 'A user'} has adopted your pet ${animal.name}. Contact phone: ${phone || 'See details'}.`,
+        message: `Great news! ${safeApplicantName} has adopted your pet ${animal.name}. Contact phone: ${safePhone || 'See details'}.`,
         actionUrl: '/dashboard'
       });
     }
 
-    // Notify Adopter user
     if (userId) {
       await notificationEngine.createNotification({
         recipient: userId,
@@ -185,14 +199,13 @@ const submitPublicAdoptionRequest = async (req, res) => {
       });
     }
 
-    // Notify Shelter Admins
     const admins = await User.find({ role: 'SHELTER_ADMIN' });
     for (const admin of admins) {
       await notificationEngine.createNotification({
         recipient: admin._id,
         type: 'ADOPTION',
         title: 'New Adoption Completed',
-        message: `${applicantName || 'User'} has adopted ${animal.name}.`,
+        message: `${safeApplicantName} has adopted ${animal.name}.`,
         actionUrl: '/shelter'
       });
     }
